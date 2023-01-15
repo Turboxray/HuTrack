@@ -1,0 +1,39 @@
+
+
+
+entry:
+    Byte0:
+
+    0x00 - 0x7f = mask 1
+    0x80 - 0xD3 = note + octave
+    0xD4 - 0xDF = reserved
+    0xE0        = note cute
+    0xE1 - 0xFE = <n> rows to skip
+    0xFF        = reserved
+
+    mask 1:
+        D0 = note+octave
+        D1 = unused
+        D2 = set: instrument
+        D3 = set: volume
+        D4 = set: FX1
+        D5 = set: FX1.arg
+        D6 = set: FX2.3.4 (mask)
+              mask 2:
+                  D0 = FX2
+                  D1 = FX2.arg
+                  D2 = FX3
+                  D3 = FX3.arg
+                  D4 = FX4
+                  D5 = FX4.arg
+                  D6 = unused
+                  D7 = unused
+
+        D7 = set: Don't use mask
+
+
+
+
+
+
+

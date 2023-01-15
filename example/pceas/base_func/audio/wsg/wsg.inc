@@ -1,0 +1,1 @@
+    .include "../base_func/audio/wsg/equ.inc"

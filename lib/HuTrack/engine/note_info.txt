@@ -1,0 +1,17 @@
+
+
+The note is stored as a linear frequency component. All operations are done
+in the linear frequency domain, and then converted to PCE's period system.
+
+The internal format of the note:
+
+      octave:note:noteCent
+
+      noteCent = 0 to 255
+      note     = 0 to 11
+      octave   = 0 to 7
+
+There is only one linear note frequency to period table, and the table is for
+octave 0 only. Since all octaves are power of 2, the period value for said note
+is simply shifted octave number of times.
+

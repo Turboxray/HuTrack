@@ -8,48 +8,48 @@ include "../base_func/video/vce/equ.inc"
 ;................................................
 VCE.BGcolor .macro
 
-	lda #(\1)
-	sta $402
-	stz $403
+    lda #(\1)
+    sta $402
+    stz $403
 
-	.endm
+    .endm
 
 ;................................................
 VCE.BGblock .macro
 
-	lda #(\1 << 4)
-	sta $402
-	stz $403
+    lda #(\1 << 4)
+    sta $402
+    stz $403
 
-	.endm
+    .endm
 
 ;................................................
 VCE.SPRcolor .macro
 
-	lda #(\1)
-	sta $402
-	lda #$01
-	sta $403
+    lda #(\1)
+    sta $402
+    lda #$01
+    sta $403
 
-	.endm
+    .endm
 
 ;................................................
 VCE.SPRblock .macro
 
-	lda #(\1 << 4)
-	sta $402
-	lda #$01
-	sta $403
+    lda #(\1 << 4)
+    sta $402
+    lda #$01
+    sta $403
 
-	.endm
+    .endm
 
 ;................................................
 VCE.reg .macro
 
-	lda #(\1)
-	sta $400
+    lda #(\1)
+    sta $400
 
-	.endm
+    .endm
 
 
 

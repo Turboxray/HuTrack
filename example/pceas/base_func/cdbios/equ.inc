@@ -1,9 +1,9 @@
 ; CD 
 
-EX_MEMOPEN	.equ	$E0DE	;SCD version check
-CD_READ	.equ	$E009	;CD sector read
+EX_MEMOPEN      .equ    $E0DE    ;SCD version check
+CD_READ         .equ    $E009    ;CD sector read
 
-AD_CPLAY	.equ	$E03F ;ADPCM streaming 
+AD_CPLAY        .equ    $E03F ;ADPCM streaming 
 
 _al .equ $20f8
 _ah .equ $20f9

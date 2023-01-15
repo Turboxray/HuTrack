@@ -34,5 +34,11 @@ char HuTrack_Arg_Pass_EAX0_u;
 #pragma fastcall HuTrackEngine_SetGlobal(byte acc);
 #pragma fastcall HuTrackEngine_SetGlobal(byte __al, byte __ah);
 
+// #pragma fastcall HuTrackEngine_getSongTitle(byte __al, farptr __fbank:__fptr);
+// #pragma fastcall HuTrackEngine_getSongAuthor(byte __al, farptr __fbank:__fptr);
+#pragma fastcall HuTrackEngine_getCurrSongTitle(farptr __fbank:__fptr);
+#pragma fastcall HuTrackEngine_getCurrSongAuthor(farptr __fbank:__fptr);
+
+
 #pragma fastcall HuTrack_Init();
 

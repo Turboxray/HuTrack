@@ -147,6 +147,79 @@ _HuTrackEngine_SetGlobal.2:
         sta HuTrack.Global.VolUpdate
   rts
 
+; #pragma fastcall HuTrackEngine_getCurrSongTitle(farptr __fbank:__fptr);
+_HuTrackEngine_getCurrSongTitle.1:
+
+        tma #$03
+            pha
+        tma #$04
+            pha
+
+        lda __fbank
+        tam #$03
+        inc a
+        tam #$04
+
+        cly
+        lda __fptr
+        sta <HuTrack.addr0
+        lda __fptr+1
+        and #$1f
+        ora #$60
+        sta <HuTrack.addr0+1
+
+.loop
+        lda HuTrack.songName,y
+      beq .out
+        sta [HuTrack.addr0],y
+        iny
+        cpy #48
+      bcc .loop
+.out
+
+        pla
+        tam #$04
+        pla
+        tam #$03
+
+    rts
+
+; #pragma fastcall HuTrackEngine_getCurrSongAuthor(farptr __fbank:__fptr);
+_HuTrackEngine_getCurrSongAuthor.1:
+
+        tma #$03
+            pha
+        tma #$04
+            pha
+
+        lda __fbank
+        tam #$03
+        inc a
+        tam #$04
+
+        cly
+        lda __fptr
+        sta <HuTrack.addr0
+        lda __fptr+1
+        and #$1f
+        ora #$60
+        sta <HuTrack.addr0+1
+
+.loop
+        lda HuTrack.songAuthor,y
+      beq .out
+        sta [HuTrack.addr0],y
+        iny
+        cpy #48
+      bcc .loop
+.out
+
+        pla
+        tam #$04
+        pla
+        tam #$03
+
+    rts
 
 
 

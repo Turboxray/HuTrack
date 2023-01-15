@@ -284,6 +284,11 @@ HuTrack.Enabled:                    .ds (1* 6)
 HuTrack.A0:                         .ds 2
 HuTrack.A1:                         .ds 2
 
+;used for functions directly
+HuTrack.addr0:                      .ds 2
+HuTrack.addr1:                      .ds 2
+
+
 HuTrack.FXptr0:                     .ds 2
 HuTrack.FXptr1:                     .ds 2
 HuTrack.FXptr2:                     .ds 2

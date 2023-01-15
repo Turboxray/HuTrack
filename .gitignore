@@ -3,3 +3,6 @@ __pycache__
 *.lst
 *.pce
 log.txt
+C_log.txt
+S_log.txt
+*.s

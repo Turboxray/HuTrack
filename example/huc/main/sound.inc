@@ -13,25 +13,25 @@
 ;---------------------------------------------------------------------------
 ; tell startup.asm that we need the SOUND_BANK and to include sound.asm
 
-NEED_SOUND_BANK    = 1
-NEED_SOUND_CODE    = 0
+NEED_SOUND_BANK	= 1
+NEED_SOUND_CODE	= 0
 
 ;---------------------------------------------------------------------------------------
 ; This macro is invoked in HuC startup.asm after the RAM is cleared, and just before
 ; interrupts are enabled.
 
-__sound_init    .macro
-        .endm
+__sound_init	.macro
+		.endm
 
 ;---------------------------------------------------------------------------------------
 ; This macro is invoked in HuC startup.asm inside the vsync handler code.
 
-__sound_vsync    .macro
+__sound_vsync	.macro
         HuTrack.setVDCreturnVector  HutrackEngine.irq1.vsyncRTN, HuTrack.returnVec
         jmp HuTrackEngine.EngineCall
 HutrackEngine.irq1.vsyncRTN:
 
-        .endm
+		.endm
 
 
 
@@ -41,10 +41,10 @@ HutrackEngine.irq1.vsyncRTN:
 ; N.B. HuC startup.asm only invokes this if NOT building for CDROM!!!
 ;
 
-__sound_timer    .macro
-        .endm
+__sound_timer	.macro
+		.endm
 
 ;---------------------------------------------------------------------------------------
 ; this is the location to start allocating HuC's internal variables.
 
-        .org            $2680
+		.org			$2680

@@ -103,6 +103,17 @@ _HuTrackEngine_Pause:
         jsr HuTrackEngine.pause
         pla
         tam #$06
+
+        ldx #05
+        lda #$DF
+.loop
+        stx $800
+        sta $804
+        stz $807
+        stz $808
+        stz $809
+      dex
+        bpl .loop
   rts
 
 ;...............................................
@@ -116,6 +127,17 @@ _HuTrackEngine_Stop:
         jsr HuTrackEngine.pause
         pla
         tam #$06
+
+        ldx #05
+        lda #$DF
+.loop
+        stx $800
+        sta $804
+        stz $807
+        stz $808
+        stz $809
+      dex
+        bpl .loop
   rts
 
 ;...............................................
@@ -173,9 +195,12 @@ _HuTrackEngine_getCurrSongTitle.1:
       beq .out
         sta [HuTrack.addr0],y
         iny
-        cpy #48
+        cpy #47
       bcc .loop
 .out
+
+        cla
+        sta [HuTrack.addr0],y
 
         pla
         tam #$04
@@ -210,9 +235,12 @@ _HuTrackEngine_getCurrSongAuthor.1:
       beq .out
         sta [HuTrack.addr0],y
         iny
-        cpy #48
+        cpy #47
       bcc .loop
 .out
+
+        cla
+        sta [HuTrack.addr0],y
 
         pla
         tam #$04

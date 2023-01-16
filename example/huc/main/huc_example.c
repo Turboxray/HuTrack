@@ -15,7 +15,7 @@
 
 char title[48];
 char author[48];
-char chanMask[6];
+char chanMask[7];
 
 int main()
 {
@@ -28,6 +28,7 @@ int main()
     cur_channel=0;      // toggle variable for which channel of sfx is being used
 
     for(i=0;i<6;i++) { chanMask[i] = '-'; }
+    chanMask[6] = 0;    // Set the string null terminator
     
 
     set_xres(344);
@@ -62,6 +63,7 @@ int main()
 
 
     put_string("Up/Down : Choose songs.", 0, 23);
+    put_string("Start: Enable/Disable channel for SFX.", 0, 24);
     put_string("Btn I: Start song.", 0, 25);
     put_string("Btn II: Stop song.", 0, 26);
 
@@ -110,7 +112,7 @@ int main()
             }
         }
 
-        for(i=0;i<6;i++) { put_char(chanMask[i], 9+i,17); }
+        put_string(chanMask, 9,17);
 
     }
 

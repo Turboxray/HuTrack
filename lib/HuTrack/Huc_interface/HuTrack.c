@@ -39,6 +39,9 @@ char HuTrack_Arg_Pass_EAX0_u;
 #pragma fastcall HuTrackEngine_getCurrSongTitle(farptr __fbank:__fptr);
 #pragma fastcall HuTrackEngine_getCurrSongAuthor(farptr __fbank:__fptr);
 
+#pragma fastcall HuTrackEngine_chanSetSFX(byte __al);
+#pragma fastcall HuTrackEngine_chanReleaseSFX(byte __al);
+
 
 #pragma fastcall HuTrack_Init();
 

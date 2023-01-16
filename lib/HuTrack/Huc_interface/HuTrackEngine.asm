@@ -250,6 +250,33 @@ _HuTrackEngine_getCurrSongAuthor.1:
     rts
 
 
+; #pragma fastcall HuTrackEngine_chanSetSFX(byte __al);
+_HuTrackEngine_chanSetSFX.1:
+
+        ldx <__al
+        cpx #06
+      bcs .out
+        lda #$80
+        sta HuTrack.SFX.inProgress, x
+        sta <HuTrack.dda.bank, x
+        lda #$df
+          php
+          sei
+            stx $800
+            stz $807
+            sta $804
+          plp
+.out
+    rts
+
+; #pragma fastcall HuTrackEngine_chanReleaseSFX(byte __al);
+_HuTrackEngine_chanReleaseSFX.1:
+        ldx <__al
+        cpx #06
+      bcs .out
+        stz HuTrack.SFX.inProgress, x
+.out
+    rts
 
   .bank SOUND_BANK, "HuTrack"
   .page $06

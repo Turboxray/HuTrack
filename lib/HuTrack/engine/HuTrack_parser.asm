@@ -106,12 +106,13 @@ HuTrackEngine.Parser:
 
 
         ;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        bit HuTrack.SFX.inProgress,x
-      bvc .real.parse
-        jsr HuTrackEngine.ParseEntry.disabled
-        sty HuTrack.rowIncrement
-      bra .check.patternBreak
-.real.parse
+        ; TODO disable old SFX handler
+;         bit HuTrack.SFX.inProgress,x
+;       bvc .real.parse
+;         jsr HuTrackEngine.ParseEntry.disabled
+;         sty HuTrack.rowIncrement
+;       bra .check.patternBreak
+; .real.parse
         jsr HuTrackEngine.ParseEntry
         sty HuTrack.rowIncrement
         jsr HuTrackEngine.Channel.update
@@ -1293,10 +1294,10 @@ HuTrack.channel.FX.handler:
         eor #$02
         sta HuTrack.channel.update.extFX
         lda HuTrack.channel.temp.fxArg
-        bit HuTrack.SFX.inProgress,x
-      bvs .FX.pan.skip
+        ; TODO disable old SFX handler
+    ;     bit HuTrack.SFX.inProgress,x
+    ;   bvs .FX.pan.skip
         sta HuTrack.channel.panState,x
-.FX.pan.skip
         jsr HuTrackEngine._htk.WSG.pan
 
 .FX.pan.out
@@ -1940,9 +1941,10 @@ HuTrackEngine.Channel.setSample
 
         _htk.PUSHBANK.2 _htk.PAGE_4000
 
-        bit HuTrack.SFX.inProgress,x
-      bvc .channel
-    rts
+        ; TODO disable old SFX handler
+    ;     bit HuTrack.SFX.inProgress,x
+    ;   bvc .channel
+    ; rts
 
 .channel
         _htk.MAP_BANK.2 HuTrack.samples.table.bank, _htk.PAGE_4000
@@ -1991,8 +1993,11 @@ HuTrackEngine.Channel.setSample
     sta <HuTrack.dda.addr.lo,x
     lda .temp.addr.hi
     sta <HuTrack.dda.addr.hi,x
+    bit HuTrack.SFX.inProgress,x
+  bmi .skip.pcm
     lda .temp.addr.bnk
     sta <HuTrack.dda.bank,x
+.skip.pcm
       cli
 
         _htk.PULLBANK.2 _htk.PAGE_4000
@@ -2075,6 +2080,11 @@ HuTrackEngine.Channel.waveformEnv
         sta HuTrack.channel.lastEnvWaveform,x
         asl a
         tay
+
+        bit HuTrack.SFX.inProgress,x
+      bpl .write.port
+        jmp .out
+.write.port
 
         lda HuTrack.waveform.table
         sta <HuTrack.A0
@@ -2672,8 +2682,9 @@ HuTrackEngine.Process.envelopes
 
         clx
 .channel.loop
-        bit HuTrack.SFX.inProgress,x
-      bvs .skip
+        ; TODO disable old SFX handler
+    ;     bit HuTrack.SFX.inProgress,x
+    ;   bvs .skip
         lda HuTrack.Enabled,x
       beq .skip
         jsr HuTrackEngine.channel.DelayAndCut
@@ -3460,8 +3471,7 @@ HuTrackEngine.reset.hardsync:
 HuTrackEngine._htk.WSG.control:
 
         bit HuTrack.SFX.inProgress,x
-      bmi .cont
-      bvs .out
+      bmi .out
 .cont
 
           sei
@@ -3479,8 +3489,7 @@ HuTrackEngine._htk.WSG.control:
 HuTrackEngine._htk.WSG.pan:
 
         bit HuTrack.SFX.inProgress,x
-      bmi .cont
-      bvs .out
+      bmi .out
 .cont
 
           sei
@@ -3498,8 +3507,7 @@ HuTrackEngine._htk.WSG.pan:
 HuTrackEngine._htk.WSG.noise:
 
         bit HuTrack.SFX.inProgress,x
-      bmi .cont
-      bvs .out
+      bmi .out
 .cont
 
           sei

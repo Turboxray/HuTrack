@@ -2,16 +2,6 @@
 #include "huc.h"
 #include "HuTrack/Huc_interface/HuTrack.c"
 
-
-// audio asm init start
-enum Songs {
-    SMB3_OVERWORLD,
-    SMEARED_GRAFFITI,
-    INITIAL_VECOCITY,
-    BOTTOM_SWEEP,
-    STORMY_EDGE_STAGE,
-};
-
 #asm
   .bank HUC_USER_RESERVED
 #endasm
@@ -25,24 +15,20 @@ enum Songs {
 
 char title[48];
 char author[48];
-// char blankString[] = "                                           \0";
+char chanMask[6];
 
 int main()
 {
 
     // var setup and init start 
-    int song_number, sfx1_number, sfx2_number, j1, j2, btn_release, button_down, max_songs, max_sfxs, mode, cursorx, cursory, cur_channel;
-    max_songs=4;         // variable to control number of songs available. base 0, should align with number of songs queued in song queue section
-    max_sfxs=2;            // variable to control number of sfx available. base 0, should align with number of sfx queued in sfx queue section
-    song_number=0;        // currently selected song
-    sfx1_number=0;        // currently selected sfx for channel 1
-    sfx2_number=0;        // currentlu selected sfx for channel 2
-    btn_release=1;        // variable for tracking if button is pressed or not
-    mode=0;                // toggle variable for if in sfx or song playtest mode. 0 = song. 1 = sfx
-    cursorx = 70;        // x position of cursor
-    cursory = 116;        // y position of cursor
-    cur_channel=0;        // toggle variable for which channel of sfx is being used
+    int song_number, j1, j2, max_songs, cur_channel;
+    int i,j,k;
+    max_songs=4;        // variable to control number of songs available. base 0, should align with number of songs queued in song queue section
+    song_number=0;      // currently selected song
+    cur_channel=0;      // toggle variable for which channel of sfx is being used
 
+    for(i=0;i<6;i++) { chanMask[i] = '-'; }
+    
 
     set_xres(344);
     cls();
@@ -71,10 +57,13 @@ int main()
     put_string("Song",11,15);
     put_number(song_number,2,16,15);
 
+    put_string("SFX: ------",4,17);
+    put_string("^",9,18);
+
+
     put_string("Up/Down : Choose songs.", 0, 23);
     put_string("Btn I: Start song.", 0, 25);
     put_string("Btn II: Stop song.", 0, 26);
-    // text display stop
 
     for(;;)
     {
@@ -82,12 +71,16 @@ int main()
         j1 = joy(0);
         j2 = joytrg(0);
 
+        put_string("      ",9,18);
+        cur_channel += (cur_channel < 5 && (j2 & JOY_RIGHT)) ? 1: 0;
+        cur_channel -= (cur_channel > 0 && (j2 & JOY_LEFT)) ? 1: 0;
+        put_string("^",9+cur_channel,18);
+
         song_number += (song_number < max_songs && (j2 & JOY_UP)) ? 1: 0;
         song_number -= (song_number > 0 && (j2 & JOY_DOWN)) ? 1: 0;
         put_number(song_number,2,16,15);
 
-        if (j2 & JOY_I)
-        {
+        if (j2 & JOY_I) {
             HuTrackEngine_Stop();
             vsync(10);
             HuTrackEngine_PlaySong(song_number);
@@ -97,11 +90,27 @@ int main()
             put_string("                                                     \0",  1,  3);
             put_string(title,  1,  5);
             put_string(author,  1,  3);
+            chanMask[0] = '-';
+            chanMask[1] = '-';
+            chanMask[2] = '-';
+            chanMask[3] = '-';
+            chanMask[4] = '-';
+            chanMask[5] = '-';
         }
-        if (j2 & JOY_II)
-        {
+        if (j2 & JOY_II) {
                 HuTrackEngine_Stop();
         }
+
+        if (j2 & JOY_STRT) {
+            chanMask[cur_channel] = (chanMask[cur_channel] == '-') ? 'X':'-';
+            if (chanMask[cur_channel]=='X') {
+                HuTrackEngine_chanSetSFX(cur_channel);
+            } else {
+                HuTrackEngine_chanReleaseSFX(cur_channel);
+            }
+        }
+
+        for(i=0;i<6;i++) { put_char(chanMask[i], 9+i,17); }
 
     }
 

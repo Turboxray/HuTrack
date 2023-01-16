@@ -251,7 +251,6 @@ HuTrack.channel.proccessState:      .ds (1* 6)
 
 HuTrack.channel.panState:           .ds (1* 6)
 
-HuTrack.channel.SFXState:           .ds (1* 6)
 HuTrack.SFX.inProgress:             .ds (1* 6)
 HuTrack.channel.ddaState:           .ds (1* 6)
 

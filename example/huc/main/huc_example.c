@@ -62,8 +62,8 @@ int main()
 
     HuTrackEngine_getCurrSongTitle(title);
     HuTrackEngine_getCurrSongAuthor(author);
-    put_string(title,  2,  5);
-    put_string(author,  2,  3);
+    put_string(title,  1,  5);
+    put_string(author,  1,  3);
 
 	put_string("Audio Test Suite", 8, 12);
 
@@ -81,163 +81,28 @@ int main()
 		vsync();
 		j1 = joy(0);
 		j2 = joytrg(0);
-		if (j2 & JOY_SLCT)
+
+        song_number += (song_number < max_songs && (j2 & JOY_UP)) ? 1: 0;
+        song_number -= (song_number > 0 && (j2 & JOY_DOWN)) ? 1: 0;
+	    put_number(song_number,2,16,15);
+
+    	if (j2 & JOY_I)
 		{
-			if (mode==0)
-			{
-				cursorx = 70;
-				cursory = 140;
-				spr_x(cursorx);
-				spr_y(cursory);
-				mode=1;
-			}
-			else if (mode==1)
-			{
-				cursorx = 70;
-				cursory = 116;
-				spr_x(cursorx);
-				spr_y(cursory);
-				mode=0;
-			}
-			satb_update();	
-		}
-		if (j2 & JOY_UP)
-		{
-			if(mode==0)
-			{
-				if (song_number < max_songs)
-				{
-					song_number+=1;
-				}
-				else
-				{
-					song_number=0;
-				}
-			}
-			if(mode==1)
-			{
-				if (cur_channel==0)
-				{
-					if (sfx1_number < max_sfxs)
-					{
-						sfx1_number+=1;
-					}
-					else
-					{
-						sfx1_number=0;
-					}
-				}
-				if (cur_channel==1)
-				{
-					if (sfx2_number < max_sfxs)
-					{
-						sfx2_number+=1;
-					}
-					else
-					{
-						sfx2_number=0;
-					}
-				}
-			}
-			put_number(song_number,2,16,15);
-			// put_number(sfx1_number,2,15,18);
-			// put_number(sfx2_number,2,26,18);
-			satb_update();
-		}
-		if (j2 & JOY_DOWN)
-		{
-			if(mode==0)
-			{
-				if (song_number > 0)
-				{
-					song_number-=1;
-				}
-				else
-				{
-					song_number=max_songs;
-				}
-			}
-			if(mode==1)
-			{
-				if (cur_channel==0)
-				{
-					if (sfx1_number > 0)
-					{
-						sfx1_number-=1;
-					}
-					else
-					{
-						sfx1_number=max_sfxs;
-					}
-				}
-				if (cur_channel==1)
-				{
-					if (sfx2_number > 0)
-					{
-						sfx2_number-=1;
-					}
-					else
-					{
-						sfx2_number=max_sfxs;
-					}
-				}
-			}
-			put_number(song_number,2,16,15);
-			// put_number(sfx1_number,2,15,18);
-			// put_number(sfx2_number,2,26,18);
-			satb_update();
-		}
-		if (j2 & JOY_LEFT)
-		{
-			if (cur_channel==1 & mode==1)
-			{
-				cursorx = 70;
-				spr_x(cursorx);
-				cur_channel=0;
-			}
-			satb_update();	
-		}
-		if (j2 & JOY_RIGHT)
-		{
-			if (cur_channel==0 & mode==1)
-			{
-				cursorx = 158;
-				spr_x(cursorx);
-				cur_channel=1;
-			}
-			satb_update();	
-		}
-		if (j2 & JOY_I)
-		{
-			if(mode==0)
-			{
-				HuTrackEngine_Stop();
-				vsync(10);
-				HuTrackEngine_PlaySong(song_number);
-                HuTrackEngine_getCurrSongTitle(title);
-                HuTrackEngine_getCurrSongAuthor(author);
-                put_string("                                                     \0",  2,  5);
-                put_string("                                                     \0",  2,  3);
-                put_string(title,  2,  5);
-                put_string(author,  2,  3);
-			}
-			if(mode==1)
-			{
-				// HuTrackEngine_PlaySFX(sfx2_number);	
-			}
+            HuTrackEngine_Stop();
+            vsync(10);
+            HuTrackEngine_PlaySong(song_number);
+            HuTrackEngine_getCurrSongTitle(title);
+            HuTrackEngine_getCurrSongAuthor(author);
+            put_string("                                                     \0",  1,  5);
+            put_string("                                                     \0",  1,  3);
+            put_string(title,  1,  5);
+            put_string(author,  1,  3);
 		}
 		if (j2 & JOY_II)
 		{
-			if(mode==0)
-			{
 				HuTrackEngine_Stop();
-			}
-			if(mode==1)
-			{
-				// HuTrackEngine_PlaySFX(sfx1_number);
-			}
 		}
-		satb_update();
+
 	}
 
   return 0;

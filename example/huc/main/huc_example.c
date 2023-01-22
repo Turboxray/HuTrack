@@ -21,11 +21,11 @@ int main()
 {
 
     // var setup and init start 
-    int song_number, j1, j2, max_songs, cur_channel;
+    int song_number, j1, j2, last_song, cur_channel;
     int i,j,k;
-    max_songs=4;        // variable to control number of songs available. base 0, should align with number of songs queued in song queue section
-    song_number=0;      // currently selected song
-    cur_channel=0;      // toggle variable for which channel of sfx is being used
+    last_song   = 4;    // variable to control number of songs available. base 0, should align with number of songs queued in song queue section
+    song_number = 0;    // currently selected song
+    cur_channel = 0;    // toggle variable for which channel of sfx is being used
 
     for(i=0;i<6;i++) { chanMask[i] = '-'; }
     chanMask[6] = 0;    // Set the string null terminator
@@ -78,7 +78,7 @@ int main()
         cur_channel -= (cur_channel > 0 && (j2 & JOY_LEFT)) ? 1: 0;
         put_string("^",9+cur_channel,18);
 
-        song_number += (song_number < max_songs && (j2 & JOY_UP)) ? 1: 0;
+        song_number += (song_number < last_song && (j2 & JOY_UP)) ? 1: 0;
         song_number -= (song_number > 0 && (j2 & JOY_DOWN)) ? 1: 0;
         put_number(song_number,2,16,15);
 

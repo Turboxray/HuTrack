@@ -16,7 +16,7 @@ INT_MIN = (INT_MAX) / -2 - 1
 runOptions = {}
 components = {}
 filterValues    = ['kaiser_best','kaiser_fast','sinc_window_32','sinc_window_Hann']
-bitdepthValues  = ['4bit','4.5bit','5bit','5.5bit','6bit','6.5bit','7bit']
+bitdepthValues  = ['5bit']
 playerateValues = ['6960','6991','7020','9279','10440','11090','12180','13920','14040']
 
 
@@ -25,37 +25,30 @@ class ConvertWave():
     def __init__(self):
         pass
 
-    def convertPCMData(self, sampleObj):
-        sampleDepth = sampleObj.sampleDepth
-        data        = sampleObj.sampleData
-        sampleRate  = sampleObj.sampleRate
-        samplePitch = sampleObj.samplePitch
-        sampleNum   = sampleObj.sampleNum
+    def convertPCMData(self, sampleObj, sampleData, ):
+        sampleDepth     = sampleObj['BitsPerSample']
+        sr_orig         = sampleObj['SamplesPerSec']
+        playbackRate    = sampleObj['playbackRate']
+        resampleFilter  = sampleObj['resampleFilter']
 
         # promote all sample data to signed 16bit
         if sampleDepth == 16:
             # need to convert any originally signed data back to signed data. Shouldn't affect 8bit samples stored as 16bit data
-            data = [ (sample, sample - 0x10000)[sample > 0x7fff] for sample in data ]
+            sampleData = [ (sample, sample - 0x10000)[sample > 0x7fff] for sample in sampleData ]
         elif sampleDepth == 8:
-            data = [ (sample - 128) * 256 for sample in data ]
+            sampleData = [ (sample - 128) * 256 for sample in sampleData ]
         else:
             print('error unknown bit depth')
-            sampleObj.sampleName = 'ERROR: Unknown sample format'
-            sampleObj.sampleData = []
-            sampleObj.samplePCE  = []
-            return
+            return 'ERROR: Unknown sample format', [], []
 
         # Update with corrected values.
-        sampleObj.sampleData = data[::]
-
-        data = [sample * 1.5 for sample in data]
-        data = [ (sample, -32767)[sample < -32767] for sample in data]
-        data = [ (sample, 32767)[sample > 32767] for sample in data]
+        sampleData = [sample * 1.5 for sample in sampleData]
+        sampleData = [ (sample, -32767)[sample < -32767] for sample in sampleData]
+        sampleData = [ (sample, 32767)[sample > 32767] for sample in sampleData]
 
         # use resampy to resample down to target frequency
-        orgData = numpy.array(data)
-        sr_orig = RATE_VAL[sampleRate] * PITCH_VAL[samplePitch]
-        newSampleData = resampy.resample(orgData, sr_orig, int(self.params['playback']), filter=self.params['resampleFilter'])
+        orgData = numpy.array(sampleData)
+        newSampleData = resampy.resample(orgData, sr_orig, playbackRate, filter=resampleFilter)
 
         # numpy arrays are great and all, but let's convert this base to a python list
         newSampleData = [ int(sample) for sample in newSampleData ]
@@ -64,22 +57,12 @@ class ConvertWave():
         newSampleData = [ (sample, -32767)[sample < -32767] for sample in newSampleData]
         newSampleData = [ (sample, 32767)[sample > 32767] for sample in newSampleData]
 
-        # DEBUG
-        # if sampleDepth == 8:
-        #     eightbitSampleData = [ ((sample + 32767) >> 8)   for sample in newSampleData ]
-            # with open(f'{sampleData.sampleName}.pre.bin','wb') as fout:
-            #     fout.write(bytearray(eightbitSampleData))
-
-        if self.params['debug']:
-            filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.{sampleNum}.8bit.bin').replace("\\","/")
-            with open(os.path.join(runOptions['destinationPath'],filename),'wb') as fout:
-                eightbitSampleData = [ ((sample + 32767) >> 8)   for sample in newSampleData ]
-                fout.write(bytearray(eightbitSampleData))
+        eightbitSampleData = [ ((sample + 32767) >> 8)   for sample in newSampleData ]
 
         # Convert the data to PCE 5bit format
         newSampleData = [ (sample + 32767) >> 11 for sample in newSampleData ]
 
-        sampleObj.samplePCE = newSampleData[::]
+        return '', newSampleData, eightbitSampleData
 
 
 class WavRead():
@@ -177,7 +160,8 @@ class WavRead():
         pcmSize     = self.wavHeader['BitsPerSample'] // 8
         step        = numChans * pcmSize
 
-        print(f' {self.contentIndex}, {len(self.content)}, {step}, {pcmSize}')
+        if self.debug:
+            print(f' {self.contentIndex}, {len(self.content)}, {step}, {pcmSize}')
 
         for idx in range(self.contentIndex, len(self.content), step):
 
@@ -220,7 +204,6 @@ class WavRead():
     def intReadLE(self):
         idx = self.contentIndex
         self.contentIndex += 4
-        # print(f'debug data: {self.content[idx+0:idx+1]}')
         val  = self.content[idx+0:idx+1][0] <<  0
         val |= self.content[idx+1:idx+2][0] <<  8
         val |= self.content[idx+2:idx+3][0] << 16
@@ -243,35 +226,67 @@ class WavRead():
 
 class GuiFrontend():
 
-    def __init__(self):
-        pcmData         = []
-        pcmHeader       = {}
+    def __init__(self, args):
+        self.pcmData    = []
+        self.pcmHeader  = {}
         self.components = {}
+        self.args       = args
 
     def openWave(self):
 
-        global hutrack, components
-
         filename = fd.askopenfilename(defaultextension='.wav', filetypes = (("wav files","*.wav"),("all files","*")))
-        filename = filename
-
         if filename == '' or filename == None:
             print('Cancel open..')
             return
         
-        result, convertInfo, pcmHeader, pcmData = WavRead(filename).readFile()
+        result, convertInfo, self.pcmHeader, self.pcmData = WavRead(filename).readFile()
 
-        if not result and tk.messagebox.showerror(title=None, message=convertInfo):
+        if not result and tk.messagebox.showerror(title="Failed...", message=convertInfo):
             return
         
-        tk.messagebox.showinfo(title=None, message=convertInfo)
+        tk.messagebox.showinfo(title="Wav/RIFF Info", message=convertInfo)
+        self.componentState(tk.NORMAL)
 
         return result
 
 
-
     def saveFile(self):
-        tk.messagebox.showinfo(title=None, message='HuTrack pce file saved.')
+
+        self.pcmHeader['resampleFilter'] = self.components['filter'].get()
+        self.pcmHeader['playbackRate']   = int(self.components['playback'].get())
+
+        message, newSampleData, eightBitData = ConvertWave().convertPCMData(self.pcmHeader,self.pcmData)
+
+        tk.messagebox.showinfo(title=None, message='HuPCM file saved.')
+
+        filename = "test"
+        with open(f'{filename}.inc','w') as f:
+            f.write(f'  .include \"{filename}.data.inc\"')
+            pass
+
+        with open(f'{filename}.data.inc','w') as f:
+            columnBytes = 0
+            for idx, val in enumerate(newSampleData):
+                valString = hex(val)[2:]
+                valString = '$'+('','0')[len(valString) == 1] + valString
+                if columnBytes == 0:
+                    f.write("  .db ")
+                f.write(f'{valString}')
+                columnBytes += 1
+                if columnBytes > 15:
+                    f.write("\n")
+                    columnBytes = 0
+                elif idx == len(newSampleData)-1:
+                    f.write("\n")
+                else:
+                    f.write(", ")
+
+        with open(f'{filename}.debug.8bit.bin','wb') as f:
+            f.write(bytearray(eightBitData))
+
+        with open(f'{filename}.debug.5bit.bin','wb') as f:
+            f.write(bytearray(newSampleData))
+
 
 
     def componentState(self, compState):
@@ -307,7 +322,7 @@ class GuiFrontend():
         bitdepthCombo = ttk.Combobox(subframe1, values=bitdepthValues)
         self.components['bitdepth'] = bitdepthCombo
         bitdepthCombo.grid(column=0, row=3)
-        bitdepthCombo.current(2)
+        bitdepthCombo.current(0)
 
         labelTop = ttk.Label(subframe1, text = "Playback Rate")
         labelTop.grid(column=0, row=4)
@@ -406,6 +421,7 @@ runOptionsGroup.add_argument('--NoSongNameSubfolder',
                                 help='Stops util from using the song name as a sub folder.')
 runOptionsGroup.add_argument('--bitpackPCM',
                                 '-pack',
+                                action="store_true",
                                 default=False,
                                 help='Bit packs the 5bit the samples.')
 runOptionsGroup.add_argument('--debug',
@@ -415,6 +431,7 @@ runOptionsGroup.add_argument('--debug',
                                 help='Output uncompressed DMF as raw bin and hex s-record.')
 runOptionsGroup.add_argument('--alignPCM256',
                                 '-align256',
+                                action="store_true",
                                 default=False,
                                 help='Forces all samples to take up a multiple of 256 bytes and block aligns to 256byte boundaries - remaining values will be 0.')
 runOptionsGroup.add_argument('--resampleFilter',
@@ -432,6 +449,11 @@ runOptionsGroup.add_argument('--playback',
                                 choices=['6960','6991','7020','9279','10440','11090','12180','13920','14040'],
                                 default='6960',
                                 help='The playback rate for PCM samples.')
+runOptionsGroup.add_argument('--noGui',
+                                '-ng',
+                                action="store_true",
+                                default=False,
+                                help='The bit depth for streaming PCM samples.')
 
 args = parser.parse_args()
 
@@ -445,5 +467,7 @@ runOptions['playback']        = args.playback
 runOptions['alignPCM256']     = args.alignPCM256
 runOptions['debug']           = args.debug
 
-
-GuiFrontend().process()
+if not args.noGui:
+    GuiFrontend(args).process()
+else:
+    print(f'Only GUI mode is operational')

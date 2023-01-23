@@ -17,7 +17,7 @@ runOptions = {}
 components = {}
 filterValues    = ['kaiser_best','kaiser_fast','sinc_window_32','sinc_window_Hann']
 bitdepthValues  = ['5bit']
-playerateValues = ['6960','6991','7020','9279','10440','11090','12180','13920','14040']
+playerateValues = ['6960','6991','7020','9279','10440','11090','12180','13920','14040','no resample']
 
 
 class ConvertWave():
@@ -47,8 +47,11 @@ class ConvertWave():
         sampleData = [ (sample, 32767)[sample > 32767] for sample in sampleData]
 
         # use resampy to resample down to target frequency
-        orgData = numpy.array(sampleData)
-        newSampleData = resampy.resample(orgData, sr_orig, playbackRate, filter=resampleFilter)
+        if sr_orig != playbackRate:
+            orgData = numpy.array(sampleData)
+            newSampleData = resampy.resample(orgData, sr_orig, playbackRate, filter=resampleFilter)
+        else:
+            newSampleData = sampleData
 
         # numpy arrays are great and all, but let's convert this base to a python list
         newSampleData = [ int(sample) for sample in newSampleData ]
@@ -252,8 +255,9 @@ class GuiFrontend():
 
     def saveFile(self):
 
+        playbackRate = self.components['playback'].get()
         self.pcmHeader['resampleFilter'] = self.components['filter'].get()
-        self.pcmHeader['playbackRate']   = int(self.components['playback'].get())
+        self.pcmHeader['playbackRate']   = int( (playbackRate,self.pcmHeader['SamplesPerSec'])[playbackRate == "no resample"] )
 
         message, newSampleData, eightBitData = ConvertWave().convertPCMData(self.pcmHeader,self.pcmData)
 

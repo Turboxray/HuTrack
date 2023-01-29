@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>HuTrack</title>
+</head>
+<body bgcolor="000000">
+<font face="Arial" color="AAAAAAA">
+<h1>HuTrack in HuC</h1>
+<p style="margin-left: 15px">
+	HuTrack use in HuC documentation - Updated1.15.2023
+</p>
+<hr>
+	<h2>Index</h2>
+<ul>
+	<a href="#about"<li>What is HuTrack</li></a><br>
+	<a href="#workflow_overview"<li>Workflow overview</li></a><br>
+	<a href="#furnace"<li> Furnace Song Creation and Exporting Data</li></a><br>
+	<a href="#conversion"<li> Converting a DMF to HuC usable INC data</li></a><br>
+	<a href="#huc_use>"<li> HuC Implementation and use </li></a><br>
+	<a href="#huc_functions>"<li> HuTrack functions available in HuC </li></a><br>
+</ul>
+<hr>
+	<dt id="about"><h2>What is HuTrack</h2></dt>
+<p style="margin-left: 15px">
+	This tool was created by Turboxray to enable homebrew developers the ability to add songs to their HuC PC-Engine / TurboGrafx-16 development projects.<br>
+	HuTrack a tool suite that allows music to be created in the furnace tracker software, and then exported data from Furnace can be converted to usable data by HuC for HuCard PSG driven audio.
+</p>
+<hr>
+	<dt id="workflow_overview"><h2>Workflow Overview</h2></dt>
+<ol>
+<li>Create a song file in Furnace</li>
+<li>Export the song from Furnace as .dmf file</li>
+<li>Convert the .dmf file to a bundle of .inc files using hutrackconverter.bat</li>
+<li>Include the HuTrack.c library in yoru application</li>
+<li>Include the song into your application with #incasmlabel(alias name for asset, include path)</li>
+<li>Instantiate the HuTrack functions with HuTrack_Init();</li>
+<li>Queue up a song you want to play with  HuTrackEngine_QueueSong(alias name of asset);</li>
+<li>Between vsyncs begin playing a song with HuTrackEngine_PlaySong(index value of song to play);</li>
+</ol>
+<hr>
+<dt id="furnace"><h2>Furnace Song Creation and Exporting Data </h2></dt>
+<p style="margin-left: 15px">
+	Furnace is the tracker style music creation software that HuTrack requires be used to export the data for use in HuC.<br>
+	Furnace	download link: <a href="https://github.com/tildearrow/furnace">https://github.com/tildearrow/furnace</a><br>
+	When using furnace it is important to note that it can be used to create music and sound effects for a variety of systems, so be certain you're working in the PC-Engine mode.<br>
+	Once in Furnace follow these steps to set the system:
+</p>
+		<ol>
+			<li>Click on the file menu </li>
+			<li>Click on Add System</li>
+			<li>Click on PC-Engine/Turbografx-16</li>
+			<dl></dl><img src="furnace_set_system.png" width="1195" height="623" alt=""/></dl>
+			<br>
+		</ol>
+<p style="margin-left: 15px">
+	From here you will need to create music using the tool until you're happy with something you make and want to get it into the game<br>
+	[TODO: ADD tutorial links, and criteria for needs of HuTrack]<br>	
+	[TODO: ADD info on how to export]<br>
+</p>
+<hr>
+<dt id="conversion"><h2>Converting a DMF to HuC usable INC data </h2></dt>
+<p style="margin-left: 15px">
+	[TODO: Add information here]<br>	
+</p>
+<hr>
+<dt id="huc_use"><h2>HuC Implementation and use </h2></dt>
+<p style="margin-left: 15px">
+	[TODO: Add information here]<br>	
+</p>
+<hr>
+<dt id="huc_functions"><h2>HuTrack functions available in HuC </h2></dt>
+<p style="margin-left: 15px">
+	[TODO: Add information here]<br>	
+</p>
+</font>
+</body>
+</html>

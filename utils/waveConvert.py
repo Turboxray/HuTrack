@@ -304,7 +304,7 @@ class GuiFrontend():
     def process(self):
         root = tk.Tk()
         self.components['root'] = root
-        root.title("Wave to HuTrack PCM Converter")
+        root.title("Wav/RIFF to HuPCM Converter")
 
 
         frame1 = tk.LabelFrame(root,padx=24, pady=24)

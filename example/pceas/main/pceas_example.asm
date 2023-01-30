@@ -422,8 +422,6 @@ showNote:
 
 playSample:
 
-        lda sampleStart
-      beq .b1.check
         ldx #$05
         lda <HuTrack.dda.bank,x
       bpl .skip
@@ -431,7 +429,6 @@ playSample:
         CallFar HuTrackEngine.chanReleaseSFX
         stz sampleStart
 .skip
-        jmp .out
 
 .b1.check
         lda input_state.buttons
@@ -465,19 +462,17 @@ playSample:
         sta $805
           plp
 
-        ldx #$01
-        ldy #$05
-        lda Sample1,x
-        inx
-        sta HuTrack.dda.addr.lo,y
-        lda Sample1,x
-        inx
-        sta HuTrack.dda.addr.hi,y
-        and #$1f
-        ora #$40
-        lda Sample1
-        sta HuTrack.dda.bank,y
-        rmb7 <HuTrack.DDAprocess
+
+        cly
+        lda Sample1,y
+        sta <_hk.EAX0.l
+        lda Sample1+1,y
+        sta <_hk.EAX0.m
+        lda Sample1+2,y
+        sta <_hk.EAX0.h
+        lda #$05
+        sta <_hk.EAX0.u
+        CallFar HuTrackEngine.SfxPcmRequest
 
           PULLBANK.2 $02
 

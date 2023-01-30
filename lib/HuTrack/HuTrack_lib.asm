@@ -126,6 +126,8 @@ HuTrackEngine.Reset
         lda #$ff
         sta HuTrack.channel.panState,x
 
+        stz HuTrack.SFX.inProgress,x
+
         inx
         cpx #$06
       bcs .out
@@ -322,6 +324,40 @@ bcc .skip
 
   rts
 
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+;...............................................
+;
+HuTrackEngine.SfxPcmRequest:
+;...............................................
+; Input <_hk.EAX0.l     bank#
+; Input <_hk.EAX0.m     lsb
+; Input <_hk.EAX0.h     msb
+; Input <_hk.EAX0.h     chan #
+
+        sec
+        bit HuTrack.SFX.inProgress,x
+      bpl .out
+        ldx <_hk.EAX0.u
+        cpx #$06
+      bcs .out
+
+        ; No error
+        clc
+        lda #$80
+        sta <HuTrack.dda.bank,x
+        lda <_hk.EAX0.m
+        sta <HuTrack.dda.addr.lo,x
+        lda <_hk.EAX0.h
+        and #$1f
+        ora #$40
+        sta <HuTrack.dda.addr.hi,x
+        lda <_hk.EAX0.l
+        sta <HuTrack.dda.bank,x
+        rmb7 <HuTrack.DDAprocess
+.out
+  rts
 
 ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -422,10 +422,13 @@ showNote:
 
 playSample:
 
-        ldx #$05
-        lda <HuTrack.dda.bank,x
+        lda #$05
+        sta <_hk.EAX0.u
+        CallFar HuTrackEngine.SfxPcmStatus
+        lda <_hk.EAX0.l
       bpl .skip
         lda #$05
+        sta <_hk.EAX0.u
         CallFar HuTrackEngine.chanReleaseSFX
         stz sampleStart
 .skip

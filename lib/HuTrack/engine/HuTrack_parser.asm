@@ -782,7 +782,7 @@ HuTrackEngine.Channel.update.Note
       bpl .note.cut
 .sample.cut
         lda #$80
-        sta <HuTrack.dda.bank,x
+        jsr HuTrackEngine._htk.WSG.DDA
       bra .out
 
 .note.cut
@@ -1616,7 +1616,7 @@ HuTrack.channel.FX.handler:
       bne .platFX.Noise.out
         ; TODO this needs a separate function so it's not dependent on only channel 5
         lda #$80
-        sta <HuTrack.dda.bank,x
+        jsr HuTrackEngine._htk.WSG.DDA
 
       jmp .platFX.Noise.out
 
@@ -1667,7 +1667,7 @@ HuTrack.channel.FX.handler:
 .dda.off
         sta HuTrack.channel.ddaState,x
         lda #$80
-        sta <HuTrack.dda.bank,x
+        jsr HuTrackEngine._htk.WSG.DDA
         ;stz HuTrack.channel.noteDelay,x
         stz HuTrack.Enabled,x
         jmp .platFX.SamplePCM.out
@@ -1988,17 +1988,19 @@ HuTrackEngine.Channel.setSample
 
     rmb7 <HuTrack.DDAprocess
 
+    bit HuTrack.SFX.inProgress,x
+  bmi .skip.pcm
+
       sei
     lda .temp.addr.lo
     sta <HuTrack.dda.addr.lo,x
     lda .temp.addr.hi
     sta <HuTrack.dda.addr.hi,x
-    bit HuTrack.SFX.inProgress,x
-  bmi .skip.pcm
     lda .temp.addr.bnk
-    sta <HuTrack.dda.bank,x
-.skip.pcm
+    jsr HuTrackEngine._htk.WSG.DDA
       cli
+
+.skip.pcm
 
         _htk.PULLBANK.2 _htk.PAGE_4000
 
@@ -2126,6 +2128,9 @@ HuTrackEngine.Channel.waveformEnv
         iny
         cpy #$20
       bcc .loop
+
+        bit HuTrack.SFX.inProgress,x
+      bmi .out
 
         lda HuTrack.channel.proccessState,x
         and #$1f
@@ -2623,7 +2628,7 @@ HuTrackEngine.channel.DelayAndCut:
       bpl .process.note.cut
 .process.sample.cut
         lda #$80
-        sta <HuTrack.dda.bank,x
+        jsr HuTrackEngine._htk.WSG.DDA
         clc
       bra .out
 
@@ -3478,6 +3483,21 @@ HuTrackEngine._htk.WSG.control:
         stx $800
         sta $804
           cli
+
+.out
+
+  rts
+
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+HuTrackEngine._htk.WSG.DDA:
+
+        bit HuTrack.SFX.inProgress,x
+      bmi .out
+.cont
+
+        sta <HuTrack.dda.bank,x
 
 .out
 

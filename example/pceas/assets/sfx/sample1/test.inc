@@ -6,5 +6,5 @@
 
   .page 7
 
-  .include "test.data.inc"
+  .include "../assets/sfx/sample1/test.data.inc"
 

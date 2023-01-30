@@ -259,13 +259,26 @@ _HuTrackEngine_chanSetSFX.1:
         lda #$80
         sta HuTrack.SFX.inProgress, x
         sta <HuTrack.dda.bank, x
+
         lda #$df
           php
           sei
             stx $800
-            stz $807
             sta $804
           plp
+
+          php
+          sei
+            stx $800
+            stz $807
+          plp
+
+          php
+          sei
+            stx $800
+            stz $809
+          plp
+
 .out
     rts
 

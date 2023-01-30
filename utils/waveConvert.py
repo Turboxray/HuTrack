@@ -261,12 +261,21 @@ class GuiFrontend():
 
         message, newSampleData, eightBitData = ConvertWave().convertPCMData(self.pcmHeader,self.pcmData)
 
+        # TODO, need to add a switch in the GUI for this
+        newSampleData = newSampleData + [0x80]
+
         tk.messagebox.showinfo(title=None, message='HuPCM file saved.')
 
         filename = "test"
         with open(f'{filename}.inc','w') as f:
-            f.write(f'  .include \"{filename}.data.inc\"')
-            pass
+
+            # TODO needs to be a GUI option
+            f.write(f'\n')
+            f.write(f'  .db bank(.sample)\n')
+            f.write(f'  .dw .sample\n\n')
+            f.write(f'.sample\n\n')
+            f.write (f'  .page {7}\n\n')
+            f.write(f'  .include \"{filename}.data.inc\"\n\n')
 
         with open(f'{filename}.data.inc','w') as f:
             columnBytes = 0
@@ -287,6 +296,10 @@ class GuiFrontend():
 
         with open(f'{filename}.debug.8bit.bin','wb') as f:
             f.write(bytearray(eightBitData))
+
+        with open(f'{filename}.debug.5it_as_8bit.bin','wb') as f:
+            [ ((sample) >> 3)<<3 for sample in eightBitData ]
+            f.write(bytearray([ ((sample) >> 3)<<3 for sample in eightBitData ]))
 
         with open(f'{filename}.debug.5bit.bin','wb') as f:
             f.write(bytearray(newSampleData))

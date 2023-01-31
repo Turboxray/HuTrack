@@ -3508,6 +3508,7 @@ HuTrackEngine._htk.WSG.DDA:
 
 HuTrackEngine._htk.WSG.pan:
 
+        sta HuTrack.channel.panState,x
         bit HuTrack.SFX.inProgress,x
       bmi .out
 .cont

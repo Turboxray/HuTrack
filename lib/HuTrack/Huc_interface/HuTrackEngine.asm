@@ -279,6 +279,13 @@ _HuTrackEngine_chanSetSFX.1:
             stz $809
           plp
 
+        lda #$ff
+          php
+          sei
+            stx $800
+            sta $805
+          plp
+
 .out
     rts
 
@@ -288,8 +295,55 @@ _HuTrackEngine_chanReleaseSFX.1:
         cpx #06
       bcs .out
         stz HuTrack.SFX.inProgress, x
+
+        lda HuTrack.channel.panState,x
+          php
+          sei
+            stx $800
+            sta $805
+          plp
+
 .out
     rts
+
+; #pragma fastcall HuTrackEngine_PcmRequest(byte __al, farptr __fbank:__fptr)
+_HuTrackEngine_PcmRequest.2:
+        ldx <__al
+        cpx #$06
+      bcs .error
+        bit HuTrack.SFX.inProgress,x
+      bpl .error
+
+        lda #$80
+        sta <HuTrack.dda.bank,x
+        lda <__fptr
+        clc
+        adc #$03
+        sta <HuTrack.dda.addr.lo,x
+        lda <__fptr+1
+        adc #$00
+        and #$1f
+        ora #$40
+        sta <HuTrack.dda.addr.hi,x
+        lda <__fbank
+        adc #$00
+        sta <HuTrack.dda.bank,x
+        rmb7 <HuTrack.DDAprocess
+
+        ; No error
+        lda #$01
+        clx
+        clc
+.out    
+  rts
+
+.error
+        clx
+        cla
+        sec
+  rts
+
+
 
   .bank SOUND_BANK, "HuTrack"
   .page $06

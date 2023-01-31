@@ -42,6 +42,8 @@ char HuTrack_Arg_Pass_EAX0_u;
 #pragma fastcall HuTrackEngine_chanSetSFX(byte __al);
 #pragma fastcall HuTrackEngine_chanReleaseSFX(byte __al);
 
+#pragma fastcall HuTrackEngine_PcmRequest(byte __al, farptr __fbank:__fptr);
+
 
 #pragma fastcall HuTrack_Init();
 

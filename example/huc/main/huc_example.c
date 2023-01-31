@@ -13,9 +13,17 @@
 #incasmlabel(Bottom_Sweep, "../assets/song/Night_Slave_-_Bottom_Sweep_V2/Night_Slave_-_Bottom_Sweep_V2.song.inc", 2);
 #incasmlabel(Stormy_Edge_Stage, "../assets/song/Night_Slave_-_Stormy_Edge_Stage_3A/Night_Slave_-_Stormy_Edge_Stage_3A.song.inc", 2);
 
+#incasmlabel(pcm1, "../assets/sfx/sample1/test.inc", 2);
+
 char title[48];
 char author[48];
 char chanMask[7];
+
+enum SfxError {
+    NO_ERROR,
+    NOT_SET_SFX,
+    INVALID_CHAN
+};
 
 int main()
 {
@@ -114,8 +122,26 @@ int main()
 
         put_string(chanMask, 9,17);
 
+        if (j2 & JOY_SLCT) {
+                playSFX(cur_channel);
+        }
+
     }
 
   return 0;
 }
+
+
+
+int playSFX(int selectedChan)
+{
+    if (HuTrackEngine_PcmRequest(selectedChan, pcm1)) {
+        put_string("Playing PCM1                   ", 0, 19);
+    } else {
+        put_string("chan ", 0, 19);
+        put_number(selectedChan,2,5,19);
+        put_string(" is not in SFX mode.", 8, 19);
+    }
+}
+
 

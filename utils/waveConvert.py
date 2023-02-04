@@ -234,6 +234,7 @@ class GuiFrontend():
         self.pcmHeader  = {}
         self.components = {}
         self.args       = args
+        self.filename   = ''
 
     def openWave(self):
 
@@ -247,6 +248,8 @@ class GuiFrontend():
         if not result and tk.messagebox.showerror(title="Failed...", message=convertInfo):
             return
         
+        self.filename = filename
+
         tk.messagebox.showinfo(title="Wav/RIFF Info", message=convertInfo)
         self.componentState(tk.NORMAL)
 
@@ -266,7 +269,8 @@ class GuiFrontend():
 
         tk.messagebox.showinfo(title=None, message='HuPCM file saved.')
 
-        filename = "test"
+        filename = (self.components['sfxname'], self.filename)[self.components['sfxname'] == ""]
+
         with open(f'{filename}.inc','w') as f:
 
             # TODO needs to be a GUI option
@@ -274,7 +278,7 @@ class GuiFrontend():
             f.write(f'  .db bank(.sample)\n')
             f.write(f'  .dw .sample\n\n')
             f.write(f'.sample\n\n')
-            f.write (f'  .page {7}\n\n')
+            f.write (f'  .page {2}\n\n')
             f.write(f'  .include \"{filename}.data.inc\"\n\n')
 
         with open(f'{filename}.data.inc','w') as f:
@@ -375,9 +379,9 @@ class GuiFrontend():
         includePath.grid(column=1, row=0)
         labelTop = ttk.Label(subframe2, text = "PCM name: ")
         labelTop.grid(column=0, row=1)
-        songname = tk.Entry(subframe2)
-        self.components['song'] = songname
-        songname.grid(column=1, row=1)
+        sfxname = tk.Entry(subframe2)
+        self.components['sfxname'] = sfxname
+        sfxname.grid(column=1, row=1)
         labelTop = ttk.Label(subframe2, text = "dest path: ")
         labelTop.grid(column=0, row=2)
         destpath = tk.Entry(subframe2)

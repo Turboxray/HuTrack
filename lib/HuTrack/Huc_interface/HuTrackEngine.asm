@@ -306,12 +306,39 @@ _HuTrackEngine_chanReleaseSFX.1:
 .out
     rts
 
-; #pragma fastcall HuTrackEngine_PcmRequest(byte __al, farptr __fbank:__fptr)
+; int __fastcall HuTrackEngine_stopPcm (unsigned char channel<__al>);
+_HuTrackEngine_stopPcm.1:
+        ldx <__al
+        cpx #$06
+      bcs .error
+        bit HuTrack.SFX.inProgress,x
+      bpl .error
+
+        lda #$80
+        sta <HuTrack.dda.bank,x
+
+        ; No error
+        lda #$01
+        clx
+        clc
+.out    
+  rts
+
+.error
+        clx
+        cla
+        sec
+  rts
+
+; int __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, unsigned char bank<__fbank>, unsigned int addr<__fptr>);
+; int __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, char far *pcm<__fbank:__fptr>);
 _HuTrackEngine_PcmRequest.2:
 _HuTrackEngine_PcmRequest.3:
         stz <__cl
         lda #$8f
         sta <__ch
+; int __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, unsigned char bank<__fbank>, unsigned int addr<__fptr>, char mask1<__cl>, char mask2<__ch>);
+; int __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, char far *pcm<__fbank:__fptr>, char mask1<__cl>, char mask2<__ch> );
 _HuTrackEngine_PcmRequest.4:
 _HuTrackEngine_PcmRequest.5:
         ldx <__al

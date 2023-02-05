@@ -42,7 +42,10 @@ char HuTrack_Arg_Pass_EAX0_u;
 #pragma fastcall HuTrackEngine_chanSetSFX(byte __al);
 #pragma fastcall HuTrackEngine_chanReleaseSFX(byte __al);
 
-#pragma fastcall HuTrackEngine_PcmRequest(byte __al, farptr __fbank:__fptr);
+void __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, unsigned char bank<__fbank>, unsigned int addr<__fptr>, char mask1<__cl>, char mask2<__ch>);
+void __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, char far *pcm<__fbank:__fptr>, char mask1<__cl>, char mask2<__ch> );
+void __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, unsigned char bank<__fbank>, unsigned int addr<__fptr>);
+void __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, char far *pcm<__fbank:__fptr>);
 
 
 #pragma fastcall HuTrack_Init();

@@ -308,6 +308,12 @@ _HuTrackEngine_chanReleaseSFX.1:
 
 ; #pragma fastcall HuTrackEngine_PcmRequest(byte __al, farptr __fbank:__fptr)
 _HuTrackEngine_PcmRequest.2:
+_HuTrackEngine_PcmRequest.3:
+        stz <__cl
+        lda #$8f
+        sta <__ch
+_HuTrackEngine_PcmRequest.4:
+_HuTrackEngine_PcmRequest.5:
         ldx <__al
         cpx #$06
       bcs .error
@@ -316,18 +322,29 @@ _HuTrackEngine_PcmRequest.2:
 
         lda #$80
         sta <HuTrack.dda.bank,x
+
+        lda <__ch
+        ora #$80
+        sta <HuTrack.dda.cntr1
+
+        lda <__cl
+        sta <HuTrack.dda.cntr0
+
         lda <__fptr
         clc
         adc #$03
         sta <HuTrack.dda.addr.lo,x
+        sta <HuTrack.dda.addr.loop.lo,x
         lda <__fptr+1
         adc #$00
         and #$1f
         ora #$40
         sta <HuTrack.dda.addr.hi,x
+        sta <HuTrack.dda.addr.loop.hi,x
         lda <__fbank
         adc #$00
         sta <HuTrack.dda.bank,x
+        sta <HuTrack.dda.loop.bank,x
         rmb7 <HuTrack.DDAprocess
 
         ; No error
@@ -343,7 +360,27 @@ _HuTrackEngine_PcmRequest.2:
         sec
   rts
 
+_getFarBank.1
+    ldx __bl
+  rts
 
+_getFarAddress.1
+    lda __si+1
+    ldx __si
+  rts
+
+;//.........................................................
+_getFarPointer.3
+
+            lda __fbank
+            sta [__ax]
+            cly
+            lda __fptr
+            sta [__bx],y
+            iny
+            lda __fptr+1
+            sta [__bx],y
+    rts
 
   .bank SOUND_BANK, "HuTrack"
   .page $06

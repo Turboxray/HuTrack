@@ -38,8 +38,12 @@ HuTrack.DDAprocess:                 .ds 1
 HuTrack.dda.bank:                   .ds (1* 6)
 HuTrack.dda.addr.lo:                .ds (1* 6)
 HuTrack.dda.addr.hi:                .ds (1* 6)
+HuTrack.dda.loop.bank:              .ds (1* 6)
+HuTrack.dda.addr.loop.lo:           .ds (1* 6)
+HuTrack.dda.addr.loop.hi:           .ds (1* 6)
 HuTrack.dda.ptr:                    .ds 2
-HuTrack.dda.cntr:                   .ds 1
+HuTrack.dda.cntr0:                  .ds 1
+HuTrack.dda.cntr1:                  .ds 1
 
 HuTrack.dda.trackUsage:             .ds 1
 

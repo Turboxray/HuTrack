@@ -14,16 +14,47 @@
 #incasmlabel(Stormy_Edge_Stage, "../assets/song/Night_Slave_-_Stormy_Edge_Stage_3A/Night_Slave_-_Stormy_Edge_Stage_3A.song.inc", 2);
 
 #incasmlabel(pcm1, "../assets/sfx/sample1/test.inc", 2);
+#incasmlabel(pcm2, "../assets/sfx/sample2/hypercocoon.inc", 2);
+#incasmlabel(pcm3, "../assets/sfx/sample3/stageclear.inc", 2);
+#incasmlabel(pcm4, "../assets/sfx/sample4/ShubibinmanIII.inc", 2);
+#incasmlabel(pcm5, "../assets/sfx/sample5/loop7.inc", 2);
+#incasmlabel(pcm6, "../assets/sfx/sample6/loop6.inc", 2);
+#incasmlabel(pcm7, "../assets/sfx/sample7/loop5.inc", 2);
+#incasmlabel(pcm8, "../assets/sfx/sample8/loop4.inc", 2);
+#incasmlabel(pcm9, "../assets/sfx/sample9/loop3.inc", 2);
+#incasmlabel(pcm10, "../assets/sfx/sample10/loop2.inc", 2);
+#incasmlabel(pcm11, "../assets/sfx/sample11/loop1.inc", 2);
+#incasmlabel(pcm12, "../assets/sfx/sample14/Track05.inc", 2);
+#incasmlabel(pcm13, "../assets/sfx/sample13/MissionFailed_b.inc", 2);
 
 char title[48];
 char author[48];
 char chanMask[7];
+
+typedef struct {
+    char idx;
+    char bank[20];
+    int  addr[20];
+    char mask0[20];
+    char mask1[20];
+    enum PCMForceOn {
+        PCM_NO_FORCE       = 0x00,
+        PCM_FORCE_REPEAT   = 0x01,
+        PCM_ALLOW_REPEAT   = 0x81,
+        PCM_DISABLE_REPEAT = 0x80,
+    };
+} PcmPointers;
+
+PcmPointers pcmPointers;
+
 
 enum SfxError {
     NO_ERROR,
     NOT_SET_SFX,
     INVALID_CHAN
 };
+
+void __fastcall getFarPointer( char far *sprite<__fbank:__fptr>, unsigned int bank_p<__ax>, unsigned int addr_p<__bx> );
 
 int main()
 {
@@ -50,6 +81,10 @@ int main()
     HuTrackEngine_QueueSong(Initial_Velocity);
     HuTrackEngine_QueueSong(Bottom_Sweep);
     HuTrackEngine_QueueSong(Stormy_Edge_Stage);
+
+    loadPcmPointers();
+
+
 
     vsync(1);
     HuTrackEngine_PlaySong(0);
@@ -107,7 +142,7 @@ int main()
             chanMask[4] = '-';
             chanMask[5] = '-';
         }
-        if (j2 & JOY_II) {
+        if ((j2 & JOY_II) && !(j2 & JOY_SLCT)){
                 HuTrackEngine_Stop();
         }
 
@@ -123,7 +158,7 @@ int main()
         put_string(chanMask, 9,17);
 
         if (j2 & JOY_SLCT) {
-                playSFX(cur_channel);
+                playSFX(cur_channel, (j1 & JOY_II));
         }
 
     }
@@ -132,16 +167,90 @@ int main()
 }
 
 
+void loadPcmPointers() {
 
-int playSFX(int selectedChan)
+    pcmPointers.idx = 0;
+    getFarPointer(pcm1, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_NO_FORCE;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_DISABLE_REPEAT;
+    
+    getFarPointer(pcm2, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_DISABLE_REPEAT;
+
+    getFarPointer(pcm3, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_NO_FORCE;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_DISABLE_REPEAT;
+
+    getFarPointer(pcm4, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_NO_FORCE;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm5, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_NO_FORCE;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm6, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm7, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm8, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm9, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm10, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm11, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm12, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm13, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_NO_FORCE;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_DISABLE_REPEAT;
+
+}
+
+int playSFX(int selectedChan, int autoInc)
 {
-    if (HuTrackEngine_PcmRequest(selectedChan, pcm1)) {
-        put_string("Playing PCM1                   ", 0, 19);
+    static int sfxSelect = 0;
+
+    if (autoInc) { 
+        sfxSelect = (++sfxSelect < pcmPointers.idx) ? sfxSelect : 0; 
+        put_string("    Set PCM ", 0, 19);
+        put_number(sfxSelect,2,12,19);
+        put_string("                   ", 14, 19);
     } else {
-        put_string("chan ", 0, 19);
-        put_number(selectedChan,2,5,19);
-        put_string(" is not in SFX mode.", 8, 19);
+
+        if ( HuTrackEngine_PcmRequest( selectedChan, 
+                                       pcmPointers.bank[sfxSelect],
+                                       pcmPointers.addr[sfxSelect],
+                                       pcmPointers.mask0[sfxSelect],
+                                       pcmPointers.mask1[sfxSelect]) 
+        ) {
+            put_string("    Set PCM ", 0, 19);
+            put_number(sfxSelect,2,12,19);
+            put_string("                   ", 14, 19); 
+        } else {
+            put_string("chan ", 0, 19);
+            put_number(selectedChan,2,5,19);
+            put_string(" is not in SFX mode.", 8, 19);
+        }
     }
+    
 }
 
 

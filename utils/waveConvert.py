@@ -3,6 +3,7 @@ import os
 import numpy
 import sys
 import resampy
+import pathlib
 
 from tkinter import filedialog as fd
 import tkinter as tk
@@ -234,6 +235,7 @@ class GuiFrontend():
         self.pcmHeader  = {}
         self.components = {}
         self.args       = args
+        self.filename = ''
 
     def openWave(self):
 
@@ -249,12 +251,14 @@ class GuiFrontend():
         
         tk.messagebox.showinfo(title="Wav/RIFF Info", message=convertInfo)
         self.componentState(tk.NORMAL)
+        self.filename = self.sfxnameVar.set(pathlib.Path(filename).stem)
 
         return result
 
 
     def saveFile(self):
 
+        saveDir = fd.askdirectory()
         playbackRate = self.components['playback'].get()
         self.pcmHeader['resampleFilter'] = self.components['filter'].get()
         self.pcmHeader['playbackRate']   = int( (playbackRate,self.pcmHeader['SamplesPerSec'])[playbackRate == "no resample"] )
@@ -266,19 +270,22 @@ class GuiFrontend():
 
         tk.messagebox.showinfo(title=None, message='HuPCM file saved.')
 
-        filename = "test"
-        with open(f'{filename}.inc','w') as f:
+        filename = (self.sfxnameVar.get().strip(),self.filename)[self.sfxnameVar.get().strip() == ""]
+        includePath = self.includePath.get().strip()
+
+        with open(f'{os.path.join(saveDir,filename)}.inc','w') as f:
 
             # TODO needs to be a GUI option
             f.write(f'\n')
             f.write(f'  .db bank(.sample)\n')
             f.write(f'  .dw .sample\n\n')
             f.write(f'.sample\n\n')
-            f.write (f'  .page {7}\n\n')
-            f.write(f'  .include \"{filename}.data.inc\"\n\n')
+            f.write (f'  .page {2}\n\n')
+            f.write(f'  .include \"{os.path.join(includePath,filename)}.data.inc\"\n\n')
 
-        with open(f'{filename}.data.inc','w') as f:
+        with open(f'{os.path.join(saveDir,filename)}.data.inc','w') as f:
             columnBytes = 0
+            sampleCount = 0
             for idx, val in enumerate(newSampleData):
                 valString = hex(val)[2:]
                 valString = '$'+('','0')[len(valString) == 1] + valString
@@ -289,10 +296,14 @@ class GuiFrontend():
                 if columnBytes > 15:
                     f.write("\n")
                     columnBytes = 0
+                    if sampleCount >= 16384:
+                        f.write(f'\n\n  .page {2}\n\n')
+                        sampleCount = 0
                 elif idx == len(newSampleData)-1:
                     f.write("\n")
                 else:
                     f.write(", ")
+                sampleCount += 1
 
         with open(f'{filename}.debug.8bit.bin','wb') as f:
             f.write(bytearray(eightBitData))
@@ -370,24 +381,18 @@ class GuiFrontend():
 
         labelTop = ttk.Label(subframe2, text = "Include Path: ")
         labelTop.grid(column=0, row=0)
-        includePath = tk.Entry(subframe2)
+        self.includePath = tk.StringVar()
+        includePath = tk.Entry(subframe2,textvariable=self.includePath)
         self.components['path'] = includePath
         includePath.grid(column=1, row=0)
         labelTop = ttk.Label(subframe2, text = "PCM name: ")
         labelTop.grid(column=0, row=1)
-        songname = tk.Entry(subframe2)
-        self.components['song'] = songname
-        songname.grid(column=1, row=1)
-        labelTop = ttk.Label(subframe2, text = "dest path: ")
-        labelTop.grid(column=0, row=2)
-        destpath = tk.Entry(subframe2)
-        self.components['destpath'] = destpath
-        destpath.grid(column=1, row=2)
-        labelTop = ttk.Label(subframe2, text = "subFolder: ")
-        labelTop.grid(column=0, row=2)
-        subFolder = tk.Entry(subframe2)
-        self.components['subFolder'] = subFolder
-        subFolder.grid(column=1, row=2)
+        self.sfxnameVar = tk.StringVar()
+        sfxname = tk.Entry(subframe2,textvariable=self.sfxnameVar )
+        self.components['sfxname'] = sfxname
+        sfxname.grid(column=1, row=1)
+
+
 
 
         subframe3 = tk.LabelFrame(frame1, padx=4, pady=4)

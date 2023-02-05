@@ -32,11 +32,11 @@ HuTrackEngine.7khz.IRQ:
       bmi .next                             ;2
         tam #$02                            ;5
 
-
         lda <HuTrack.dda.addr.lo,x          ;4
-        sta HuTrack.dda.ptr                 ;4
+        sta <HuTrack.dda.ptr                ;4
         lda <HuTrack.dda.addr.hi,x          ;4
-        sta HuTrack.dda.ptr + 1             ;4
+        sta <HuTrack.dda.ptr + 1            ;4
+.re_entry
         lda [HuTrack.dda.ptr]               ;7
       bmi .control_flag                     ;2
 
@@ -67,11 +67,6 @@ HuTrackEngine.7khz.IRQ:
 .in_progress
     rti                                     ;7 = 30
 
-
-.control_flag
-        sta <HuTrack.dda.bank,x
-        bra .next
-
 .overflow
         inc <HuTrack.dda.addr.hi,x
         lda <HuTrack.dda.addr.hi,x
@@ -81,4 +76,29 @@ HuTrackEngine.7khz.IRQ:
         sta <HuTrack.dda.addr.hi,x
         inc <HuTrack.dda.bank,x
       bra .next
+
+.control_flag
+        ora <HuTrack.dda.cntr0
+        and <HuTrack.dda.cntr1
+        cmp #$80
+      beq .stop
+        lda <HuTrack.dda.loop.bank,x
+        sta <HuTrack.dda.bank,x
+        tam #$02
+
+        lda <HuTrack.dda.addr.loop.hi,x
+        sta <HuTrack.dda.addr.hi,x
+        sta <HuTrack.dda.ptr+1
+
+        lda <HuTrack.dda.addr.loop.lo,x
+        sta <HuTrack.dda.addr.lo,x
+        sta <HuTrack.dda.ptr
+
+      jmp .re_entry
+
+.stop
+        sta <HuTrack.dda.bank,x
+        bra .next
+
+
 

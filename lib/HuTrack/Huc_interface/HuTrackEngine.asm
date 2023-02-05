@@ -325,10 +325,10 @@ _HuTrackEngine_PcmRequest.5:
 
         lda <__ch
         ora #$80
-        sta <HuTrack.dda.cntr1
+        sta <HuTrack.dda.cntr1,x
 
         lda <__cl
-        sta <HuTrack.dda.cntr0
+        sta <HuTrack.dda.cntr0,x
 
         lda <__fptr
         clc

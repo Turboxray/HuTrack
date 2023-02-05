@@ -78,8 +78,8 @@ HuTrackEngine.7khz.IRQ:
       bra .next
 
 .control_flag
-        ora <HuTrack.dda.cntr0
-        and <HuTrack.dda.cntr1
+        ora <HuTrack.dda.cntr0,x
+        and <HuTrack.dda.cntr1,x
         cmp #$80
       beq .stop
         lda <HuTrack.dda.loop.bank,x

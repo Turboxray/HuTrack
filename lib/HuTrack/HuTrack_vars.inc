@@ -42,8 +42,8 @@ HuTrack.dda.loop.bank:              .ds (1* 6)
 HuTrack.dda.addr.loop.lo:           .ds (1* 6)
 HuTrack.dda.addr.loop.hi:           .ds (1* 6)
 HuTrack.dda.ptr:                    .ds 2
-HuTrack.dda.cntr0:                  .ds 1
-HuTrack.dda.cntr1:                  .ds 1
+HuTrack.dda.cntr0:                  .ds (1* 6)
+HuTrack.dda.cntr1:                  .ds (1* 6)
 
 HuTrack.dda.trackUsage:             .ds 1
 

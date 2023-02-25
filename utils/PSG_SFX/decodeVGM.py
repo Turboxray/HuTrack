@@ -35,8 +35,8 @@ class GuiGui():
 
         subframe2 = tk.LabelFrame(root, text='Debug',padx=2, pady=2)
         subframe2.grid(row=0, column=1,sticky=tk.W)
-        self.outputBin = tk.IntVar(0)
-        self.outputLog = tk.IntVar(0)
+        self.outputBin = tk.IntVar().set(0)
+        self.outputLog = tk.IntVar().set(0)
         tk.Checkbutton(subframe2, text="bin", variable=self.outputBin).grid(row=0, column=0,sticky=tk.W)
         tk.Checkbutton(subframe2, text="log", variable=self.outputLog).grid(row=0, column=1,sticky=tk.W)
 

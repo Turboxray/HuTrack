@@ -72,6 +72,15 @@ int main()
     for(i=0;i<6;i++) { chanMask[i] = '-'; }
     chanMask[6] = 0;    // Set the string null terminator
     
+    changeSubState0(1);
+
+    changeSubState1(getchangeSubState1Vars(1,2,3));
+
+    changeSubState3(44556);
+
+
+    changeSubState1_alt(1,(unsigned int*) prevSubState1, (unsigned int*) subState1);
+    changeSubState1_alt2(1,(unsigned int*) prevSubState1, (unsigned int*) subState1);
 
     set_xres(344);
     cls();

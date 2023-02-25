@@ -122,6 +122,8 @@ HuTrackEngine.Reset
 
         lda #$80
         sta <HuTrack.dda.bank,x
+        lda #$8F
+        sta <HuTrack.dda.cntr1
 
         lda #$ff
         sta HuTrack.channel.panState,x

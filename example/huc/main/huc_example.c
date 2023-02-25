@@ -14,10 +14,39 @@
 #incasmlabel(Stormy_Edge_Stage, "../assets/song/Night_Slave_-_Stormy_Edge_Stage_3A/Night_Slave_-_Stormy_Edge_Stage_3A.song.inc", 2);
 
 #incasmlabel(pcm1, "../assets/sfx/sample1/test.inc", 2);
+#incasmlabel(pcm2, "../assets/sfx/sample2/hypercocoon.inc", 2);
+#incasmlabel(pcm3, "../assets/sfx/sample3/stageclear.inc", 2);
+#incasmlabel(pcm4, "../assets/sfx/sample4/ShubibinmanIII.inc", 2);
+#incasmlabel(pcm5, "../assets/sfx/sample5/loop7.inc", 2);
+#incasmlabel(pcm6, "../assets/sfx/sample6/loop6.inc", 2);
+#incasmlabel(pcm7, "../assets/sfx/sample7/loop5.inc", 2);
+#incasmlabel(pcm8, "../assets/sfx/sample8/loop4.inc", 2);
+#incasmlabel(pcm9, "../assets/sfx/sample9/loop3.inc", 2);
+#incasmlabel(pcm10, "../assets/sfx/sample10/loop2.inc", 2);
+#incasmlabel(pcm11, "../assets/sfx/sample11/loop1.inc", 2);
+#incasmlabel(pcm12, "../assets/sfx/sample14/Track05.inc", 2);
+#incasmlabel(pcm13, "../assets/sfx/sample13/MissionFailed_b.inc", 2);
 
 char title[48];
 char author[48];
 char chanMask[7];
+
+typedef struct {
+    char idx;
+    char bank[20];
+    int  addr[20];
+    char mask0[20];
+    char mask1[20];
+    enum PCMForceOn {
+        PCM_NO_FORCE       = 0x00,
+        PCM_FORCE_REPEAT   = 0x01,
+        PCM_ALLOW_REPEAT   = 0x81,
+        PCM_DISABLE_REPEAT = 0x80,
+    };
+} PcmPointers;
+
+PcmPointers pcmPointers;
+
 
 enum SfxError {
     NO_ERROR,
@@ -25,19 +54,33 @@ enum SfxError {
     INVALID_CHAN
 };
 
+void __fastcall getFarPointer( char far *sprite<__fbank:__fptr>, unsigned int bank_p<__ax>, unsigned int addr_p<__bx> );
+
 int main()
 {
 
     // var setup and init start 
-    int song_number, j1, j2, last_song, cur_channel;
+    int song_number, j1, j2, last_song, cur_channel, song_playing, sfxSelect, sfxMode;
     int i,j,k;
-    last_song   = 4;    // variable to control number of songs available. base 0, should align with number of songs queued in song queue section
-    song_number = 0;    // currently selected song
-    cur_channel = 0;    // toggle variable for which channel of sfx is being used
+    last_song    = 4;    // variable to control number of songs available. base 0, should align with number of songs queued in song queue section
+    song_number  = 0;    // currently selected song
+    cur_channel  = 0;    // toggle variable for which channel of sfx is being used
+    song_playing = 1;
+    sfxSelect    = 0;
+    sfxMode      = 0;
 
     for(i=0;i<6;i++) { chanMask[i] = '-'; }
     chanMask[6] = 0;    // Set the string null terminator
     
+    changeSubState0(1);
+
+    changeSubState1(getchangeSubState1Vars(1,2,3));
+
+    changeSubState3(44556);
+
+
+    changeSubState1_alt(1,(unsigned int*) prevSubState1, (unsigned int*) subState1);
+    changeSubState1_alt2(1,(unsigned int*) prevSubState1, (unsigned int*) subState1);
 
     set_xres(344);
     cls();
@@ -51,8 +94,12 @@ int main()
     HuTrackEngine_QueueSong(Bottom_Sweep);
     HuTrackEngine_QueueSong(Stormy_Edge_Stage);
 
+    loadPcmPointers();
+
+
+
     vsync(1);
-    HuTrackEngine_PlaySong(0);
+    // HuTrackEngine_PlaySong(0);
     vsync(1);
 
     HuTrackEngine_getCurrSongTitle(title);
@@ -70,11 +117,17 @@ int main()
     put_string("^",9,18);
 
 
-    put_string("Up/Down : Choose songs.", 0, 23);
-    put_string("Start: Enable/Disable channel for SFX.", 0, 24);
-    put_string("Btn I: Start song.", 0, 25);
-    put_string("Btn II: Stop song.", 0, 26);
+    put_string("(Toggle) SELECT:  SFX / Song mode.", 0, 21);
+    put_string("(Song)   UP/DOWN: Choose song.", 0, 22);
+    put_string("(Song)   I/II:    Start / Stop song.", 0, 23);
+    put_string("(SFX)    START:   En/Dis chan for SFX.", 0, 24);
+    put_string("(SFX)    UP/DOWN: Choose PCM.", 0, 25);
+    put_string("(SFX)    I/II:    Play/Stop PCM.", 0, 26);
 
+    put_string("    Set PCM ", 0, 19);
+    put_number(sfxSelect,2,12,19);
+    put_string("                   ", 14, 19); 
+    
     for(;;)
     {
         vsync();
@@ -86,62 +139,148 @@ int main()
         cur_channel -= (cur_channel > 0 && (j2 & JOY_LEFT)) ? 1: 0;
         put_string("^",9+cur_channel,18);
 
-        song_number += (song_number < last_song && (j2 & JOY_UP)) ? 1: 0;
-        song_number -= (song_number > 0 && (j2 & JOY_DOWN)) ? 1: 0;
-        put_number(song_number,2,16,15);
-
-        if (j2 & JOY_I) {
-            HuTrackEngine_Stop();
-            vsync(10);
-            HuTrackEngine_PlaySong(song_number);
-            HuTrackEngine_getCurrSongTitle(title);
-            HuTrackEngine_getCurrSongAuthor(author);
-            put_string("                                                     \0",  1,  5);
-            put_string("                                                     \0",  1,  3);
-            put_string(title,  1,  5);
-            put_string(author,  1,  3);
-            chanMask[0] = '-';
-            chanMask[1] = '-';
-            chanMask[2] = '-';
-            chanMask[3] = '-';
-            chanMask[4] = '-';
-            chanMask[5] = '-';
+        if (j2 & JOY_SLCT) {
+            sfxMode ^= 0x01;
         }
-        if (j2 & JOY_II) {
+
+        // Song interface mode
+        if ( !sfxMode ) {
+            if (j2 & JOY_I) {
                 HuTrackEngine_Stop();
-        }
-
-        if (j2 & JOY_STRT) {
-            chanMask[cur_channel] = (chanMask[cur_channel] == '-') ? 'X':'-';
-            if (chanMask[cur_channel]=='X') {
-                HuTrackEngine_chanSetSFX(cur_channel);
-            } else {
-                HuTrackEngine_chanReleaseSFX(cur_channel);
+                vsync(10);
+                HuTrackEngine_PlaySong(song_number);
+                HuTrackEngine_getCurrSongTitle(title);
+                HuTrackEngine_getCurrSongAuthor(author);
+                put_string("                                                     \0",  1,  5);
+                put_string("                                                     \0",  1,  3);
+                put_string(title,  1,  5);
+                put_string(author,  1,  3);
+                chanMask[0] = '-';
+                chanMask[1] = '-';
+                chanMask[2] = '-';
+                chanMask[3] = '-';
+                chanMask[4] = '-';
+                chanMask[5] = '-';
             }
+            else if (j2 & JOY_II)   { HuTrackEngine_Stop(); }
+            else if (j2 & JOY_UP)   { song_number += (song_number < last_song) ? 1: 0; }
+            else if (j2 & JOY_DOWN) { song_number -= (song_number > 0) ? 1: 0; }
+        }
+        // SFX interface mode
+        else {
+            if (j2 & JOY_STRT) {
+                chanMask[cur_channel] = (chanMask[cur_channel] == '-') ? 'X':'-';
+
+                if (chanMask[cur_channel]=='X') { HuTrackEngine_chanSetSFX(cur_channel); }
+                else { HuTrackEngine_chanReleaseSFX(cur_channel); }
+            }
+
+            if ((j2 & JOY_DOWN) || (j2 & JOY_UP)) {
+                sfxSelect += (sfxSelect < pcmPointers.idx && (j2 & JOY_UP)) ? 1: 0;
+                sfxSelect -= (sfxSelect > 0 && (j2 & JOY_DOWN)) ? 1: 0;
+                put_string("    Set PCM ", 0, 19);
+                put_number(sfxSelect,2,12,19);
+                put_string("                   ", 14, 19); 
+            }
+
+            if (j2 & JOY_I) { playPcmSFX(cur_channel, sfxSelect); }
+            else if (j2 & JOY_II) { stopPcmSFX(cur_channel); }        
         }
 
         put_string(chanMask, 9,17);
-
-        if (j2 & JOY_SLCT) {
-                playSFX(cur_channel);
-        }
-
+        put_number(song_number,2,16,15);
+        put_string("Mode: ", 0, 20);
+        put_string(((!sfxMode) ? "Song" : "SFX " ), 7, 20);
     }
 
   return 0;
 }
 
 
+void loadPcmPointers() {
 
-int playSFX(int selectedChan)
+    pcmPointers.idx = 0;
+    getFarPointer(pcm1, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_NO_FORCE;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_DISABLE_REPEAT;
+    
+    getFarPointer(pcm2, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_DISABLE_REPEAT;
+
+    getFarPointer(pcm3, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_NO_FORCE;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_DISABLE_REPEAT;
+
+    getFarPointer(pcm4, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_NO_FORCE;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm5, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_NO_FORCE;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm6, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm7, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm8, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm9, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm10, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm11, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm12, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
+
+    getFarPointer(pcm13, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    pcmPointers.mask0[pcmPointers.idx  ] = PCM_NO_FORCE;
+    pcmPointers.mask1[pcmPointers.idx++] = PCM_DISABLE_REPEAT;
+
+}
+
+int playPcmSFX(int selectedChan, int sfxSelect)
 {
-    if (HuTrackEngine_PcmRequest(selectedChan, pcm1)) {
-        put_string("Playing PCM1                   ", 0, 19);
+
+    if ( HuTrackEngine_PcmRequest( selectedChan, 
+                                   pcmPointers.bank[sfxSelect],
+                                   pcmPointers.addr[sfxSelect],
+                                   pcmPointers.mask0[sfxSelect],
+                                   pcmPointers.mask1[sfxSelect]) 
+    ) {
+        put_string("    Set PCM ", 0, 19);
+        put_number(sfxSelect,2,12,19);
+        put_string("                   ", 14, 19); 
+    } else {
+        put_string("chan ", 0, 19);
+        put_number(selectedChan,2,5,19);
+        put_string(" is not in SFX mode.", 8, 19);
+    }
+    
+}
+
+int stopPcmSFX(int selectedChan, )
+{
+    if ( HuTrackEngine_stopPcm(selectedChan) ) {
+        put_string("        PCM  Stopped           ", 0, 19); 
     } else {
         put_string("chan ", 0, 19);
         put_number(selectedChan,2,5,19);
         put_string(" is not in SFX mode.", 8, 19);
     }
 }
-
-

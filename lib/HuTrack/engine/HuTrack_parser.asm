@@ -2577,11 +2577,13 @@ HuTrackEngine.Channel.SetFrequency
         ; TODO !!! The limit boundaries for porta up and porta down need to be checked here!
         ;      !!! If those boundaries have cross, saturate to said boundaries. And then cancel all slides?
 
-          sei
-        stx $800
-        sty $802
-        sta $803
-          cli
+        jsr HuTrackEngine._htk.WSG.freq
+        ;   sei
+        ; stx $800
+        ; sty $802
+        ; sta $803
+        ;   cli
+
 .return
 .out
   rts
@@ -3478,11 +3480,30 @@ HuTrackEngine._htk.WSG.control:
         bit HuTrack.SFX.inProgress,x
       bmi .out
 .cont
-
+          php
           sei
         stx $800
         sta $804
-          cli
+          plp
+
+.out
+
+  rts
+
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+HuTrackEngine._htk.WSG.freq:
+
+        bit HuTrack.SFX.inProgress,x
+      bmi .out
+.cont
+          php
+          sei
+        stx $800
+        sty $802
+        sta $803
+          plp
 
 .out
 
@@ -3512,11 +3533,12 @@ HuTrackEngine._htk.WSG.pan:
         bit HuTrack.SFX.inProgress,x
       bmi .out
 .cont
-
+          php
           sei
         stx $800
         sta $805
           cli
+          plp
 
 .out
 
@@ -3530,11 +3552,11 @@ HuTrackEngine._htk.WSG.noise:
         bit HuTrack.SFX.inProgress,x
       bmi .out
 .cont
-
+          php
           sei
         stx $800
         sta $807
-          cli
+          plp
 
 .out
 

@@ -722,16 +722,21 @@ HuTrackEngineSFXprocess
         inc a
         tam #$03
 
-          php
-        nop
-        sei
-        stx $800
         lda HuTrack.sfx.control,x
+        tay
         and #$1f
-        sta $804
-        jsr HuTrack.DMA
-        lda HuTrack.sfx.control,x
-        sta $804
+        ora #$40
+          php
+            sei
+            stx $800
+            sta $804
+            tya
+            and #$1f
+            sta $804
+
+            jsr HuTrack.DMA
+            tya
+            sta $804
           plp
 
         pla

@@ -16,13 +16,13 @@
 -===========-
                 volume                  no operand
                    |
-                   |-> Write this directly to $804
+                   |-> Write this directly to $804 with OR $80
 
 0x80 to 0x9f
 -===========-
                 volume (DDA)            no operand
                    |
-                   |-> Write this directly to $804
+                   |-> Write this directly to $804 with OR $C0
 
 0xA0 to 0xA9
 -===========-
@@ -49,7 +49,7 @@
 
 0xfb
 -===-
-                Stop all streaming.     no operand.         NOTE: This is a pseudo instruction, not a register write.
+                Stop all streaming for current channel: EOF.   no operand.         NOTE: This is a pseudo instruction, not a register write.
 
 0xfc
 -===-

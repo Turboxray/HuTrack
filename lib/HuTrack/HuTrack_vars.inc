@@ -34,6 +34,7 @@ _hk.EAX0.u = _hk.EAX0+3
 
 
       .zp
+
 HuTrack.DDAprocess:                 .ds 1
 HuTrack.dda.bank:                   .ds (1* 6)
 HuTrack.dda.addr.lo:                .ds (1* 6)
@@ -62,6 +63,7 @@ current_song:                       .ds 1
 
 song_repeat:                        .ds 1
 
+HuTrack.DDAprocessBackup:           .ds 1
 
 
 HuTrack.channel.noiseST.backup:     .ds (1* 6)
@@ -274,6 +276,20 @@ HuTrack.rowIncrement:               .ds 1
 
 HuTrack.waveform.buffer:            .ds 32
 
+            ;-----------------------------------------------
+HuTrack.SFXstream.bnk:              .ds 6
+HuTrack.SFXstream.lo:               .ds 6
+HuTrack.SFXstream.hi:               .ds 6
+HuTrack.SFXwf.bnk:                  .ds 6
+HuTrack.SFXwf.lo:                   .ds 6
+HuTrack.SFXwf.hi:                   .ds 6
+HuTrack.sfx.delay:                  .ds 6
+HuTrack.sfx.control:                .ds 6
+HuTrack.DMA:                        .ds (1+2+2+2+1)   ; this needs to be initialized to TIN and RTS.
+
+HuTrack.DMA.TINop = $D3
+HuTrack.DMA.RTSop = $60
+
 HuTrackEngine.VarEnd
             ;----------------------------------------------
 
@@ -286,6 +302,8 @@ HuTrack.Enabled:                    .ds (1* 6)
 
 HuTrack.A0:                         .ds 2
 HuTrack.A1:                         .ds 2
+HuTrack.bnk:                        .ds 2
+
 
 ;used for functions directly
 HuTrack.addr0:                      .ds 2

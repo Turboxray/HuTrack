@@ -130,6 +130,9 @@ HuTrackEngine.Reset
 
         stz HuTrack.SFX.inProgress,x
 
+        lda #$ff
+        sta HuTrack.SFXstream.bnk,x
+
         inx
         cpx #$06
       bcs .out
@@ -547,4 +550,300 @@ HuTrackEngine.playSong:
 
         _htk.PULLBANK.4 _htk.PAGE_4000
   rts
+
+
+
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+;...............................................
+; Input EAX0.l
+HuTrackEngineSFXprocess
+
+        clx
+.loop
+        lda HuTrack.SFXstream.bnk,x
+        cmp #$ff
+      beq .skip_entry
+
+        lda HuTrack.sfx.delay,x
+      bmi .skip_entry
+      beq .do_entry
+        dec HuTrack.sfx.delay,x
+      bra .skip_entry
+
+.do_entry
+        jmp .process
+.return_entry
+
+.skip_entry
+        inx
+        cpx #$06
+      bne .loop
+  rts    
+
+
+.process
+        ; Map in stream
+        tma #$02
+        pha
+        tma #$03
+        pha
+        lda HuTrack.SFXstream.bnk,x
+        tam #$02
+        inc a
+        tam #$03
+
+        ; Prep stream pointer
+        lda HuTrack.SFXstream.lo,x
+        sta <HuTrack.A0
+        lda HuTrack.SFXstream.hi,x
+        and #$1f
+        ora #$40
+        sta <HuTrack.A0 + 1
+
+
+.decode_byte
+        jsr .fetch_byte
+
+        cmp #$A0
+      bcs .next1
+        jmp .804            ; < #$A0
+.next1
+        cmp #$B0
+      bcs .next2
+        jmp .reg_update     ; < #$B0
+.next2
+      bne .next3
+        jmp .wf_update      ; == #$A0
+.next3
+        cmp #$D0
+      bcs .next4
+        jmp .frq_update     ; < #$D0
+.next4
+        cmp #$fb
+      bne .next5
+        jmp .eof            ; == #$FB
+.next5
+        cmp #$fc
+      bne .next6
+        jmp .play_pcm
+.next6
+        cmp #$fd
+      bne .next7
+        jmp .stop_pcm
+.next7
+        cmp #$fe
+      bne .next8
+        jmp .wait_n_frames
+.next8
+        cmp #$ff
+      bne .next9
+        jmp .wait_1_frame
+.next9
+
+
+;..............
+.804
+        sta HuTrack.sfx.control,x
+            php
+        sei
+        stx $800
+        sta $804
+            plp
+      jmp .decode_byte
+
+;..............
+.wf_update
+
+        ;// This is a slow, but for now it works.
+
+        lda #(HuTrack.DMA.TINop)
+        sta HuTrack.DMA + 0
+        lda #(HuTrack.DMA.RTSop)
+        sta HuTrack.DMA + 7
+
+        tma #$02
+        pha
+        tma #$03
+        pha
+
+      jsr .fetch_byte
+
+          cly
+          asl a
+          say
+          rol a
+          say
+
+          asl a
+          say
+          rol a
+          say
+
+          asl a
+          say
+          rol a
+          say
+
+          asl a
+          say
+          rol a
+          say
+
+          asl a
+          say
+          rol a
+          say
+          sty HuTrack.DMA + 2
+
+        clc
+        adc HuTrack.SFXwf.lo,x
+        sta HuTrack.DMA + 1
+        lda HuTrack.SFXwf.hi,x
+        and #$1f
+        ora #$40
+        adc HuTrack.DMA + 2
+        sta HuTrack.DMA + 2
+
+        lda #low($806)
+        sta HuTrack.DMA + 3
+        lda #high($806)
+        sta HuTrack.DMA + 4
+
+        lda #low(32)
+        sta HuTrack.DMA + 5
+        lda #high(32)
+        sta HuTrack.DMA + 6
+
+        lda HuTrack.SFXwf.bnk,x
+
+        tam #$02
+        inc a
+        tam #$03
+
+          php
+        nop
+        sei
+        stx $800
+        lda HuTrack.sfx.control,x
+        and #$1f
+        sta $804
+        jsr HuTrack.DMA
+        lda HuTrack.sfx.control,x
+        sta $804
+          plp
+
+        pla
+        tam #$03
+        pla
+        tam #$02
+
+      jmp .decode_byte
+
+;..............
+.reg_update
+        and #$0f
+        tay
+      jsr .fetch_byte
+            php
+        sei
+        stx $800
+        sta $800,y
+            plp
+      jmp .decode_byte
+
+
+;..............
+.frq_update
+        and #$0f
+        tay
+      jsr .fetch_byte
+            php
+        sei
+        stx $800
+        sta $802
+        sty $803
+            plp
+      jmp .decode_byte
+
+
+;..............
+.eof
+        lda #$ff
+        sta HuTrack.SFXstream.bnk,x
+      jmp .exit_parse
+
+;..............
+.play_pcm
+      jsr .fetch_byte
+      jsr .fetch_byte
+        ; Skip PCM operands for now
+      jmp .decode_byte
+
+;..............
+.stop_pcm
+        ; TODO
+      jmp .decode_byte
+
+;..............
+.wait_n_frames
+      jsr .fetch_byte
+        and #$7f
+        sta HuTrack.sfx.delay,x
+      jmp .exit_parse
+;..............
+.wait_1_frame
+        lda #$01
+        sta HuTrack.sfx.delay,x
+      jmp .exit_parse
+
+
+;.............................
+.inc_ptr
+            pha
+        inc <HuTrack.A0
+      bne .inc_ptr.out
+        inc <HuTrack.A0 + 1
+        lda <HuTrack.A0 + 1
+        cmp #$60
+      bne .inc_ptr.out
+        and #$1f
+        ora #$40
+        sta <HuTrack.A0 + 1
+        inc HuTrack.SFXstream.bnk,x
+        lda HuTrack.SFXstream.bnk,x
+        tam #$02
+        inc a
+        tam #$03
+.inc_ptr.out
+            pla
+  rts
+
+;..................
+.fetch_byte
+        lda [HuTrack.A0]
+      jmp .inc_ptr
+
+
+;..................
+.exit_parse
+        lda <HuTrack.A0
+        sta HuTrack.SFXstream.lo,x
+        lda <HuTrack.A0 + 1
+        sta HuTrack.SFXstream.hi,x
+
+        pla
+        tma #$03
+        pla
+        tma #$02
+    jmp .return_entry
+
+
+
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+;...............................................
+; Input EAX0.l
 

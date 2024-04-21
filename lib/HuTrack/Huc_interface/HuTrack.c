@@ -49,11 +49,9 @@ int __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, char far *p
 int __fastcall HuTrackEngine_stopPcm   (unsigned char channel<__al>);
 int __fastcall HuTrackEngine_SFXmode(unsigned char channel<__al>);
 int __fastcall HuTrackEngine_SFXmode();
+int __fastcall HuTrackEngineSFXrest(unsigned char channel<__al>);
 int __fastcall HuTrackEnginePauseDDA();
 int __fastcall HuTrackEngineResumeDDA();
-int __fastcall HuTrackEngineSFXrest(unsigned char channel<__al>);
-int __fastcall HuTrackEngineSFXprocess();
-int __fastcall HuTrackEngineSFXplay( char channel<__al>, unsigned char bank1<__fbank>, unsigned int addr1<__fptr>, unsigned char bank2<__cl>, unsigned int addr2<__bx>);
 
 void __fastcall __nop getDataPtr(unsigned char far *my_data_label<__bl:__ax>);
 

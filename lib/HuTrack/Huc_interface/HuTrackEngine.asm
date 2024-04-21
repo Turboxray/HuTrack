@@ -487,39 +487,6 @@ _HuTrackEngine_SFXmode.1:
         sec
   rts
 
-
-;//.........................................................
-; int __fastcall HuTrackEngineSFXplay( char channel<__al>, unsigned char bank1<__fbank>, unsigned int addr1<__fptr>, unsigned char bank2<__cl>, unsigned int addr2<__bx>)
-_HuTrackEngineSFXplay.5
-        ldx <__al
-        cpx #$06
-      bcs .error
-
-      lda <__fbank
-      sta HuTrack.SFXstream.bnk,x
-      lda <__fptr
-      sta HuTrack.SFXstream.lo,x
-      lda <__fptr + 1
-      sta HuTrack.SFXstream.hi,x
-      lda <__cl
-      sta HuTrack.SFXwf.bnk,x
-      lda <__bx
-      sta HuTrack.SFXwf.lo,x
-      lda <__bx + 1
-      sta HuTrack.SFXwf.hi,x
-
-        lda #$01
-        clx
-        clc
-.out    
-  rts
-
-.error
-        clx
-        cla
-        sec
-  rts
-
 ;//.........................................................
 _getFarPointer.3
 
@@ -544,19 +511,6 @@ _getFarPointer2.3 .macro
             sta [__bx],y
   .endm
 
-;//...............................................................................................................
-;//...............................................................................................................
-;//...............................................................................................................
-;//...............................................................................................................
-;//
-;int __fastcall HuTrackEngineSFXprocess();
-_HuTrackEngineSFXprocess:
-
-          HuTrack.CallFar HuTrackEngineSFXprocess
-          lda #$01
-          clx
-  rts
-
 ;//.........................................................
 
   .bank SOUND_BANK, "HuTrack"
@@ -564,7 +518,6 @@ _HuTrackEngineSFXprocess:
 
     .include "HuTrack/engine/HuTrack_parser.asm"
     .include "HuTrack/HuTrack_lib.asm"
+    .include "HuSFX/HuSFX_lib.asm"
 
   .bank LIB1_BANK
-
-

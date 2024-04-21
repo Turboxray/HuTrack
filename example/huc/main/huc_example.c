@@ -2,6 +2,7 @@
 #include "HuVGM_defs.h"
 #include "huc.h"
 #include "HuTrack/Huc_interface/HuTrack.c"
+#include "HuSFX/Huc_interface/HuSFX.c"
 
 #asm
 .bank HUC_USER_RESERVED
@@ -382,7 +383,7 @@ int playSFX(int selectedChan, int sfxSelect)
     if ( HuTrackEngine_SFXmode(selectedChan) ) {
         sFXassign[selectedChan].status = SFX_ON;
         sFXassign[selectedChan].ptr = sfxSelect;
-        HuTrackEngineSFXplay(   selectedChan,
+        HuSFXplay(   selectedChan,
                                 sFXcollection.sfxBank[sfxSelect],
                                 sFXcollection.sfxBase[sfxSelect],
                                 sFXcollection.wfBank,
@@ -431,8 +432,7 @@ int updateChipSFX()
         }
     }
 
-    HuTrackEngineSFXprocess();
+    HuSFXprocess();
 
     return 1;
 }
-

@@ -238,6 +238,7 @@ HuTrackEngine.Parser:
 HuTrackEngine.ParseEntry:
 
         cly
+        stz HuTrack.channel.temp.fxArg1,x
 
 .parseChannel
         lda [HuTrack.currentPattern],y
@@ -320,11 +321,11 @@ HuTrackEngine.ParseEntry:
 .decode.fx1
         lda HuTrack.entryParse
         bit #$10
-      beq .skip.fx1
+      beq .skip.fx1.arg
         lda [HuTrack.currentPattern],y
         sta HuTrack.channel.temp.fx1,x
         iny
-        lda #$08
+        lda #($08 | $10)                   ;// TXray - 5/19/2024: If FX, then arg forced to 00. Update both.
         tsb HuTrack.channel.update
 .skip.fx1
 
@@ -439,7 +440,7 @@ HuTrackEngine.ParseEntry.disabled:
     bcc .skip4
         pha
       lda [HuTrack.currentPattern],y
-      sta HuTrack.channel.temp.fxArg
+      sta HuTrack.channel.current.fxArg
       jsr HuTrackEngine.FX.disabled.store
         pla
       iny
@@ -468,13 +469,13 @@ HuTrackEngine.FX.disabled.store:
       lda HuTrack.channel.temp.fxNum
         cmp #$08        ; Pan
       bne .skip0
-      lda HuTrack.channel.temp.fxArg
+      lda HuTrack.channel.current.fxArg
       sta HuTrack.channel.panState,x
     rts
 .skip0
         cmp #$09        ; speed 1
       bne .skip1
-      lda HuTrack.channel.temp.fxArg
+      lda HuTrack.channel.current.fxArg
       sta HuTrack.tickReload+1
         phy
       ldy HuTrack.TickIdx
@@ -485,19 +486,19 @@ HuTrackEngine.FX.disabled.store:
 .skip1
         cmp #$0D        ; Pattern break
       bne .skip2
-      lda HuTrack.channel.temp.fxArg
+      lda HuTrack.channel.current.fxArg
       sta HuTrack.channel.panState,x
     jmp .out
 .skip2
         cmp #$0B        ; Position jump
       bne .skip3
-      lda HuTrack.channel.temp.fxArg
+      lda HuTrack.channel.current.fxArg
       sta HuTrack.channel.panState,x
     rts
 .skip3
         cmp #$0F        ; speed 2
       bne .skip4
-      lda HuTrack.channel.temp.fxArg
+      lda HuTrack.channel.current.fxArg
       sta HuTrack.tickReload
         phy
       ldy HuTrack.TickIdx
@@ -508,7 +509,7 @@ HuTrackEngine.FX.disabled.store:
 .skip4
         cmp #$17        ; PCM
       bne .skip5
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
       bne .dda.mode
         lda #$ff
         sta HuTrack.channel.pcmIDX.backup,x
@@ -528,7 +529,7 @@ HuTrackEngine.FX.disabled.store:
 
         cmp #$11        ; Noise
       bne .skip6
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
       bne .noise.on
         stz HuTrack.channel.noiseST.backup,x
     rts
@@ -558,13 +559,16 @@ HuTrackEngine.FX.disabled.store:
 ;
 HuTrackEngine.parse.extFX
         stz HuTrack.channel.update.extFX
+        stz HuTrack.channel.temp.fxArg2,x
+        stz HuTrack.channel.temp.fxArg3,x
+        stz HuTrack.channel.temp.fxArg4,x
 .do.fx2
         bit #$01
       beq .do.fxarg2
         lda [HuTrack.currentPattern],y
         sta HuTrack.channel.temp.fx2,x
         iny
-        lda #$01
+        lda #($01 | $02)
         tsb HuTrack.channel.update.extFX
 .do.fxarg2
         lda HuTrack.entryParse.extFX
@@ -583,7 +587,7 @@ HuTrackEngine.parse.extFX
         lda [HuTrack.currentPattern],y
         sta HuTrack.channel.temp.fx3,x
         iny
-        lda #$04
+        lda #($04 | $08)
         tsb HuTrack.channel.update.extFX
 
 .do.fxarg3
@@ -603,7 +607,7 @@ HuTrackEngine.parse.extFX
         lda [HuTrack.currentPattern],y
         sta HuTrack.channel.temp.fx4,x
         iny
-        lda #$10
+        lda #($10 | $20)
         tsb HuTrack.channel.update.extFX
 
 .do.fxarg4
@@ -636,7 +640,7 @@ HuTrackEngine.parse.extFX.disabled
     bcc .skip1
         pha
       lda [HuTrack.currentPattern],y
-      sta HuTrack.channel.temp.fxArg
+      sta HuTrack.channel.current.fxArg
       jsr HuTrackEngine.FX.disabled.store
         pla
       iny
@@ -653,7 +657,7 @@ HuTrackEngine.parse.extFX.disabled
     bcc .skip3
         pha
       lda [HuTrack.currentPattern],y
-      sta HuTrack.channel.temp.fxArg
+      sta HuTrack.channel.current.fxArg
       jsr HuTrackEngine.FX.disabled.store
         pla
       iny
@@ -670,7 +674,7 @@ HuTrackEngine.parse.extFX.disabled
     bcc .skip5
         pha
       lda [HuTrack.currentPattern],y
-      sta HuTrack.channel.temp.fxArg
+      sta HuTrack.channel.current.fxArg
       jsr HuTrackEngine.FX.disabled.store
         pla
       iny
@@ -881,7 +885,7 @@ HuTrackEngine.Channel.update.FX:
 
         lda HuTrack.channel.temp.fxArg1,x
         sta HuTrack.channel.fxArg1,x
-        sta HuTrack.channel.temp.fxArg
+        sta HuTrack.channel.current.fxArg
 
         lda HuTrack.channel.temp.fx1,x
         sta HuTrack.channel.fx1,x
@@ -902,7 +906,7 @@ HuTrackEngine.Channel.update.FX.arg
 
         lda HuTrack.channel.temp.fxArg1,x
         sta HuTrack.channel.fxArg1,x
-        sta HuTrack.channel.temp.fxArg
+        sta HuTrack.channel.current.fxArg
 
         lda HuTrack.channel.fx1,x
 
@@ -922,7 +926,7 @@ HuTrackEngine.Channel.update.FX234
       beq .fx2.arg
         lda HuTrack.channel.temp.fxArg2,x
         sta HuTrack.channel.fxArg2,x
-        sta HuTrack.channel.temp.fxArg
+        sta HuTrack.channel.current.fxArg
 
         lda HuTrack.channel.temp.fx2,x
         sta HuTrack.channel.fx2,x
@@ -936,7 +940,7 @@ HuTrackEngine.Channel.update.FX234
       beq .fx3
         lda HuTrack.channel.temp.fxArg1,x
         sta HuTrack.channel.fxArg1,x
-        sta HuTrack.channel.temp.fxArg
+        sta HuTrack.channel.current.fxArg
 
         lda HuTrack.channel.fx2,x
 
@@ -948,7 +952,7 @@ HuTrackEngine.Channel.update.FX234
       beq .fx3.arg
         lda HuTrack.channel.temp.fxArg3,x
         sta HuTrack.channel.fxArg3,x
-        sta HuTrack.channel.temp.fxArg
+        sta HuTrack.channel.current.fxArg
 
         lda HuTrack.channel.temp.fx3,x
         sta HuTrack.channel.fx3,x
@@ -962,7 +966,7 @@ HuTrackEngine.Channel.update.FX234
       beq .fx4
         lda HuTrack.channel.temp.fxArg3,x
         sta HuTrack.channel.fxArg3,x
-        sta HuTrack.channel.temp.fxArg
+        sta HuTrack.channel.current.fxArg
 
         lda HuTrack.channel.fx3,x
 
@@ -974,7 +978,7 @@ HuTrackEngine.Channel.update.FX234
       beq .fx4.arg
         lda HuTrack.channel.temp.fxArg4,x
         sta HuTrack.channel.fxArg4,x
-        sta HuTrack.channel.temp.fxArg
+        sta HuTrack.channel.current.fxArg
 
         lda HuTrack.channel.temp.fx4,x
         sta HuTrack.channel.fx4,x
@@ -988,7 +992,7 @@ HuTrackEngine.Channel.update.FX234
       beq .out
         lda HuTrack.channel.temp.fxArg4,x
         sta HuTrack.channel.fxArg4,x
-        sta HuTrack.channel.temp.fxArg
+        sta HuTrack.channel.current.fxArg
 
         lda HuTrack.channel.fx4,x
 
@@ -1171,7 +1175,7 @@ HuTrack.channel.FX.handler:
 ; 01xx
 .FX.PortaUp
           plx
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
         eor #$ff
         clc
         adc #$01
@@ -1190,7 +1194,7 @@ HuTrack.channel.FX.handler:
 ; 02xx
 .FX.PortaDown
           plx
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
         sta HuTrack.channel.porta.down.lo,x
         stz HuTrack.channel.porta.down.hi,x
 
@@ -1210,7 +1214,7 @@ HuTrack.channel.FX.handler:
 ; 04xx
 .FX.vibrato
           plx
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
       bne .cont
         lda HuTrack.channel.vibrato.idx,x
         ora #$80
@@ -1223,7 +1227,7 @@ HuTrack.channel.FX.handler:
         lsr a
         lsr a
         sta HuTrack.channel.vibrato.inc,x
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
         and #$0F
         tay
         lda VibratoScaleTable,y
@@ -1251,16 +1255,16 @@ HuTrack.channel.FX.handler:
 .FX.vibrato_volSlide
           plx
         ; NOTE: The vibrato part does nothing here. The manual is wrong from my tests.
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
       beq .FX.vibrato_volSlide.disable
-        tst #$f0, HuTrack.channel.temp.fxArg
+        tst #$f0, HuTrack.channel.current.fxArg
       bne .FX.vibrato_volSlide.check.vol.up
         sta HuTrack.channel.volSlideDown,x
         stz HuTrack.channel.volSlideUp,x
       bra .FX.vibrato_volSlide.out
 
 .FX.vibrato_volSlide.check.vol.up
-        tst #$0f, HuTrack.channel.temp.fxArg
+        tst #$0f, HuTrack.channel.current.fxArg
       bne .FX.vibrato_volSlide.disable        ; impossible combo
         stz HuTrack.channel.volSlideDown,x
         lsr a
@@ -1293,7 +1297,7 @@ HuTrack.channel.FX.handler:
         lda HuTrack.channel.update.extFX
         eor #$02
         sta HuTrack.channel.update.extFX
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
         ; TODO disable old SFX handler
     ;     bit HuTrack.SFX.inProgress,x
     ;   bvs .FX.pan.skip
@@ -1309,7 +1313,7 @@ HuTrack.channel.FX.handler:
 ; 09xx
 .FX.setSpeed1
           plx
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
         sta HuTrack.tickReload+1
         ldy HuTrack.TickIdx
         lda HuTrack.tickReload,y
@@ -1331,7 +1335,7 @@ HuTrack.channel.FX.handler:
 ; 0Bxx
 .FX.jump
           plx
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
         dec a
         sta HuTrack.channel.pattern.num+0
         sta HuTrack.channel.pattern.num+1
@@ -1374,7 +1378,7 @@ HuTrack.channel.FX.handler:
 ; 0Fxx
 .FX.SetSpeed2
           plx
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
         sta HuTrack.tickReload
         ldy HuTrack.TickIdx
         lda HuTrack.tickReload,y
@@ -1401,12 +1405,12 @@ HuTrack.channel.FX.handler:
 ; E1xx
 .extFX.NoteSlideUp
           plx
-            lda HuTrack.channel.temp.fxArg
+            lda HuTrack.channel.current.fxArg
             and #$0f
             sta HuTrack.channel.semitoneUP.op,x
             sta HuTrack.channel.semitoneUP.cent,x
             stz HuTrack.channel.semitoneUP.note,x
-            lda HuTrack.channel.temp.fxArg
+            lda HuTrack.channel.current.fxArg
             and #$f0
             asl a
             sta HuTrack.channel.semitoneUP.delta,x
@@ -1421,7 +1425,7 @@ HuTrack.channel.FX.handler:
             sta HuTrack.channel.semitoneDOWN.op,x
             sta HuTrack.channel.semitoneDOWN.cent,x
             stz HuTrack.channel.semitoneDOWN.note,x
-            lda HuTrack.channel.temp.fxArg
+            lda HuTrack.channel.current.fxArg
             and #$f0
             asl a
             sta HuTrack.channel.semitoneDOWN.delta,x
@@ -1453,7 +1457,7 @@ HuTrack.channel.FX.handler:
         sta HuTrack.channel.update.extFX
 
 
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
         sta HuTrack.channel.detune,x
 
         lda HuTrack.channel.output,x
@@ -1518,7 +1522,7 @@ HuTrack.channel.FX.handler:
 .extFX.NoteCut
         ; This is not the same as 'OFF' which is an immediate effect. This has a delay.
           plx
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
         ora #$80                        ; Setting these bits so this is processed later.
                                         ; NOTE: Because a value greater than the current row tick length is ignored
                                         ;       and a tick/speed change could happen on an FX column after this entry.
@@ -1532,7 +1536,7 @@ HuTrack.channel.FX.handler:
 ; EDxx
 .extFX.NoteDelay
           plx
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
         ora #$80+$40                    ; Setting these bits so this is processed later.
                                         ; NOTE: Because a value greater than the current row tick length is ignored
                                         ;       and a tick/speed change could happen on an FX column after this entry.
@@ -1570,7 +1574,7 @@ HuTrack.channel.FX.handler:
         lda #$00
         jsr HuTrackEngine._htk.WSG.noise
         stz HuTrack.channel.noiseMode,x
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
         sta HuTrack.channel.directWaveform,x
 
         lda HuTrack.WfEnv.len,x
@@ -1582,7 +1586,7 @@ HuTrack.channel.FX.handler:
         lda HuTrack.WfEnv.repeat,x
         cmp #$ff
       bne .platFX.setWave.out
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
         sta HuTrack.channel.lastEnvWaveform,x
 
 .platFX.setWave.out
@@ -1594,7 +1598,7 @@ HuTrack.channel.FX.handler:
 ; 11xx
 .platFX.Noise
           plx
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
 
       beq .turnoff.noise
 .turnon.noise
@@ -1660,7 +1664,7 @@ HuTrack.channel.FX.handler:
 .platFX.SamplePCM
           plx
 
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
 
         cmp #$00    ; redundant
       bne .dda.mode
@@ -1708,7 +1712,7 @@ HuTrack.channel.FX.handler:
 ; 18xy overload. X = speed, Y == amount. X = 0, effect is paused. Y = 0, internal accumulator is reset to 0.
 .platFX.overload
           plx
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
       beq .platFX.overload.resetAll
         and #$f0
         lsr a
@@ -1716,7 +1720,7 @@ HuTrack.channel.FX.handler:
         lsr a
         lsr a
         sta HuTrack.channel.overload.spd,x
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
         and #$0f
         sta HuTrack.channel.overload.amt,x
       bra .platFX.overload.out
@@ -1734,7 +1738,7 @@ HuTrack.channel.FX.handler:
 ; 19xy overload. X = speed, Y == amount. X = 0 mean pauses. Y = 0, internal accumulator is reset to 0.
 .platFX.corruption
           plx
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
       beq .platFX.corruption.resetAll
         and #$f0
         lsr a
@@ -1742,7 +1746,7 @@ HuTrack.channel.FX.handler:
         lsr a
         lsr a
         sta HuTrack.channel.corruption.spd,x
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
         and #$0f
         sta HuTrack.channel.corruption.delta,x
       bra .platFX.overload.out
@@ -1760,7 +1764,7 @@ HuTrack.channel.FX.handler:
 ; 20xy overload. X = speed, Y == amount. X = 0 mean pauses. Y = 0, internal accumulator is reset to 0.
 .platFX.hardsync
           plx
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
       beq .platFX.hardsync.resetAll
         and #$f0
         lsr a
@@ -1768,7 +1772,7 @@ HuTrack.channel.FX.handler:
         lsr a
         lsr a
         sta HuTrack.channel.hardsync.spd,x
-        lda HuTrack.channel.temp.fxArg
+        lda HuTrack.channel.current.fxArg
         and #$0f
         sta HuTrack.channel.hardsync.amt,x
       bra .platFX.overload.out
@@ -2974,6 +2978,7 @@ HuTrackEngine.Channel.exeFX.volSlideDown:
         sbc HuTrack.channel.volSlideDown,x
       bcs .skip
         cla
+        stz HuTrack.channel.volSlideDown,x      ;// TXray - 5/19/2024: if volume slide down has reached 0 volume, turn off volume slide.
 .skip
         sta HuTrack.channel.directVolume,x
         lda #$1f

@@ -259,13 +259,33 @@ _HuTrackEngine_chanSetSFX.1:
         lda #$80
         sta HuTrack.SFX.inProgress, x
         sta <HuTrack.dda.bank, x
+
         lda #$df
           php
           sei
             stx $800
-            stz $807
             sta $804
           plp
+
+          php
+          sei
+            stx $800
+            stz $807
+          plp
+
+          php
+          sei
+            stx $800
+            stz $809
+          plp
+
+        lda #$ff
+          php
+          sei
+            stx $800
+            sta $805
+          plp
+
 .out
     rts
 
@@ -275,15 +295,229 @@ _HuTrackEngine_chanReleaseSFX.1:
         cpx #06
       bcs .out
         stz HuTrack.SFX.inProgress, x
+
+        lda HuTrack.channel.panState,x
+          php
+          sei
+            stx $800
+            sta $805
+          plp
+
 .out
     rts
+
+; int __fastcall HuTrackEngine_stopPcm (unsigned char channel<__al>);
+_HuTrackEngine_stopPcm.1:
+        ldx <__al
+        cpx #$06
+      bcs .error
+        bit HuTrack.SFX.inProgress,x
+      bpl .error
+
+        lda #$80
+        sta <HuTrack.dda.bank,x
+
+        ; No error
+        lda #$01
+        clx
+        clc
+.out    
+  rts
+
+.error
+        clx
+        cla
+        sec
+  rts
+
+; int __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, unsigned char bank<__fbank>, unsigned int addr<__fptr>);
+; int __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, char far *pcm<__fbank:__fptr>);
+_HuTrackEngine_PcmRequest.2:
+_HuTrackEngine_PcmRequest.3:
+        stz <__cl
+        lda #$8f
+        sta <__ch
+; int __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, unsigned char bank<__fbank>, unsigned int addr<__fptr>, char mask1<__cl>, char mask2<__ch>);
+; int __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, char far *pcm<__fbank:__fptr>, char mask1<__cl>, char mask2<__ch> );
+_HuTrackEngine_PcmRequest.4:
+_HuTrackEngine_PcmRequest.5:
+        ldx <__al
+        cpx #$06
+      bcs .error
+        bit HuTrack.SFX.inProgress,x
+      bpl .error
+
+        lda #$80
+        sta <HuTrack.dda.bank,x
+
+        lda <__ch
+        ora #$80
+        sta <HuTrack.dda.cntr1,x
+
+        lda <__cl
+        sta <HuTrack.dda.cntr0,x
+
+        lda <__fptr
+        clc
+        adc #$03
+        sta <HuTrack.dda.addr.lo,x
+        sta <HuTrack.dda.addr.loop.lo,x
+        lda <__fptr+1
+        adc #$00
+        and #$1f
+        ora #$40
+        sta <HuTrack.dda.addr.hi,x
+        sta <HuTrack.dda.addr.loop.hi,x
+        lda <__fbank
+        adc #$00
+        sta <HuTrack.dda.bank,x
+        sta <HuTrack.dda.loop.bank,x
+        rmb7 <HuTrack.DDAprocess
+
+        ; No error
+        lda #$01
+        clx
+        clc
+.out    
+  rts
+
+.error
+        clx
+        cla
+        sec
+  rts
+
+_getFarBank.1
+    ldx __bl
+  rts
+
+_getFarAddress.1
+    lda __si+1
+    ldx __si
+  rts
+
+;//.........................................................
+; int __fastcall HuTrackEnginePauseDDA();
+_HuTrackEnginePauseDDA:
+
+        lda HuTrack.DDAprocess
+        sta HuTrack.DDAprocessBackup
+        and #$7f
+        sta HuTrack.DDAprocess
+  rts
+
+;//.........................................................
+; int __fastcall HuTrackEngineResumeDDA();
+_HuTrackEngineResumeDDA:
+        lda HuTrack.DDAprocessBackup
+        sta HuTrack.DDAprocess
+  rts
+
+
+;//.........................................................
+; int __fastcall HuTrackEngineSFXrest(unsigned char channel<__al>);
+_HuTrackEngineSFXrest.1:
+
+        ldx <__al
+        cpx #$06
+      bcs .error
+        bit HuTrack.SFX.inProgress,x
+      bpl .error
+
+        lda HuTrack.DDAprocess
+          pha
+        and #$7f
+        sta HuTrack.DDAprocess
+
+        stx $800
+        lda #$d0
+        sta $804
+
+          pla
+        sta HuTrack.DDAprocess
+
+        lda #$01
+        clx
+        clc
+.out    
+  rts
+
+.error
+        clx
+        cla
+        sec
+  rts
+
+;//.........................................................
+; int __fastcall HuTrackEngine_SFXmode();
+_HuTrackEngine_SFXmode:
+
+        clx
+.loop
+        lda HuTrack.SFX.inProgress,x
+        cmp #$80
+        say
+        ror 
+        say
+
+        inx
+        cpx #$06
+      bcc .loop 
+  rts
+
+;//.........................................................
+; int __fastcall HuTrackEngine_SFXmode(unsigned char channel<__al>);
+_HuTrackEngine_SFXmode.1:
+
+        ldx <__al
+        cpx #$06
+      bcs .error
+        bit HuTrack.SFX.inProgress,x
+      bpl .error
+
+        lda #$01
+        clx
+        clc
+.out    
+  rts
+
+.error
+        clx
+        cla
+        sec
+  rts
+
+;//.........................................................
+_getFarPointer.3
+
+            lda __fbank
+            sta [__ax]
+            cly
+            lda __fptr
+            sta [__bx],y
+            iny
+            lda __fptr+1
+            sta [__bx],y
+    rts
+
+_getFarPointer2.3 .macro
+            lda __fbank
+            sta [__ax]
+            cly
+            lda __fptr
+            sta [__bx],y
+            iny
+            lda __fptr+1
+            sta [__bx],y
+  .endm
+
+;//.........................................................
 
   .bank SOUND_BANK, "HuTrack"
   .page $06
 
     .include "HuTrack/engine/HuTrack_parser.asm"
     .include "HuTrack/HuTrack_lib.asm"
+    .include "HuSFX/HuSFX_lib.asm"
 
   .bank LIB1_BANK
-
-

@@ -1,0 +1,2 @@
+python waveConvert.py
+pause

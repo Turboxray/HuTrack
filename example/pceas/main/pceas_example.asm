@@ -42,6 +42,7 @@
     .include "HuTrack/HuTrack_vars.inc"
     .include "../base_func/IO/gamepad/vars.inc"
     .include "../lib/controls/vars.inc"
+    .include "../lib/control_vars/vars.inc"
     .include "../base_func/IO/irq_controller/vars.inc"
     .include "../base_func/IO/mapper/mapper.inc"
 
@@ -120,6 +121,7 @@ startup:
 ;other basic functions
     .include "../base_func/video/vdc/lib.asm"
     .include "HuTrack/engine/HuTrack_engine.asm"
+    .include "../base_func/IO/gamepad/lib.asm"
     .include "../lib/controls/lib.asm"
 ;end DATA
 ;//...................................................................
@@ -229,6 +231,10 @@ MAIN:
         ;Turn display on
         VDC.reg CR , #(BG_ON|SPR_ON|VINT_ON|HINT_ON)
 
+        ;...............................
+        ; Initialize gamepad IO and controls
+        call Controls.Init
+        call Gamepad.Init
 
         ;................................
         ;Load font
@@ -294,18 +300,22 @@ MAIN:
         PRINT_STR_i "Number of samples: ",2,10
         PRINT_BYTEhex_a_q HuTrack.sampleListLen
 
+        stz sampleStart
+
         WAITVBLANK 10
 
 
 main_loop:
-
         WAITVBLANK
+        call Gamepad.READ_IO.single_controller
+        call Controls.ProcessInput
+
         PRINT_STR_i "Current Tick 1: ",2,12
         PRINT_BYTEhex_a_q  HuTrack.tickReload + 1
         PRINT_STR_i "Current Tick 2: ",2,13
         PRINT_BYTEhex_a_q  HuTrack.tickReload
 
-       PRINT_STR_i "Channel 0 Note: ",2,14
+        PRINT_STR_i "Channel 0 Note: ",2,14
         ldx #$00
         lda HuTrack.channel.note,x
         jsr showNote
@@ -392,8 +402,15 @@ main_loop:
         ldx #$05
         PRINT_BYTEhex_a_q HuTrack.channel.pattern.num,x
 
+
+        jsr playSample
+
       jmp main_loop
 
+;.......................................................
+;.......................................................
+;.......................................................
+;.......................................................
 showNote:
         and #$0f
         asl a
@@ -406,7 +423,84 @@ showNote:
         sta <R0+1
         PRINT_STR_a
   rts
+
+;.......................................................
+;.......................................................
+;.......................................................
+;.......................................................
+playSample:
+
+        lda #$05
+        sta <_hk.EAX0.u
+        CallFar HuTrackEngine.SfxPcmStatus
+        lda <_hk.EAX0.l
+      bpl .skip
+        lda #$05
+        sta <_hk.EAX0.u
+        CallFar HuTrackEngine.chanReleaseSFX
+        stz sampleStart
+.skip
+
+.b1.check
+        lda input_state.buttons
+        and #control.b1.mask
+        cmp #control.b1.pressed
+      beq .load_sample
+        jmp .out
+
+.load_sample
+        lda #$05
+        sta <_hk.EAX0.l
+        CallFar HuTrackEngine.setChanForSFX
+        lda #$80
+        sta sampleStart
+
+          PUSHBANK.2 $02
+          MAP_BANK.2 #Sample1, MPR2
+
+        ldy #$05
+        lda #$df
+          php
+          sei
+        sty $800
+        sta $804
+          plp
+
+        lda #$ff
+          php
+          sei
+        sty $800
+        sta $805
+          plp
+
+
+        cly
+        lda Sample1,y
+        sta <_hk.EAX0.l
+        lda Sample1+1,y
+        sta <_hk.EAX0.m
+        lda Sample1+2,y
+        sta <_hk.EAX0.h
+        lda #$05
+        sta <_hk.EAX0.u
+        CallFar HuTrackEngine.SfxPcmRequest
+
+          PULLBANK.2 $02
+
+.out
+  rts
+
+
 ;Main end
+;//...................................................................
+;//...................................................................
+;//...................................................................
+;//...................................................................
+;//...................................................................
+;//...................................................................
+;//...................................................................
+;//...................................................................
+;//...................................................................
 ;//...................................................................
 
 noteDisplay:
@@ -537,6 +631,22 @@ init_video
 Song:
     .include "../assets/song/smb3_overworld/smb3_overworld.song.inc"
 Song.end
+
+;/////////////////////////////////////////////////////////////////////////////////
+;/////////////////////////////////////////////////////////////////////////////////
+;/////////////////////////////////////////////////////////////////////////////////
+;
+
+;....................................
+    .code
+    .bank $20, "Samples"
+    .org $4000
+;....................................
+
+  .page 2
+Sample1:
+    .include "../assets/sfx/sample1/test.inc"
+Sample1.end
 
 
 ;/////////////////////////////////////////////////////////////////////////////////

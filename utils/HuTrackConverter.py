@@ -163,10 +163,10 @@ def initGui():
     components['song'] = songname
     songname.grid(column=1, row=1)
     labelTop = ttk.Label(subframe2, text = "dest path: ")
-    labelTop.grid(column=0, row=2)
+    labelTop.grid(column=0, row=3)
     destpath = tk.Entry(subframe2)
     components['destpath'] = destpath
-    destpath.grid(column=1, row=2)
+    destpath.grid(column=1, row=3)
     labelTop = ttk.Label(subframe2, text = "subFolder: ")
     labelTop.grid(column=0, row=2)
     subFolder = tk.Entry(subframe2)

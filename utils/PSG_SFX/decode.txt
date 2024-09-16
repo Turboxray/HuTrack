@@ -1,0 +1,73 @@
+
+
+0x00 to 0x1f
+-===========-
+                volume                  no operand
+                   |
+                   |-> Write this directly to $804
+
+0x20 to 0x3f
+-===========-
+                volume (DDA)            no operand
+                   |
+                   |-> Write this directly to $804
+
+0x40 to 0x5f
+-===========-
+                volume                  no operand
+                   |
+                   |-> Write this directly to $804 with OR $80
+
+0x80 to 0x9f
+-===========-
+                volume (DDA)            no operand
+                   |
+                   |-> Write this directly to $804 with OR $C0
+
+0xA0 to 0xA9
+-===========-
+                register destination    one byte operand
+                   |                         |
+                   |                         |->  Write this directly to the "resolved register number"
+                   |
+                   |-> (0xA0 to 0xAF) & 0x0f + $800 to create "resolved register number"
+
+0xB0
+-===-
+                waveform update         one byte operand.   NOTE: This is a pseudo instruction, not a register write.
+                   |
+                   |-> Waveform block number. Used as an index into table of 32byte entries. Write all 32bytes to $806
+
+
+0xC0 to 0xCF
+-===========-
+                period values           one byte operand
+                   |                         |
+                   |                         |->  Write this directly to $803
+                   |
+                   |-> (0xC0 to 0xCF) & 0x0f to $802
+
+0xfb
+-===-
+                Stop all streaming for current channel: EOF.   no operand.         NOTE: This is a pseudo instruction, not a register write.
+
+0xfc
+-===-
+                play fixed sample       two byte operand
+                   |
+                   |-> TODO for sample playback
+
+0xfd
+-===-
+                stop sample             no operand
+                   |
+                   |-> TODO for sample playback
+
+0xfe
+-===-
+                wait <n> frames         one byte operand.   NOTE: This is a pseudo instruction, not a register write.
+
+0xff
+-===-
+                wait one frame          no operand.         NOTE: This is a pseudo instruction, not a register write.
+

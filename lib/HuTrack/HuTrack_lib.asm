@@ -2,6 +2,8 @@
 ;
 ; HuTrack music engine for PC-Engine
 ;
+; \file HuTrack_lib.asm
+;
 ; Ver: 0.1
 ;
 ; History:
@@ -122,9 +124,16 @@ HuTrackEngine.Reset
 
         lda #$80
         sta <HuTrack.dda.bank,x
+        lda #$8F
+        sta <HuTrack.dda.cntr1
 
         lda #$ff
         sta HuTrack.channel.panState,x
+
+        stz HuTrack.SFX.inProgress,x
+
+        lda #$ff
+        sta HuTrack.SFXstream.bnk,x
 
         inx
         cpx #$06
@@ -262,6 +271,129 @@ HuTrackEngine.SaveSongPosition:
 ;
 HuTrackEngine.LoadSongPosition:
 
+  rts
+
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+;...............................................
+;
+HuTrackEngine.setChanForSFX:
+;...............................................
+; Input <_hk.EAX0.l     lower nybble -> chan #
+
+        ldx <_hk.EAX0.l
+        cpx #$06
+bcc .skip
+        ldx #$05
+.skip
+        lda #$80
+        sta HuTrack.SFX.inProgress,x
+        sta <HuTrack.dda.bank,x
+
+        lda #$df
+          php
+          sei
+        stx $800
+        sta $804
+          plp
+
+          php
+          sei
+        stx $800
+        stz $807
+          plp
+
+          php
+          sei
+        stx $800
+        stz $809
+          plp
+
+
+  rts
+
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+;...............................................
+;
+HuTrackEngine.chanReleaseSFX:
+;...............................................
+; Input <_hk.EAX0.u
+
+        sec
+        ldx <_hk.EAX0.u
+        cpx #$06
+      bcs .out
+        clc
+        stz HuTrack.SFX.inProgress,x
+.out
+  rts
+
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+;...............................................
+;
+HuTrackEngine.SfxPcmRequest:
+;...............................................
+; Input <_hk.EAX0.l     bank#
+; Input <_hk.EAX0.m     lsb
+; Input <_hk.EAX0.h     msb
+; Input <_hk.EAX0.h     chan #
+
+        sec
+        ldx <_hk.EAX0.u
+        cpx #$06
+      bcs .out
+        bit HuTrack.SFX.inProgress,x
+      bpl .out
+
+        ; No error
+        clc
+        lda #$80
+        sta <HuTrack.dda.cntr0,x
+        sta <HuTrack.dda.cntr1,x
+
+        sta <HuTrack.dda.bank,x
+        lda <_hk.EAX0.m
+        sta <HuTrack.dda.addr.lo,x
+        lda <_hk.EAX0.h
+        and #$1f
+        ora #$40
+        sta <HuTrack.dda.addr.hi,x
+        lda <_hk.EAX0.l
+        sta <HuTrack.dda.bank,x
+        rmb7 <HuTrack.DDAprocess
+.out
+  rts
+
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+;...............................................
+;
+HuTrackEngine.SfxPcmStatus:
+;...............................................
+; Input <_hk.EAX0.h     chan #
+
+        sec
+        ldx <_hk.EAX0.u
+        cpx #$06
+      bcs .out
+        bit HuTrack.SFX.inProgress,x
+      bpl .out
+
+        ; No error
+        clc
+        lda <HuTrack.dda.bank,x
+        sta <_hk.EAX0.l
+        lda <HuTrack.dda.addr.lo,x
+        sta <_hk.EAX0.m
+        lda <HuTrack.dda.addr.hi,x
+        sta <_hk.EAX0.h
+.out
   rts
 
 ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -423,4 +555,5 @@ HuTrackEngine.playSong:
 
         _htk.PULLBANK.4 _htk.PAGE_4000
   rts
+
 

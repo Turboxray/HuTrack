@@ -481,26 +481,26 @@ class HuTrackExportPCE():
                 hu_out.write(f';###########################################################################\n')
                 hu_out.write(f'\n\n')
 
-                # Pattern data
-                for channel in range(HuTrackContainer.SYSTEM_TOTAL_CHANNELS):
-                    hu_out.write(f';........................................................................\n')
-                    hu_out.write(f';........................................................................\n')
+            # Pattern data
+            for channel in range(HuTrackContainer.SYSTEM_TOTAL_CHANNELS):
+                hu_out.write(f';........................................................................\n')
+                hu_out.write(f';........................................................................\n')
+                hu_out.write(f'\n')
+                for pattern in set(self.huTrack.PatternMatrixCompressed[channel]):
+                    hu_out.write(f';......................................\n')
+                    hu_out.write(f'.pattern.table.chan{channel}.pattern{pattern}\n')
                     hu_out.write(f'\n')
-                    for pattern in set(self.huTrack.PatternMatrixCompressed[channel]):
-                        hu_out.write(f';......................................\n')
-                        hu_out.write(f'.pattern.table.chan{channel}.pattern{pattern}\n')
-                        hu_out.write(f'\n')
-                        for row in self.huTrack.patternData[channel][pattern].patternData:
+                    for row in self.huTrack.patternData[channel][pattern].patternData:
 
-                            byteNum = 0
-                            for byte in row:
-                                if byteNum == 0:
-                                    hu_out.write(f'  .db ${hex(byte).split("0x")[1]}')
-                                else:
-                                    hu_out.write(f', ${hex(byte).split("0x")[1]}')
-                                byteNum += 1
-                            hu_out.write(f'\n')
-                        hu_out.write(f'\n\n')
+                        byteNum = 0
+                        for byte in row:
+                            if byteNum == 0:
+                                hu_out.write(f'  .db ${hex(byte).split("0x")[1]}')
+                            else:
+                                hu_out.write(f', ${hex(byte).split("0x")[1]}')
+                            byteNum += 1
+                        hu_out.write(f'\n')
+                    hu_out.write(f'\n\n')
             hu_out.write(f'\n\n')
 
 

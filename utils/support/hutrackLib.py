@@ -12,6 +12,102 @@ from support.huTrackBase import HuTrackContainer, RATE_TABLE, RATE_VAL
 from support.dmfReader import ConvertDeflemask
 
 
+class HuTrackEntry():
+
+    noteLUT   = ['A-','A#','B-','C-','C#','D-','D#','E-','F-','F#'  '..']
+    octiveLUT = ['0','1','2','3','4','5','6','7','8',                ' ']
+
+    def _init__(self,note,volume,octave,fx1,fx1arg,fx2,fx2arg,fx3,fx3arg,fx4,fx4arg):
+        self.note       = note
+        self.volume     = volume
+        self.octave     = octave
+        self.fx         = [
+                            [fx1, fx1arg],
+                            [fx2, fx2arg],
+                            [fx3, fx3arg],
+                            [fx4, fx4arg]
+                          ]
+
+    def __init__(self):
+        self.note       = -1
+        self.volume     = -1
+        self.octave     = -1
+        self.fx         = [
+                            [0, 0],
+                            [0, 0],
+                            [0, 0],
+                            [0, 0]
+                          ]
+
+    def setNote(self,note):
+        self.note       = note
+
+    def setNote(self,note, octave):
+        self.note       = note
+        self.octave     = octave
+
+    def setVolume(self, volume):
+        self.volume = volume
+
+    def setFX(self, fx, arg, fxNum):
+        self.fx[fxNum] = [fx,arg]
+
+    def getNote(self):
+        return self.note
+
+    def getOctave(self):
+        return self.octave
+
+    def getNoteOctave(self):
+        return self.note, self.octave
+
+    def getNoteString(self):
+        return HuTrackEntry.noteLUT[self.note] + HuTrackEntry.octiveLUT[self.octave]
+
+    def getVolume(self):
+        return self.volume
+
+    def getFX(self,fxNum):
+        return self.fx[fxNum][:]
+
+
+class HuTrackRow():
+
+    def __init__(self, entry0, entry1, entry2, entry3, entry4, entry5):
+        self.row = [entry0,entry1,entry2,entry3,entry4,entry5]
+
+    def __init__(self):
+        self.row = [HuTrackEntry(),HuTrackEntry(),HuTrackEntry(),HuTrackEntry(),HuTrackEntry(),HuTrackEntry()]
+
+    def getEntry(self):
+        pass
+    
+    def setEntry(self):
+        pass
+
+class HuTrackPattern():
+    def __init__(self, numRows):
+        self.numRows = numRows
+        self.pattern = {}
+        for row in range(numRows):
+            self.pattern[row] = HuTrackRow()
+
+class HuTrackFormat():
+
+    def __init__(self, songname, authorName):
+        self.songname   = songname
+        self.authorName = authorName
+        self.timeBase   = 1
+        self.frameMode  = 0
+        self.customMode = 0
+        self.tickTime1  = 1
+        self.tickTime2  = 1
+        self.rowsPerPattern   = 0
+        self.PatternMatrixLen = 0
+        self.instrumentsLen   = 0
+        self.wavetableLen     = 0
+        self.samplesLen       = 0
+
 class HuTrackLib():
 
     def __init__(self, hutrack=None, params=None):
@@ -33,6 +129,9 @@ class HuTrackLib():
         pceModule.process()
         del pceModule
         return True
+
+    def exportHuTrackJson(self):
+        filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.json').replace("\\","/")
 
     def exportPceHuTrackFile(self):
 

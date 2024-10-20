@@ -562,13 +562,14 @@ HuTrackEngine.parse.extFX
         stz HuTrack.channel.temp.fxArg2,x
         stz HuTrack.channel.temp.fxArg3,x
         stz HuTrack.channel.temp.fxArg4,x
+
 .do.fx2
         bit #$01
-      beq .do.fxarg2
+      beq .do.fx3
         lda [HuTrack.currentPattern],y
         sta HuTrack.channel.temp.fx2,x
         iny
-        lda #($01 | $02)
+        lda #$01
         tsb HuTrack.channel.update.extFX
 .do.fxarg2
         lda HuTrack.entryParse.extFX
@@ -577,19 +578,16 @@ HuTrackEngine.parse.extFX
         lda [HuTrack.currentPattern],y
         sta HuTrack.channel.temp.fxArg2,x
         iny
-        lda #$02
-        tsb HuTrack.channel.update.extFX
 
 .do.fx3
         lda HuTrack.entryParse.extFX
         bit #$04
-      beq .do.fxarg3
+      beq .do.fx4
         lda [HuTrack.currentPattern],y
         sta HuTrack.channel.temp.fx3,x
         iny
-        lda #($04 | $08)
+        lda #$04
         tsb HuTrack.channel.update.extFX
-
 .do.fxarg3
         lda HuTrack.entryParse.extFX
         bit #$08
@@ -597,19 +595,16 @@ HuTrackEngine.parse.extFX
         lda [HuTrack.currentPattern],y
         sta HuTrack.channel.temp.fxArg3,x
         iny
-        lda #$08
-        tsb HuTrack.channel.update.extFX
 
 .do.fx4
         lda HuTrack.entryParse.extFX
         bit #$10
-      beq .do.fxarg4
+      beq .out
         lda [HuTrack.currentPattern],y
         sta HuTrack.channel.temp.fx4,x
         iny
-        lda #($10 | $20)
+        lda #$10
         tsb HuTrack.channel.update.extFX
-
 .do.fxarg4
         lda HuTrack.entryParse.extFX
         bit #$20
@@ -617,8 +612,6 @@ HuTrackEngine.parse.extFX
         lda [HuTrack.currentPattern],y
         sta HuTrack.channel.temp.fxArg4,x
         iny
-        lda #$20
-        tsb HuTrack.channel.update.extFX
 
 .out
   rts
@@ -733,15 +726,9 @@ HuTrackEngine.Channel.update:
 .fx
         lda HuTrack.channel.change,x
         bit #$08
-      beq .fx.arg
+      beq .fx234
         jsr HuTrackEngine.Channel.update.FX
 
-
-.fx.arg
-        lda HuTrack.channel.change,x
-        bit #$10
-      beq .fx234
-        jsr HuTrackEngine.Channel.update.FX.arg
 
 .fx234
         lda HuTrack.channel.change,x
@@ -876,11 +863,7 @@ HuTrackEngine.Channel.update.Volume
 ;...........................................................
 HuTrackEngine.Channel.update.FX:
         lda HuTrack.channel.change,x
-        eor #$08
-        sta HuTrack.channel.change,x
-
-        lda HuTrack.channel.change,x
-        eor #$10
+        eor #($08 | $10)
         sta HuTrack.channel.change,x
 
         lda HuTrack.channel.temp.fxArg1,x
@@ -896,25 +879,6 @@ HuTrackEngine.Channel.update.FX:
 
 
 ;...........................................................
-HuTrackEngine.Channel.update.FX.arg
-        lda HuTrack.channel.change,x
-        eor #$10
-        sta HuTrack.channel.change,x
-
-        lda #$00
-        stx HuTrack.channel.temp.fxNum
-
-        lda HuTrack.channel.temp.fxArg1,x
-        sta HuTrack.channel.fxArg1,x
-        sta HuTrack.channel.current.fxArg
-
-        lda HuTrack.channel.fx1,x
-
-        jsr HuTrack.channel.FX.handler
-  rts
-
-
-;...........................................................
 HuTrackEngine.Channel.update.FX234
 
         lda HuTrack.channel.change,x
@@ -923,7 +887,7 @@ HuTrackEngine.Channel.update.FX234
 
         lda HuTrack.channel.update.extFX
         bit #$01
-      beq .fx2.arg
+      beq .fx3
         lda HuTrack.channel.temp.fxArg2,x
         sta HuTrack.channel.fxArg2,x
         sta HuTrack.channel.current.fxArg
@@ -932,24 +896,12 @@ HuTrackEngine.Channel.update.FX234
         sta HuTrack.channel.fx2,x
 
         jsr HuTrack.channel.FX.handler
-        bra .fx3
 
-.fx2.arg
-        lda HuTrack.channel.update.extFX
-        bit #$02
-      beq .fx3
-        lda HuTrack.channel.temp.fxArg1,x
-        sta HuTrack.channel.fxArg1,x
-        sta HuTrack.channel.current.fxArg
-
-        lda HuTrack.channel.fx2,x
-
-        jsr HuTrack.channel.FX.handler
 
 .fx3
         lda HuTrack.channel.update.extFX
         bit #$04
-      beq .fx3.arg
+      beq .fx4
         lda HuTrack.channel.temp.fxArg3,x
         sta HuTrack.channel.fxArg3,x
         sta HuTrack.channel.current.fxArg
@@ -958,24 +910,12 @@ HuTrackEngine.Channel.update.FX234
         sta HuTrack.channel.fx3,x
 
         jsr HuTrack.channel.FX.handler
-        bra .fx4
 
-.fx3.arg
-        lda HuTrack.channel.update.extFX
-        bit #$08
-      beq .fx4
-        lda HuTrack.channel.temp.fxArg3,x
-        sta HuTrack.channel.fxArg3,x
-        sta HuTrack.channel.current.fxArg
-
-        lda HuTrack.channel.fx3,x
-
-        jsr HuTrack.channel.FX.handler
 
 .fx4
         lda HuTrack.channel.update.extFX
         bit #$10
-      beq .fx4.arg
+      beq .out
         lda HuTrack.channel.temp.fxArg4,x
         sta HuTrack.channel.fxArg4,x
         sta HuTrack.channel.current.fxArg
@@ -984,21 +924,10 @@ HuTrackEngine.Channel.update.FX234
         sta HuTrack.channel.fx4,x
 
         jsr HuTrack.channel.FX.handler
-        bra .out
 
-.fx4.arg
-        lda HuTrack.channel.update.extFX
-        bit #$20
-      beq .out
-        lda HuTrack.channel.temp.fxArg4,x
-        sta HuTrack.channel.fxArg4,x
-        sta HuTrack.channel.current.fxArg
-
-        lda HuTrack.channel.fx4,x
-
-        jsr HuTrack.channel.FX.handler
 
 .out
+          stz HuTrack.channel.update.extFX
   rts
 
 ;...........................................................
@@ -1294,13 +1223,7 @@ HuTrack.channel.FX.handler:
 ; 08xx
 .FX.pan
           plx
-        lda HuTrack.channel.update.extFX
-        eor #$02
-        sta HuTrack.channel.update.extFX
         lda HuTrack.channel.current.fxArg
-        ; TODO disable old SFX handler
-    ;     bit HuTrack.SFX.inProgress,x
-    ;   bvs .FX.pan.skip
         sta HuTrack.channel.panState,x
         jsr HuTrackEngine._htk.WSG.pan
 
@@ -1452,10 +1375,6 @@ HuTrack.channel.FX.handler:
 ; E5xx
 .extFX.FineTune
           plx
-        lda HuTrack.channel.update.extFX
-        eor #$02
-        sta HuTrack.channel.update.extFX
-
 
         lda HuTrack.channel.current.fxArg
         sta HuTrack.channel.detune,x
@@ -2577,16 +2496,16 @@ HuTrackEngine.Channel.SetFrequency
         adc HuTrack.channel.pitch.period.lo,x
         say
         adc HuTrack.channel.pitch.period.hi,x
-
+        cmp #$10
+      bcc .period.write.cont
+        ldy #$ff
+        lda #$0f
+.period.write.cont
         ; TODO !!! The limit boundaries for porta up and porta down need to be checked here!
         ;      !!! If those boundaries have cross, saturate to said boundaries. And then cancel all slides?
 
         jsr HuTrackEngine._htk.WSG.freq
-        ;   sei
-        ; stx $800
-        ; sty $802
-        ; sta $803
-        ;   cli
+
 
 .return
 .out
@@ -3490,7 +3409,7 @@ HuTrackEngine._htk.WSG.control:
         stx $800
         sta $804
           plp
-
+        sta HuTrack.channel.write.volume,x
 .out
 
   rts
@@ -3542,7 +3461,6 @@ HuTrackEngine._htk.WSG.pan:
           sei
         stx $800
         sta $805
-          cli
           plp
 
 .out

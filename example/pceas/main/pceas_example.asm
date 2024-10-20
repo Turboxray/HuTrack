@@ -315,71 +315,112 @@ main_loop:
         PRINT_STR_i "Current Tick 2: ",2,13
         PRINT_BYTEhex_a_q  HuTrack.tickReload
 
-        PRINT_STR_i "Channel 0 Note: ",2,14
+        PRINT_STR_i "Chan0 Note: ",2,14
         ldx #$00
         lda HuTrack.channel.note,x
         jsr showNote
-        PRINT_STR_a_i "  Octave: "
+        PRINT_STR_a_i " Oct: "
         ldx #$00
         PRINT_LO_Nibblehex_a_q HuTrack.channel.octave,x
-        PRINT_STR_a_i "  "
-        PRINT_STR_i "Channel 1 Note: ",2,15
-        ldx #$01
-        lda HuTrack.channel.note,x
-        jsr showNote
-        PRINT_STR_a_i "  Octave: "
-        ldx #$01
-        PRINT_LO_Nibblehex_a_q HuTrack.channel.octave,x
-        PRINT_STR_a_i "  "
-        PRINT_STR_i "Channel 2 Note: ",2,16
-        ldx #$02
-        lda HuTrack.channel.note,x
-        jsr showNote
-        PRINT_STR_a_i "  Octave: "
-        ldx #$02
-        PRINT_LO_Nibblehex_a_q HuTrack.channel.octave,x
-        PRINT_STR_a_i "  "
-        PRINT_STR_i "Channel 3 Note: ",2,17
-        ldx #$03
-        lda HuTrack.channel.note,x
-        jsr showNote
-        PRINT_STR_a_i "  Octave: "
-        ldx #$03
-        PRINT_LO_Nibblehex_a_q HuTrack.channel.octave,x
-        PRINT_STR_a_i "  "
-        PRINT_STR_i "Channel 4 Note: ",2,18
-        ldx #$04
-        lda HuTrack.channel.note,x
-        jsr showNote
-        PRINT_STR_a_i "  Octave: "
-        ldx #$04
-        PRINT_LO_Nibblehex_a_q HuTrack.channel.octave,x
-        PRINT_STR_a_i "  "
-        PRINT_STR_i "Channel 5 Note: ",2,19
-        ldx #$05
-        lda HuTrack.channel.note,x
-        jsr showNote
-        PRINT_STR_a_i "  Octave: "
-        ldx #$05
-        PRINT_LO_Nibblehex_a_q HuTrack.channel.octave,x
+        PRINT_STR_a_i " Ins: "
+        ldx #$00
+        PRINT_BYTEhex_a_q HuTrack.channel.instr,x
+        PRINT_STR_a_i " Vol: "
+        ldx #$00
+        PRINT_BYTEhex_a_q HuTrack.channel.write.volume,x
         PRINT_STR_a_i "  "
 
-        PRINT_STR_i "Channel 0 Pattern #: ",2,20
+        PRINT_STR_i "Chan1 Note: ",2,15
+        ldx #$01
+        lda HuTrack.channel.note,x
+        jsr showNote
+        PRINT_STR_a_i " Oct: "
+        ldx #$01
+        PRINT_LO_Nibblehex_a_q HuTrack.channel.octave,x
+        PRINT_STR_a_i " Ins: "
+        ldx #$02
+        PRINT_BYTEhex_a_q HuTrack.channel.instr,x
+        PRINT_STR_a_i " Vol: "
+        ldx #$01
+        PRINT_BYTEhex_a_q HuTrack.channel.write.volume,x
+        PRINT_STR_a_i "  "
+
+        PRINT_STR_i "Chan2 Note: ",2,16
+        ldx #$02
+        lda HuTrack.channel.note,x
+        jsr showNote
+        PRINT_STR_a_i " Oct: "
+        ldx #$02
+        PRINT_LO_Nibblehex_a_q HuTrack.channel.octave,x
+        PRINT_STR_a_i " Ins: "
+        ldx #$02
+        PRINT_BYTEhex_a_q HuTrack.channel.instr,x
+        PRINT_STR_a_i " Vol: "
+        ldx #$02
+        PRINT_BYTEhex_a_q HuTrack.channel.write.volume,x
+        PRINT_STR_a_i "  "
+
+        PRINT_STR_i "Chan3 Note: ",2,17
+        ldx #$03
+        lda HuTrack.channel.note,x
+        jsr showNote
+        PRINT_STR_a_i " Oct: "
+        ldx #$03
+        PRINT_LO_Nibblehex_a_q HuTrack.channel.octave,x
+        PRINT_STR_a_i " Ins: "
+        ldx #$03
+        PRINT_BYTEhex_a_q HuTrack.channel.instr,x
+        PRINT_STR_a_i " Vol: "
+        ldx #$003
+        PRINT_BYTEhex_a_q HuTrack.channel.write.volume,x
+        PRINT_STR_a_i "  "
+
+        PRINT_STR_i "Chan4 Note: ",2,18
+        ldx #$04
+        lda HuTrack.channel.note,x
+        jsr showNote
+        PRINT_STR_a_i " Oct: "
+        ldx #$04
+        PRINT_LO_Nibblehex_a_q HuTrack.channel.octave,x
+        PRINT_STR_a_i " Ins: "
+        ldx #$04
+        PRINT_BYTEhex_a_q HuTrack.channel.instr,x
+        PRINT_STR_a_i " Vol: "
+        ldx #$04
+        PRINT_BYTEhex_a_q HuTrack.channel.write.volume,x
+        PRINT_STR_a_i "  "
+
+        PRINT_STR_i "Chan5 Note: ",2,19
+        ldx #$05
+        lda HuTrack.channel.note,x
+        jsr showNote
+        PRINT_STR_a_i " Oct: "
+        ldx #$05
+        PRINT_LO_Nibblehex_a_q HuTrack.channel.octave,x
+        PRINT_STR_a_i " Ins: "
+        ldx #$05
+        PRINT_BYTEhex_a_q HuTrack.channel.instr,x
+        PRINT_STR_a_i " Vol: "
+        ldx #$05
+        PRINT_BYTEhex_a_q HuTrack.channel.write.volume,x
+        PRINT_STR_a_i "  "
+
+        PRINT_STR_i "Chan0 Pattern #: ",2,20
         ldx #$00
         PRINT_BYTEhex_a_q HuTrack.channel.pattern.idx,x
-        PRINT_STR_i "Channel 1 Pattern #: ",2,21
+        PRINT_STR_i "Chan1 Pattern #: ",2,21
         ldx #$01
         PRINT_BYTEhex_a_q HuTrack.channel.pattern.idx,x
-        PRINT_STR_i "Channel 2 Pattern #: ",2,22
+        PRINT_STR_i "Chan2 Pattern #: ",2,22
         ldx #$02
         PRINT_BYTEhex_a_q HuTrack.channel.pattern.idx,x
-        PRINT_STR_i "Channel 3 Pattern #: ",2,23
+        PRINT_STR_i "Chan3 Pattern #: ",2,23
         ldx #$03
         PRINT_BYTEhex_a_q HuTrack.channel.pattern.idx,x
-        PRINT_STR_i "Channel 4 Pattern #: ",2,24
+        PRINT_STR_i "Chan4 Pattern #: ",2,24
         ldx #$04
         PRINT_BYTEhex_a_q HuTrack.channel.pattern.idx,x
-        PRINT_STR_i "Channel 5 Pattern #: ",2,25
+        PRINT_STR_i "Chan5 Pattern #: ",2,25
         ldx #$05
         PRINT_BYTEhex_a_q HuTrack.channel.pattern.idx,x
 
@@ -629,7 +670,8 @@ init_video
 
   .page 2
 Song:
-    .include "../assets/song/smb3_overworld/smb3_overworld.song.inc"
+    ; .include "../assets/song/smb3_overworld/smb3_overworld.song.inc"
+    .include "../assets/song/dungeon/dungeon.song.inc"
 Song.end
 
 ;/////////////////////////////////////////////////////////////////////////////////

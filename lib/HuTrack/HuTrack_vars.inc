@@ -220,8 +220,11 @@ HuTrack.channel.temp.fxArg3:        .ds (1* 6)
 HuTrack.channel.temp.fxArg4:        .ds (1* 6)
 HuTrack.channel.temp.instr:         .ds (1* 6)
 
-HuTrack.channel.current.fxArg:         .ds 1
+HuTrack.channel.current.fxArg:      .ds 1
 HuTrack.channel.temp.fxNum:         .ds 1
+
+HuTrack.channel.write.volume:       .ds (1* 6)
+
 
 HuTrack.channel.applied.period.lo:  .ds (1* 6)
 HuTrack.channel.applied.period.hi:  .ds (1* 6)

@@ -439,12 +439,7 @@ _HuTrackEngineSFXrest.1:
 
           plp
 
-        lda #$01
         clx
-        clc
-.out    
-  rts
-
 .error
         clx
         cla
@@ -521,5 +516,6 @@ _getFarPointer2.3 .macro
 
     .include "HuTrack/engine/HuTrack_parser.asm"
     .include "HuTrack/HuTrack_lib.asm"
+    .include "HuSFX/HuSFX_lib.asm"
 
   .bank LIB1_BANK

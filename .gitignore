@@ -6,5 +6,9 @@ log.txt
 C_log.txt
 S_log.txt
 *.s
+<<<<<<< HEAD
 utils/wavs/
 .vscode
+=======
+utils/wavs/
+>>>>>>> f9ae1c10b6d72b7810b29d23c369c1dde81e0a1f

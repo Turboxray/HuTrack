@@ -1,4 +1,9 @@
 
+;//
+;// file: HuTrackEngine.asm
+;//
+;//
+
   .include "HuTrack/engine/HuTrack_engine.asm"
 
 
@@ -424,17 +429,15 @@ _HuTrackEngineSFXrest.1:
         bit HuTrack.SFX.inProgress,x
       bpl .error
 
-        lda HuTrack.DDAprocess
-          pha
-        and #$7f
-        sta HuTrack.DDAprocess
+          php
+          nop
+          sei
 
         stx $800
         lda #$d0
         sta $804
 
-          pla
-        sta HuTrack.DDAprocess
+          plp
 
         lda #$01
         clx
@@ -518,6 +521,5 @@ _getFarPointer2.3 .macro
 
     .include "HuTrack/engine/HuTrack_parser.asm"
     .include "HuTrack/HuTrack_lib.asm"
-    .include "HuSFX/HuSFX_lib.asm"
 
   .bank LIB1_BANK

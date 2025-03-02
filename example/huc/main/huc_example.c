@@ -2,7 +2,7 @@
 #include "HuVGM_defs.h"
 #include "huc.h"
 #include "HuTrack/Huc_interface/HuTrack.c"
-#include "HuSFX/Huc_interface/HuSFX.c"
+#include "HuSFX/Huc_interface/HucSFX.c"
 
 #asm
 .bank HUC_USER_RESERVED
@@ -115,9 +115,6 @@ SFXassign sFXassign[6];
 
 void __fastcall getFarPointer( char far *obj<__fbank:__fptr>, unsigned int bank_p<__ax>, unsigned int addr_p<__bx> );
 
-void __fastcall __macro getFarPointer2( char far *obj<__fbank:__fptr>, unsigned int bank_p<__ax>, unsigned int addr_p<__bx> );
-
-
 //###############################################################################
 //###############################################################################
 // Main                                                                         #
@@ -146,6 +143,8 @@ int main()
     load_default_font();
     disp_on();
 
+    HuSFX_Init();
+
     HuTrack_Init();
     HuTrackEngine_QueueSong(SMB3Overworld);
     HuTrackEngine_QueueSong(FF3_smeared_graffiti);
@@ -160,7 +159,6 @@ int main()
 
 
     vsync(1);
-    // HuTrackEngine_PlaySong(0);
     vsync(1);
 
     HuTrackEngine_getCurrSongTitle(title);
@@ -238,8 +236,8 @@ int main()
             }
 
             if ((j2 & JOY_DOWN) || (j2 & JOY_UP)) {
-                sfxSelect += (sfxSelect < sFXcollection.len && (j2 & JOY_UP)) ? 1: 0;
-                sfxSelect -= (sfxSelect > 0 && (j2 & JOY_DOWN)) ? 1: 0;
+                sfxSelect += ((sfxSelect < (sFXcollection.len-1)) && (j2 & JOY_UP)) ? 1: 0;
+                sfxSelect -= ((sfxSelect > 0) && (j2 & JOY_DOWN)) ? 1: 0;
                 put_string("    Set SFX ", 0, 19);
                 put_number(sfxSelect,2,12,19);
                 put_string("                   ", 14, 19); 
@@ -274,7 +272,7 @@ void loadPcmPointers() {
     pcmPointers.idx = 0;
     getFarPointer(pcm1, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
 
-    getFarPointer2(pcm1, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
+    getFarPointer(pcm1, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
 
     pcmPointers.mask0[pcmPointers.idx  ] = PCM_NO_FORCE;
     pcmPointers.mask1[pcmPointers.idx++] = PCM_DISABLE_REPEAT;
@@ -358,28 +356,6 @@ void initSFXcollections()
 int playSFX(int selectedChan, int sfxSelect)
 {
 
-    // if (sfxSelect > 12 && sfxSelect < 12) {
-    //     playChipSFX(selectedChan,sfxSelect);
-    //     return 2;
-    // }
-
-
-    // if ( HuTrackEngine_PcmRequest( selectedChan, 
-    //                                pcmPointers.bank[sfxSelect],
-    //                                pcmPointers.addr[sfxSelect],
-    //                                pcmPointers.mask0[sfxSelect],
-    //                                pcmPointers.mask1[sfxSelect]) 
-    // ) {
-    //     put_string("    Set PCM ", 0, 19);
-    //     put_number(sfxSelect,2,12,19);
-    //     put_string("                   ", 14, 19); 
-    // } else {
-    //     put_string("chan ", 0, 19);
-    //     put_number(selectedChan,2,5,19);
-    //     put_string(" is not in SFX mode.", 8, 19);
-    // }
-    
-
     if ( HuTrackEngine_SFXmode(selectedChan) ) {
         sFXassign[selectedChan].status = SFX_ON;
         sFXassign[selectedChan].ptr = sfxSelect;
@@ -427,6 +403,7 @@ int updateChipSFX()
 
     for (chan=0; chan<6; chan++) {
         if ( sFXassign[chan].status == SFX_STOP_RQST && HuTrackEngine_SFXmode(chan)) { 
+            HuSFXstop(chan);
             HuTrackEngineSFXrest(chan);
             continue;
         }

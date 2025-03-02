@@ -19,10 +19,9 @@
 ;//...............................................................................................................
 ;//
 ;int __fastcall HuSFXprocess();
-; _HuSFXprocess.remove:
+_HuSFXprocess:
 
-;           jmp HuSFX.process
-;           lda #$01
+          jmp HuSFX.process
 
 ;//.........................................................
 ; int __fastcall HuSFXplay( char channel<__al>, unsigned char bank1<__fbank>, unsigned int addr1<__fptr>, unsigned char bank2<__cl>, unsigned int addr2<__bx>)
@@ -61,7 +60,7 @@ _HuSFXplay.5
 
 ;...............................................
 ; Input EAX0.l
-HuSFX.process2
+HuSFX.process
 
         clx
 .loop

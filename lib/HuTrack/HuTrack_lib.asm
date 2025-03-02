@@ -353,6 +353,9 @@ HuTrackEngine.SfxPcmRequest:
         ; No error
         clc
         lda #$80
+        sta <HuTrack.dda.cntr0,x
+        sta <HuTrack.dda.cntr1,x
+
         sta <HuTrack.dda.bank,x
         lda <_hk.EAX0.m
         sta <HuTrack.dda.addr.lo,x

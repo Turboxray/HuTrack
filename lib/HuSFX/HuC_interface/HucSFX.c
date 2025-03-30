@@ -36,3 +36,9 @@ int HuSFXprocess()
 {
     return HuSFXprocess_intf();
 }
+
+//......................................................
+int HuSFXstatus( char channel )
+{
+    return HuSFXstatus_intf( channel );
+}

@@ -20,14 +20,14 @@ _HuSFXstop_intf.1   .macro
 
         ldx <__al
         cpx #$06
-        bcs .error\@
+      bcs .error\@
 
         lda #$ff
         sta HuSFX.stream.bnk,x
         lda #$01
         tax
         clc
-        bra .return\@
+      bra .return\@
     
 .error\@
         clx
@@ -65,32 +65,32 @@ _HuSFX_Init_intf    .macro
 int __fastcall __macro HuSFXplay_intf( char channel<__al>, unsigned char bank1<__fbank>, unsigned int addr1<__fptr>, unsigned char bank2<__cl>, unsigned int addr2<__bx>);
 #asm
 _HuSFXplay_intf.5 .macro
-    ldx <__al
-    cpx #$06
-  bcs .error\@
+        ldx <__al
+        cpx #$06
+      bcs .error\@
 
-    lda <__fbank
-    sta HuSFX.stream.bnk,x
-    lda <__fptr
-    sta HuSFX.stream.lo,x
-    lda <__fptr + 1
-    sta HuSFX.stream.hi,x
-    lda <__cl
-    sta HuSFX.wf.bnk,x
-    lda <__bx
-    sta HuSFX.wf.lo,x
-    lda <__bx + 1
-    sta HuSFX.wf.hi,x
+        lda <__fbank
+        sta HuSFX.stream.bnk,x
+        lda <__fptr
+        sta HuSFX.stream.lo,x
+        lda <__fptr + 1
+        sta HuSFX.stream.hi,x
+        lda <__cl
+        sta HuSFX.wf.bnk,x
+        lda <__bx
+        sta HuSFX.wf.lo,x
+        lda <__bx + 1
+        sta HuSFX.wf.hi,x
 
-    lda #$01
-    tax
-    clc
-    bra .return\@
+        lda #$01
+        tax
+        clc
+      bra .return\@
 
 .error\@
-    clx
-    cla
-    sec
+        clx
+        cla
+        sec
 
 .return\@
 .endm
@@ -407,4 +407,36 @@ _HuSFXprocess_intf  .macro
 .return_huc\@
 
 .endm
+#endasm
+
+
+//..........................................................................
+//..........................................................................
+//..........................................................................
+//..........................................................................
+// HuSFXstatus
+int __fastcall __macro HuSFXstatus_intf( char channel<__al> );
+#asm
+_HuSFXstatus_intf.1 .macro
+
+        ldx <__al
+        cpx #$06
+      bcs .error\@
+
+        lda HuSFX.stream.bnk,x
+        cmp #$ff
+      bra .noplay\@
+        tax
+        clc
+      bra .return\@
+
+.noplay\@
+.error\@
+        clx
+        cla
+        sec
+
+.return\@
+.endm
+
 #endasm

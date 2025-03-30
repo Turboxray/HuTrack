@@ -341,9 +341,9 @@ HuSFX.process
         sta HuSFX.stream.hi,x
 
         pla
-        tma #$03
+        tam #$03
         pla
-        tma #$02
+        tam #$02
     jmp .return_entry
 
 

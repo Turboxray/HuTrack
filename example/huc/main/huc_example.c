@@ -1,5 +1,5 @@
 
-#include "HuVGM_defs.h"
+#include "HuSFX/Huc_interface/HuVGM_defs.h"
 #include "huc.h"
 #include "HuTrack/Huc_interface/HuTrack.c"
 #include "HuSFX/Huc_interface/HucSFX.c"
@@ -29,25 +29,25 @@ const char wf_set[] = {   // 12% duty square wave
                         15,14,13,12,11,10,09,08,07,06,05,04,03,02,01,00
                     };
 
-const char SFX_1[] = {  huChanOff, huChanWFupdate(3), huWFvol(31), huPeriod(0x1, 0xFF),huPan(15,15),
-                        HuWait_frames(3),huWFvol(30),HuWait_frames(4),huWFvol(29),HuWait_frames(5),huWFvol(28),
-                        HuWait_frames(6),huWFvol(27),HuWait_frames(7),huWFvol(26),HuWait_frames(7),huWFvol(25),
-                        HuWait_frames(7),huWFvol(22),HuWait_frames(7),huWFvol(20),HuWait_frames(7),huWFvol(17),
-                        HuWait_frames(7),huWFvol(15),HuWait_frames(7),huWFvol(11),HuWait_frames(7),huWFvol(00),huEndOfStream
+const char SFX_1[] = {  HuChanOff, HuChanWFupdate(3), HuWFvol(31), HuPeriod(0x1, 0xFF),HuPan(15,15),
+                        HuWait_frames(3),HuWFvol(30),HuWait_frames(4),HuWFvol(29),HuWait_frames(5),HuWFvol(28),
+                        HuWait_frames(6),HuWFvol(27),HuWait_frames(7),HuWFvol(26),HuWait_frames(7),HuWFvol(25),
+                        HuWait_frames(7),HuWFvol(22),HuWait_frames(7),HuWFvol(20),HuWait_frames(7),HuWFvol(17),
+                        HuWait_frames(7),HuWFvol(15),HuWait_frames(7),HuWFvol(11),HuWait_frames(7),HuWFvol(00),HuEndOfStream
                      };
 
-const char SFX_2[] = {  huChanOff, huChanWFupdate(4), huWFvol(31), huPeriod(0x1, 0xFF),huPan(15,15),
-                        HuWait_frames(3),huWFvol(30),HuWait_frames(4),huWFvol(29),HuWait_frames(5),huWFvol(28),
-                        HuWait_frames(6),huWFvol(27),HuWait_frames(7),huWFvol(26),HuWait_frames(7),huWFvol(25),
-                        HuWait_frames(7),huWFvol(22),HuWait_frames(7),huWFvol(20),HuWait_frames(7),huWFvol(17),
-                        HuWait_frames(7),huWFvol(15),HuWait_frames(7),huWFvol(11),HuWait_frames(7),huWFvol(00),huEndOfStream
+const char SFX_2[] = {  HuChanOff, HuChanWFupdate(4), HuWFvol(31), HuPeriod(0x1, 0xFF),HuPan(15,15),
+                        HuWait_frames(3),HuWFvol(30),HuWait_frames(4),HuWFvol(29),HuWait_frames(5),HuWFvol(28),
+                        HuWait_frames(6),HuWFvol(27),HuWait_frames(7),HuWFvol(26),HuWait_frames(7),HuWFvol(25),
+                        HuWait_frames(7),HuWFvol(22),HuWait_frames(7),HuWFvol(20),HuWait_frames(7),HuWFvol(17),
+                        HuWait_frames(7),HuWFvol(15),HuWait_frames(7),HuWFvol(11),HuWait_frames(7),HuWFvol(00),HuEndOfStream
                      };
 
-const char SFX_3[] = {  huChanOff, huChanWFupdate(0), huWFvol(31), huPeriod(0x1, 0xFF),huPan(15,15),
-                        HuWait_frames(3),huWFvol(30),huChanWFupdate(1),HuWait_frames(4),huWFvol(29),HuWait_frames(5),huWFvol(28),
-                        HuWait_frames(6),huChanWFupdate(2),huWFvol(27),HuWait_frames(7),huWFvol(26),HuWait_frames(7),huWFvol(25),
-                        HuWait_frames(7),huWFvol(22),HuWait_frames(7),huWFvol(20),HuWait_frames(7),huWFvol(17),
-                        HuWait_frames(7),huWFvol(15),HuWait_frames(7),huWFvol(11),HuWait_frames(7),huWFvol(00),huEndOfStream
+const char SFX_3[] = {  HuChanOff, HuChanWFupdate(0), HuWFvol(31), HuPeriod(0x1, 0xFF),HuPan(15,15),
+                        HuWait_frames(3),HuWFvol(30),HuChanWFupdate(1),HuWait_frames(4),HuWFvol(29),HuWait_frames(5),HuWFvol(28),
+                        HuWait_frames(6),HuChanWFupdate(2),HuWFvol(27),HuWait_frames(7),HuWFvol(26),HuWait_frames(7),HuWFvol(25),
+                        HuWait_frames(7),HuWFvol(22),HuWait_frames(7),HuWFvol(20),HuWait_frames(7),HuWFvol(17),
+                        HuWait_frames(7),HuWFvol(15),HuWait_frames(7),HuWFvol(11),HuWait_frames(7),HuWFvol(00),HuEndOfStream
                      };
 
 

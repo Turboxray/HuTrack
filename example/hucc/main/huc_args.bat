@@ -2,8 +2,8 @@ rem ***************************************************************************
 
 setlocal
 
-set PCE_INCLUDE=%CD%\..\..\..\lib;C:\huc\include\huc
+set PCE_INCLUDE=%CD%\..\..\..\lib;C:\huc\include\hucc
 set PATH=%PATH%;c:\huc\bin
 
-huc.exe  
+hucc.exe  
 pause

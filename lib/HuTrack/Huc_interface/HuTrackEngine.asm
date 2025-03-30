@@ -144,7 +144,6 @@ _HuTrackEngine_Stop:
 ;
 ;#pragma fastcall HuTrackEngine_SetGlobal(byte acc);
 _HuTrackEngine_SetGlobal.1:
-        sax
         sta HuTrack.Global.SetVolume
         lda #$80
         sta HuTrack.Global.VolUpdate

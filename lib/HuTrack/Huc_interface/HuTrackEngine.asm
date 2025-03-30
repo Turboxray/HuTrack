@@ -30,11 +30,24 @@ _HuTrack_Init:
       sta timer_jmp
       lda #high(HuTrackEngine.7khz.IRQ)
       sta timer_jmp+1
+      .ifdef HUCC
+      lda #low(_HuTrackEngine.CORE.VBL.IRQ)
+      sta sound_hook
+      lda #high(_HuTrackEngine.CORE.VBL.IRQ)
+      sta sound_hook+1
+      .endif
+
         plp
       
       lda #$00
       sta $c00
   rts
+
+      .ifdef HUCC
+_HuTrackEngine.CORE.VBL.IRQ:
+      HutrackEngine.ManualCall
+      rts
+      .endif
 
 ;...............................................
 ;
@@ -521,4 +534,8 @@ _getFarPointer2.3 .macro
     .include "HuTrack/engine/HuTrack_parser.asm"
     .include "HuTrack/HuTrack_lib.asm"
 
+  .ifdef HUCC
+  .bank CORE_BANK
+  .else
   .bank LIB1_BANK
+  .endif

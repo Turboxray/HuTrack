@@ -53,7 +53,20 @@ int __fastcall HuTrackEngineSFXrest(unsigned char channel<__al>);
 int __fastcall HuTrackEnginePauseDDA();
 int __fastcall HuTrackEngineResumeDDA();
 
+#ifdef __HUCC__
+void __fastcall __macro getDataPtr(unsigned char far *my_data_label<__bl:__ax>);
+#else
 void __fastcall __nop getDataPtr(unsigned char far *my_data_label<__bl:__ax>);
+#endif
 
 #pragma fastcall HuTrack_Init();
 
+#ifdef __HUCC__
+#asm
+		.data
+		include	"HuTrack/hutrack.inc"
+		include "HuTrack/HuTrack_vars.inc"
+		.code
+		include "HuTrack/Huc_interface/HuTrackEngine.asm"
+#endasm
+#endif

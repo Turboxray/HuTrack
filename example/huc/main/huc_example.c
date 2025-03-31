@@ -71,6 +71,11 @@ const char SFX_3[] = {  HuChanOff, HuChanWFupdate(0), HuWFvol(31), HuPeriod(0x1,
 #incasmlabel(pcm12, "../assets/sfx/sample14/Track05.inc", 2);
 #incasmlabel(pcm13, "../assets/sfx/sample13/MissionFailed_b.inc", 2);
 
+// TODO: Some of these will use the wrong waveforms, but the data parses correctly otherwise.
+#incasmlabel(test_sfx_1, "../assets/sfx/swiss/swiss.chan0.inc", 2);
+#incasmlabel(test_sfx_2, "../assets/sfx/light_1/light_1.chan0.inc", 2);
+#incasmlabel(test_sfx_3, "../assets/sfx/test1/test1.chan2.inc", 2);
+
 char title[48];
 char author[48];
 char chanMask[7];
@@ -341,6 +346,9 @@ void initSFXcollections()
     getFarPointer(SFX_1, &(sFXcollection.sfxBank[sFXcollection.len]), &(sFXcollection.sfxBase[sFXcollection.len]) ); sFXcollection.len++;
     getFarPointer(SFX_2, &(sFXcollection.sfxBank[sFXcollection.len]), &(sFXcollection.sfxBase[sFXcollection.len]) ); sFXcollection.len++;
     getFarPointer(SFX_3, &(sFXcollection.sfxBank[sFXcollection.len]), &(sFXcollection.sfxBase[sFXcollection.len]) ); sFXcollection.len++;
+    getFarPointer(test_sfx_1, &(sFXcollection.sfxBank[sFXcollection.len]), &(sFXcollection.sfxBase[sFXcollection.len]) ); sFXcollection.len++;
+    getFarPointer(test_sfx_2, &(sFXcollection.sfxBank[sFXcollection.len]), &(sFXcollection.sfxBase[sFXcollection.len]) ); sFXcollection.len++;
+    getFarPointer(test_sfx_3, &(sFXcollection.sfxBank[sFXcollection.len]), &(sFXcollection.sfxBase[sFXcollection.len]) ); sFXcollection.len++;
 
     for (x=0; x<6; x++) {
         sFXassign[x].status = SFX_OFF;

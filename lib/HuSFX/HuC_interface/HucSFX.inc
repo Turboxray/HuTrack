@@ -24,6 +24,21 @@ _HuSFXstop_intf.1   .macro
 
         lda #$ff
         sta HuSFX.stream.bnk,x
+
+            php
+        sei
+        lda #$d0
+        stx $800
+        stz $804
+            plp
+
+            php
+        sei
+        nop
+        stx $800
+        stz $807
+            plp
+
         lda #$01
         tax
         clc
@@ -81,6 +96,20 @@ _HuSFXplay_intf.5 .macro
         sta HuSFX.wf.lo,x
         lda <__bx + 1
         sta HuSFX.wf.hi,x
+
+            php
+        sei
+        nop
+        stx $800
+        stz $807
+            plp
+
+            php
+        sei
+        nop
+        stx $800
+        stz $808
+            plp
 
         lda #$01
         tax
@@ -336,6 +365,29 @@ _HuSFXprocess_intf  .macro
 .eof\@
         lda #$ff
         sta HuSFX.stream.bnk,x
+
+            php
+        sei
+        lda #$d0
+        stx $800
+        sta $804
+            plp
+
+            php
+        sei
+        nop
+        stx $800
+        stz $807
+            plp
+
+            php
+        sei
+        nop
+        stx $800
+        stz $808
+            plp
+
+
       jmp .exit_parse\@
 
 ;..............
@@ -397,6 +449,8 @@ _HuSFXprocess_intf  .macro
         sta HuSFX.stream.lo,x
         lda <HuSFX.A0 + 1
         sta HuSFX.stream.hi,x
+
+
 
         pla
         tam #$03

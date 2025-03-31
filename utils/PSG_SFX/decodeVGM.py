@@ -726,7 +726,7 @@ class ConvertVGM():
                         self.debugPrint(f'{data}')
                         waveform = set([idx<<8|val for idx,val in enumerate(data)])
                         self.debugPrint(f'{waveform}')
-                        if waveform not in waveform_list:
+                        if not self.waveformCheck(waveform, waveform_list):
                             waveform_list.append(waveform)
 
 
@@ -749,7 +749,7 @@ class ConvertVGM():
                     data = data_pair['data']
                     if reg == 0x06 and len(data) == 32:
                         waveform = set([idx<<8|val for idx,val in enumerate(data)])
-                        waveform_index = waveform_list.index(waveform)
+                        waveform_index = self.getWaveformIndex(waveform_list, waveform)
                         self.prep_reg_list[chan][frame][idx] = { 'reg' : 0x10, 'data' : [waveform_index] }
 
 
@@ -923,6 +923,29 @@ class ConvertVGM():
 
         return (waveform_list, bin_output)
 
+    def getWaveformIndex(self, waveform_list, waveform):
+        # try all 32 rotations
+        for wf_idx, cmp_wf in enumerate(waveform_list):
+            for i in range(32):
+                if cmp_wf == self.rotateWF(waveform, i):
+                    return wf_idx
+
+        return False         
+
+    def waveformCheck(self, waveform, waveform_list):
+
+        # try all 32 rotations
+        for cmp_wf in waveform_list:
+            for i in range(32):
+                if cmp_wf == self.rotateWF(waveform, i):
+                    return True
+
+        return False            
+
+    def rotateWF(self,waveform, idx):
+        waveform = list(waveform)
+        new_wf = waveform[idx:] + waveform[:idx]
+        return set(new_wf)
 
     def get_decodeData(self, offset, content):
         op = content[offset]

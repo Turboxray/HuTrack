@@ -7,3 +7,4 @@ C_log.txt
 S_log.txt
 *.s
 utils/wavs/
+.vscode

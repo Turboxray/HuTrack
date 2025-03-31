@@ -410,8 +410,7 @@ _HuSFXprocess_intf  .macro
       jmp .exit_parse\@
 ;..............
 .wait_1_frame\@
-        lda #$01
-        sta HuSFX.delay,x
+        stz HuSFX.delay,x
       jmp .exit_parse\@
 
 

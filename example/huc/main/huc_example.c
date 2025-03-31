@@ -73,7 +73,7 @@ const char SFX_3[] = {  HuChanOff, HuChanWFupdate(0), HuWFvol(31), HuPeriod(0x1,
 
 // TODO: Some of these will use the wrong waveforms, but the data parses correctly otherwise.
 #incasmlabel(test_sfx_1, "../assets/sfx/swiss/swiss.chan0.inc", 2);
-#incasmlabel(test_sfx_2, "../assets/sfx/light_1/light_1.chan0.inc", 2);
+#incasmlabel(test_sfx_2, "../assets/sfx/swish/swish.chan5.inc", 2);
 #incasmlabel(test_sfx_3, "../assets/sfx/test1/test1.chan2.inc", 2);
 
 char title[48];

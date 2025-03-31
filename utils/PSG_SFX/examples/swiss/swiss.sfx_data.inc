@@ -1,0 +1,7 @@
+ .include "swiss.dataTable.inc"
+ .include "swiss.chan0.inc"
+ .include "swiss.chan1.inc"
+ .include "swiss.chan2.inc"
+ .include "swiss.chan3.inc"
+ .include "swiss.chan4.inc"
+ .include "swiss.chan5.inc"

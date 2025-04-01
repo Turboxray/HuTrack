@@ -219,6 +219,7 @@ HuTrack.AlignByte256    .macro
 HuTrack.BenchmarkColorZero   .macro
 
 .ifdef HUTRACK_BENCHMARK
+.if (HUTRACK_BENCHMARK == 1)
         stz $402
         lda #$01
         sta $403
@@ -226,6 +227,7 @@ HuTrack.BenchmarkColorZero   .macro
         sta $404
         lda #high((\2<<6) + (\1<<3) + \3)
         sta $405
+.endif
 .endif
 
     .endm

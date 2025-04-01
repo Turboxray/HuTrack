@@ -54,8 +54,6 @@ NEED_SOUND_BANK	= 1
 ;		include	"audio/tools/HuTrack/lib/HuTrack/hutrack.inc"
 ;		.code
 
-HUTRACK_BENCHMARK = 1
-
 __sound_init	.macro
 		stz	<HuTrack.Status
 		; Stop parsing songs

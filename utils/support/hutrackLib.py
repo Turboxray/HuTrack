@@ -19,7 +19,7 @@ class HuTrackLib():
         self.params  = params
 
     def importDmf(self):
-        print("\n params",self.params)
+        print("\n\n import params",self.params,"\n")
         convertDeflemask = ConvertDeflemask(self.params)
         result, hutrack = convertDeflemask.process()
         return result, hutrack
@@ -29,7 +29,7 @@ class HuTrackLib():
 
     def exportHuTrackTextFile(self):
         pceModule = HuTrackExportPCE(hutrack=self.huTrack, params=self.params)
-        print("\n\n params", self.params,"\n\n params")
+        print("\n\n export params", self.params,"\n")
         pceModule.process()
         del pceModule
         return True
@@ -314,12 +314,14 @@ class HuTrackExportPCE():
             hu_out.write(f'  .dw .song.tables\n')
             hu_out.write(f'  .dw .song.tables.bank\n')
 
+            songname = (self.huTrack.songName,'')[ self.params['no_songname'] ]
+            authorname = (self.huTrack.authorName,'')[ self.params['no_author'] ]
             hu_out.write(f'.songname\n')
-            hu_out.write(f'  .db "{self.huTrack.songName}",0\n')
+            hu_out.write(f'  .db "{songname}",0\n')
             hu_out.write(f'.author\n')
-            hu_out.write(f'  .db "{self.huTrack.authorName}",0\n')
-            hu_out.write(f'\n\n')
+            hu_out.write(f'  .db "{authorname}",0\n')
 
+            hu_out.write(f'\n\n')
             hu_out.write(f'.song.tables\n')
             hu_out.write(f'  .dw .attributes\n')
             hu_out.write(f'  .dw .patternList.table\n')

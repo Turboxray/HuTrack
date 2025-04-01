@@ -4,7 +4,7 @@ import os
 import sys
 
 from support.hutrackLib import HuTrackLib
-
+from pathlib import Path
 
 from tkinter import filedialog as fd
 import tkinter as tk
@@ -90,6 +90,8 @@ def saveHuTrack():
     runOptions['subFolder']       = components['subFolder'].get()
     runOptions['songName']        = components['song'].get()
     runOptions['includePath']     = components['path'].get()
+    runOptions['no_songname']     = (False,True)[components['incsongname'].get()==0]
+    runOptions['no_author']       = (False,True)[components['incauthorname'].get()==0]
 
 
     hutrackConv = HuTrackLib(hutrack=hutrack, params=runOptions)
@@ -157,21 +159,36 @@ def initGui():
     includePath = tk.Entry(subframe2)
     components['path'] = includePath
     includePath.grid(column=1, row=0)
+
     labelTop = ttk.Label(subframe2, text = "Song name: ")
     labelTop.grid(column=0, row=1)
     songname = tk.Entry(subframe2)
     components['song'] = songname
     songname.grid(column=1, row=1)
-    labelTop = ttk.Label(subframe2, text = "dest path: ")
-    labelTop.grid(column=0, row=3)
-    destpath = tk.Entry(subframe2)
-    components['destpath'] = destpath
-    destpath.grid(column=1, row=3)
+
     labelTop = ttk.Label(subframe2, text = "subFolder: ")
     labelTop.grid(column=0, row=2)
     subFolder = tk.Entry(subframe2)
     components['subFolder'] = subFolder
     subFolder.grid(column=1, row=2)
+
+    labelTop = ttk.Label(subframe2, text = "dest path: ")
+    labelTop.grid(column=0, row=3)
+    destpath = tk.Entry(subframe2)
+    components['destpath'] = destpath
+    destpath.grid(column=1, row=3)
+
+    incsongname = tk.IntVar()
+    incsongname.set(1)
+    labelTop = tk.Checkbutton(subframe2, text = "Include Song name", variable = incsongname, onvalue=1, offvalue=0)
+    labelTop.grid(column=0, row=4)
+    components['incsongname'] = incsongname
+
+    incauthorname = tk.IntVar()
+    incauthorname.set(1)
+    labelTop = tk.Checkbutton(subframe2, text = "Include Author name", variable = incauthorname, onvalue=1, offvalue=0)
+    labelTop.grid(column=1, row=4)
+    components['incauthorname'] = incauthorname
 
 
     subframe3 = tk.LabelFrame(frame1, padx=4, pady=4)
@@ -200,69 +217,112 @@ def initGui():
 # Main                                                                                                      .
 #............................................................................................................
 
-def auto_int(val):
-    val = int(val, (DECbase,HEXbase)['0x' in val])
-    return val
+if __name__ == '__main__':
+    def auto_int(val):
+        val = int(val, (DECbase,HEXbase)['0x' in val])
+        return val
 
-parser = argparse.ArgumentParser(description='Convert DefleMask DMF to PCE HuTrack format.',
-                                    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(description='Convert DefleMask DMF to PCE HuTrack format.',
+                                        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-runOptionsGroup = parser.add_argument_group('Run options', 'Run options for DMF converter')
-runOptionsGroup.add_argument('--destinationPath',
-                                '-destpth',
-                                required=False,
-                                default="",
-                                help='Copies the newly created files to a specific path.')
-runOptionsGroup.add_argument('--includePath',
-                                '-incpth',
-                                required=False,
-                                default="",
-                                help='Relative path prefix for file ".include"')
-runOptionsGroup.add_argument('--NoSongNameSubfolder',
-                                '-nosub',
-                                required=False,
-                                action="store_true",
-                                help='Stops util from using the song name as a sub folder.')
-runOptionsGroup.add_argument('--bitpackPCM',
-                                '-pack',
-                                default=False,
-                                help='Bit packs the 5bit the samples.')
-runOptionsGroup.add_argument('--debug',
-                                '-dbg',
-                                default=False,
-                                action="store_true",
-                                help='Output uncompressed DMF as raw bin and hex s-record.')
-runOptionsGroup.add_argument('--alignPCM256',
-                                '-align256',
-                                default=False,
-                                help='Forces all samples to take up a multiple of 256 bytes and block aligns to 256byte boundaries - remaining values will be 0.')
-runOptionsGroup.add_argument('--resampleFilter',
-                                '-refil',
-                                choices=['kaiser_best','kaiser_fast','sinc_window_32','sinc_window_Hann','default'],
-                                default='kaiser_best',
-                                help='See https://resampy.readthedocs.io/ documentation for info on filters.')
-runOptionsGroup.add_argument('--bitDepth',
-                                '-bdpth',
-                                choices=['4bit','4.5bit','5bit','5.5bit','6bit','6.5bit','7bit'],
-                                default='5bit',
-                                help='The bit depth for streaming PCM samples.')
-runOptionsGroup.add_argument('--playback',
-                                '-pb',
-                                choices=['6960','6991','9279','10440','11090','12180'],
-                                default='6960',
-                                help='The playback rate for PCM samples.')
+    runOptionsGroup = parser.add_argument_group('Run options', 'Run options for DMF converter')
+    runOptionsGroup.add_argument('--filein',
+                                    default="",
+                                    help='DMF file to convert.')
+    runOptionsGroup.add_argument('--destinationPath',
+                                    '-destpth',
+                                    required=False,
+                                    default="",
+                                    help='Copies the newly created files to a specific path.')
+    runOptionsGroup.add_argument('--songname',
+                                    required=False,
+                                    default="",
+                                    help='Name the song to something specific instead of taken from the filen name.')
+    runOptionsGroup.add_argument('--includePath',
+                                    '-incpth',
+                                    required=False,
+                                    default="",
+                                    help='Relative path prefix for file ".include"')
+    runOptionsGroup.add_argument('--subfolder',
+                                    required=False,
+                                    default=".=songName=.",
+                                    help='Use different subfolder than the song file name.')
+    runOptionsGroup.add_argument('--bitpackPCM',
+                                    '-pack',
+                                    default=False,
+                                    help='Bit packs the 5bit the samples.')
+    runOptionsGroup.add_argument('--debug',
+                                    '-dbg',
+                                    default=False,
+                                    action="store_true",
+                                    help='Output uncompressed DMF as raw bin and hex s-record.')
+    runOptionsGroup.add_argument('--alignPCM256',
+                                    '-align256',
+                                    default=False,
+                                    help='Forces all samples to take up a multiple of 256 bytes and block aligns to 256byte boundaries - remaining values will be 0.')
+    runOptionsGroup.add_argument('--resampleFilter',
+                                    '-refil',
+                                    choices=['kaiser_best','kaiser_fast','sinc_window_32','sinc_window_Hann','default'],
+                                    default='kaiser_best',
+                                    help='See https://resampy.readthedocs.io/ documentation for info on filters.')
+    runOptionsGroup.add_argument('--bitDepth',
+                                    '-bdpth',
+                                    choices=['4bit','4.5bit','5bit','5.5bit','6bit','6.5bit','7bit'],
+                                    default='5bit',
+                                    help='The bit depth for streaming PCM samples.')
+    runOptionsGroup.add_argument('--playback',
+                                    '-pb',
+                                    choices=['6960','6991','9279','10440','11090','12180'],
+                                    default='6960',
+                                    help='The playback rate for PCM samples.')
+    runOptionsGroup.add_argument('--no_songname',
+                                    action='store_true',
+                                    help='Do not store song name in output file.')
+    runOptionsGroup.add_argument('--no_author',
+                                    action='store_true',
+                                    help='Do not store author name in output file.')
+    runOptionsGroup.add_argument('--no_gui',
+                                    action='store_true',
+                                    help='Forces command line only.')
 
-args = parser.parse_args()
+    args = parser.parse_args()
 
-runOptions['destinationPath'] = args.destinationPath
-runOptions['subFolder']       = ('songName','')[args.NoSongNameSubfolder]
-runOptions['includePath']     = args.includePath
-runOptions['bitpackPCM']      = args.bitpackPCM
-runOptions['bitDepth']        = args.bitDepth
-runOptions['resampleFilter']  = args.resampleFilter
-runOptions['playback']        = args.playback
-runOptions['alignPCM256']     = args.alignPCM256
-runOptions['debug']           = args.debug
+    runOptions['destinationPath'] = args.destinationPath
+    runOptions['subFolder']       = args.subfolder
+    runOptions['includePath']     = args.includePath
+    runOptions['bitpackPCM']      = args.bitpackPCM
+    runOptions['bitDepth']        = args.bitDepth
+    runOptions['resampleFilter']  = args.resampleFilter
+    runOptions['playback']        = args.playback
+    runOptions['alignPCM256']     = args.alignPCM256
+    runOptions['debug']           = args.debug
+    runOptions['no_songname']     = args.no_songname
+    runOptions['no_author']       = args.no_author
 
+    if args.no_gui:
+        if args.filein == "":
+            print(f'Error: filein argument is required for no-gui mode.')
+            sys.exit(1)
+        runOptions['filein'] = args.filein
+        print(runOptions['filein'])
+        runOptions['songName'] = 'converter'
 
-initGui()
+        print("\n saveHuTrack",runOptions)
+        hutrackConv = HuTrackLib(params=runOptions)
+        result, hutrack = hutrackConv.importDmf()
+
+        if not result:
+            print('DMF could not be loaded')
+            sys.exit(1)
+        else:
+
+            runOptions['subFolder'] = (runOptions['subFolder'], Path(args.filein).stem)[runOptions['subFolder'] == '.=songName=.']
+            runOptions['destinationPath'] = (runOptions['destinationPath'], Path(args.filein).parent )[runOptions['destinationPath'] == '']
+            runOptions['songName'] = (args.songname, Path(args.filein).stem)[args.songname == '']
+
+            hutrackConv = HuTrackLib(hutrack=hutrack, params=runOptions)
+            hutrackConv.exportHuTrackTextFile()
+
+            print('\nHuTrack pce file saved.')        
+    else:
+        initGui()

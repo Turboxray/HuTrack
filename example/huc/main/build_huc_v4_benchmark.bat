@@ -12,10 +12,10 @@ del *.sym
 del *.lst
 del *.s
 
-set PCE_INCLUDE=%CD%\..\..\..\lib;C:\huc\include\hucc
+set PCE_INCLUDE=%CD%\..\..\..\lib;C:\huc\include\huc
 set PATH=%PATH%;c:\huc\bin
 
-hucc.exe -v -v -gL -msmall -fno-recursive hucc_example.c > C_log.txt
+huc.exe  -v -v -msmall -AHUTRACK_BENCHMARK=1 -fno-recursive huc_example.c -T > C_log.txt
 
 type C_log.txt
 

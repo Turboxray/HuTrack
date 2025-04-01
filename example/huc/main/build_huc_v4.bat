@@ -8,6 +8,9 @@ pushd
 
 del C_log.txt
 del S_log.txt
+del *.sym
+del *.lst
+del *.s
 
 set PCE_INCLUDE=%CD%\..\..\..\lib;C:\huc\include\huc
 set PATH=%PATH%;c:\huc\bin

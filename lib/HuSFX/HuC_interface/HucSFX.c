@@ -10,35 +10,47 @@
 // ;
 // ;
 
+#include "HuSFX/HuC_interface/HucSFX.h"
 #include "HuSFX/HuC_interface/HucSFX.inc"
 
 //......................................................
-int HuSFX_Init(void)
-{ 
-   return HuSFX_Init_intf();
-}
-
-//......................................................
-int HuSFXplay( char channel, unsigned char bank1, unsigned int addr1, unsigned char bank2, unsigned int addr2 )
+void HuSFX_Init( char bank, unsigned int address )
 {
-    return HuSFXplay_intf( channel, bank1, addr1, bank2, addr2);
+    HuSFX_Init_intf( bank, address );
 }
 
 //......................................................
-int HuSFXstop( char channel )
+void HuSFXprocess( void )
+{
+    HuSFXprocess_intf();
+}
+
+//......................................................
+HU_SFX_STATUS_t HuSFXplay( char channel, unsigned char bank1, unsigned int addr1 )
+{
+    return HuSFXplay_intf( channel, bank1, addr1 );
+}
+
+//......................................................
+HU_SFX_STATUS_t HuSFXchanVol( char channel, unsigned char vol )
+{
+    return HuSFXchanVol_intf( channel, vol );
+}
+
+//......................................................
+HU_SFX_STATUS_t HuSFXpanVol( char channel, unsigned char pan )
+{
+    return HuSFXchanPan_intf( channel, pan );
+}
+
+//......................................................
+HU_SFX_STATUS_t HuSFXstop( char channel )
 {
     return HuSFXstop_intf( channel );
 }
 
-
 //......................................................
-int HuSFXprocess()
+HU_SFX_STREAMNIG_t HuSFXstate( char channel )
 {
-    return HuSFXprocess_intf();
-}
-
-//......................................................
-int HuSFXstatus( char channel )
-{
-    return HuSFXstatus_intf( channel );
+    return HuSFXstate_intf( channel );
 }

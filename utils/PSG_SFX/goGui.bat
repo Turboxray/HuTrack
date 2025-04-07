@@ -1,3 +1,3 @@
 del lot.txt
-python decodeVGM.py --gui
+python VGM2SFX.py --gui
 pause

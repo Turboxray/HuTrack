@@ -1,55 +1,12 @@
-
-#include "HuSFX/Huc_interface/HuVGM_defs.h"
 #include "huc.h"
 #include "HuTrack/Huc_interface/HuTrack.c"
+#include "HuSFX/Huc_interface/HucSFX.h"
 #include "HuSFX/Huc_interface/HucSFX.c"
+#include "HuCsupport/HuCsupport.h"
 
 #asm
 .bank HUC_USER_RESERVED
 #endasm
-
-const char wf_set[] = {   // 12% duty square wave
-                        31,31,31,31,00,00,00,00,00,00,00,00,00,00,00,00,
-                        00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,                    
-
-                        // 25% duty square wave
-                        31,31,31,31,31,31,31,31,00,00,00,00,00,00,00,00,
-                        00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,                    
-
-                        // 50% duty square wave
-                        31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,
-                        00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,                    
-
-                        // Saw-tooth wave 
-                        00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,
-                        16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,
-
-                        // Triangle wave
-                        00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,
-                        15,14,13,12,11,10,09,08,07,06,05,04,03,02,01,00
-                    };
-
-const char SFX_1[] = {  HuChanOff, HuChanWFupdate(3), HuWFvol(31), HuPeriod(0x1, 0xFF),HuPan(15,15),
-                        HuWait_frames(3),HuWFvol(30),HuWait_frames(4),HuWFvol(29),HuWait_frames(5),HuWFvol(28),
-                        HuWait_frames(6),HuWFvol(27),HuWait_frames(7),HuWFvol(26),HuWait_frames(7),HuWFvol(25),
-                        HuWait_frames(7),HuWFvol(22),HuWait_frames(7),HuWFvol(20),HuWait_frames(7),HuWFvol(17),
-                        HuWait_frames(7),HuWFvol(15),HuWait_frames(7),HuWFvol(11),HuWait_frames(7),HuWFvol(00),HuEndOfStream
-                     };
-
-const char SFX_2[] = {  HuChanOff, HuChanWFupdate(4), HuWFvol(31), HuPeriod(0x1, 0xFF),HuPan(15,15),
-                        HuWait_frames(3),HuWFvol(30),HuWait_frames(4),HuWFvol(29),HuWait_frames(5),HuWFvol(28),
-                        HuWait_frames(6),HuWFvol(27),HuWait_frames(7),HuWFvol(26),HuWait_frames(7),HuWFvol(25),
-                        HuWait_frames(7),HuWFvol(22),HuWait_frames(7),HuWFvol(20),HuWait_frames(7),HuWFvol(17),
-                        HuWait_frames(7),HuWFvol(15),HuWait_frames(7),HuWFvol(11),HuWait_frames(7),HuWFvol(00),HuEndOfStream
-                     };
-
-const char SFX_3[] = {  HuChanOff, HuChanWFupdate(0), HuWFvol(31), HuPeriod(0x1, 0xFF),HuPan(15,15),
-                        HuWait_frames(3),HuWFvol(30),HuChanWFupdate(1),HuWait_frames(4),HuWFvol(29),HuWait_frames(5),HuWFvol(28),
-                        HuWait_frames(6),HuChanWFupdate(2),HuWFvol(27),HuWait_frames(7),HuWFvol(26),HuWait_frames(7),HuWFvol(25),
-                        HuWait_frames(7),HuWFvol(22),HuWait_frames(7),HuWFvol(20),HuWait_frames(7),HuWFvol(17),
-                        HuWait_frames(7),HuWFvol(15),HuWait_frames(7),HuWFvol(11),HuWait_frames(7),HuWFvol(00),HuEndOfStream
-                     };
-
 
 #incasmlabel(SMB3Overworld, "../assets/song/smb3_overworld/smb3_overworld.song.inc", 2);
 #incasmlabel(FF3_smeared_graffiti, "../assets/song/FF3_smeared_graffiti/FF3_smeared_graffiti.song.inc", 2);
@@ -57,24 +14,20 @@ const char SFX_3[] = {  HuChanOff, HuChanWFupdate(0), HuWFvol(31), HuPeriod(0x1,
 #incasmlabel(Bottom_Sweep, "../assets/song/Night_Slave_-_Bottom_Sweep_V2/Night_Slave_-_Bottom_Sweep_V2.song.inc", 2);
 #incasmlabel(Stormy_Edge_Stage, "../assets/song/Night_Slave_-_Stormy_Edge_Stage_3A/Night_Slave_-_Stormy_Edge_Stage_3A.song.inc", 2);
 
-#incasmlabel(pcm1, "../assets/sfx/sample1/test.inc", 2);
-#incasmlabel(pcm2, "../assets/sfx/sample2/hypercocoon.inc", 2);
-#incasmlabel(pcm3, "../assets/sfx/sample3/stageclear.inc", 2);
-#incasmlabel(pcm4, "../assets/sfx/sample4/ShubibinmanIII.inc", 2);
-#incasmlabel(pcm5, "../assets/sfx/sample5/loop7.inc", 2);
-#incasmlabel(pcm6, "../assets/sfx/sample6/loop6.inc", 2);
-#incasmlabel(pcm7, "../assets/sfx/sample7/loop5.inc", 2);
-#incasmlabel(pcm8, "../assets/sfx/sample8/loop4.inc", 2);
-#incasmlabel(pcm9, "../assets/sfx/sample9/loop3.inc", 2);
-#incasmlabel(pcm10, "../assets/sfx/sample10/loop2.inc", 2);
-#incasmlabel(pcm11, "../assets/sfx/sample11/loop1.inc", 2);
-#incasmlabel(pcm12, "../assets/sfx/sample14/Track05.inc", 2);
-#incasmlabel(pcm13, "../assets/sfx/sample13/MissionFailed_b.inc", 2);
+#incasmlabel(pcm1, "../assets/sfx/sample2/hypercocoon.inc", 2);
+#incasmlabel(pcm2, "../assets/sfx/sample3/stageclear.inc", 2);
+#incasmlabel(pcm3, "../assets/sfx/sample4/ShubibinmanIII.inc", 2);
+#incasmlabel(pcm4, "../assets/sfx/sample5/loop7.inc", 2);
+#incasmlabel(pcm5, "../assets/sfx/sample13/MissionFailed_b.inc", 2);
 
-// TODO: Some of these will use the wrong waveforms, but the data parses correctly otherwise.
-#incasmlabel(test_sfx_1, "../assets/sfx/swiss/swiss.chan0.inc", 2);
-#incasmlabel(test_sfx_2, "../assets/sfx/swish/swish.chan5.inc", 2);
-#incasmlabel(test_sfx_3, "../assets/sfx/test1/test1.chan2.inc", 2);
+// HuSFX
+#incasmlabel(SFX_1, "../assets/sfx/smb3/smb3_sfx.chan5.inc", 2);
+#incasmlabel(SFX_2, "../assets/sfx/swiss/swiss.chan0.inc", 2);
+#incasmlabel(SFX_3, "../assets/sfx/test1/test1.chan2.inc", 2);
+#incasmlabel(SFX_4, "../assets/sfx/l1/light_1.chan0.inc", 2);
+
+// HuSFX waveforms
+#incasmlabel(sfx_waveforms, "../assets/sfx/main.wf.inc", 2);
 
 char title[48];
 char author[48];
@@ -99,8 +52,6 @@ typedef struct {
     char len;
     char sfxBank[20];
     int  sfxBase[20];
-    int  wfBase;
-    char wfBank;
 } SFXcollection;
 SFXcollection sFXcollection;
 
@@ -118,8 +69,6 @@ typedef struct {
 SFXassign sFXassign[6];
 
 
-void __fastcall getFarPointer( char far *obj<__fbank:__fptr>, unsigned int bank_p<__ax>, unsigned int addr_p<__bx> );
-
 //###############################################################################
 //###############################################################################
 // Main                                                                         #
@@ -131,6 +80,8 @@ int main()
     // var setup and init start 
     int song_number, j1, j2, last_song, cur_channel, song_playing, sfxSelect, sfxMode;
     int i,j,k;
+    HU_SFX_STREAMNIG_t sfx_streaming;
+
     last_song    = 4;    // variable to control number of songs available. base 0, should align with number of songs queued in song queue section
     song_number  = 0;    // currently selected song
     cur_channel  = 0;    // toggle variable for which channel of sfx is being used
@@ -148,7 +99,7 @@ int main()
     load_default_font();
     disp_on();
 
-    HuSFX_Init();
+    HuSFX_Init( getBank(sfx_waveforms), getAddress(sfx_waveforms) );
 
     HuTrack_Init();
     HuTrackEngine_QueueSong(SMB3Overworld);
@@ -236,8 +187,8 @@ int main()
             if (j2 & JOY_STRT) {
                 chanMask[cur_channel] = (chanMask[cur_channel] == '-') ? 'X':'-';
 
-                if (chanMask[cur_channel]=='X') { HuTrackEngine_chanSetSFX(cur_channel); }
-                else { HuTrackEngine_chanReleaseSFX(cur_channel); }
+                if (chanMask[cur_channel]=='X') { HuTrackEngine_chanReserve(cur_channel); }
+                else { HuTrackEngine_chanRelease(cur_channel); }
             }
 
             if ((j2 & JOY_DOWN) || (j2 & JOY_UP)) {
@@ -298,38 +249,6 @@ void loadPcmPointers() {
     pcmPointers.mask0[pcmPointers.idx  ] = PCM_NO_FORCE;
     pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
 
-    getFarPointer(pcm6, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
-    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
-    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
-
-    getFarPointer(pcm7, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
-    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
-    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
-
-    getFarPointer(pcm8, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
-    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
-    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
-
-    getFarPointer(pcm9, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
-    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
-    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
-
-    getFarPointer(pcm10, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
-    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
-    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
-
-    getFarPointer(pcm11, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
-    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
-    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
-
-    getFarPointer(pcm12, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
-    pcmPointers.mask0[pcmPointers.idx  ] = PCM_FORCE_REPEAT;
-    pcmPointers.mask1[pcmPointers.idx++] = PCM_ALLOW_REPEAT;
-
-    getFarPointer(pcm13, &(pcmPointers.bank[pcmPointers.idx]), &(pcmPointers.addr[pcmPointers.idx]) );
-    pcmPointers.mask0[pcmPointers.idx  ] = PCM_NO_FORCE;
-    pcmPointers.mask1[pcmPointers.idx++] = PCM_DISABLE_REPEAT;
-
 }
 
 //...............................................................................
@@ -338,17 +257,26 @@ void loadPcmPointers() {
 
 void initSFXcollections()
 {
-    int x;
+    char sfx_num;
+    char x;
 
-    getFarPointer(wf_set, &(sFXcollection.wfBank), &(sFXcollection.wfBase) );
+    sFXcollection.sfxBank[sfx_num] = getBank(SFX_1);
+    sFXcollection.sfxBase[sfx_num] = getAddress(SFX_1);
+    sfx_num++;
 
-    sFXcollection.len = 0;
-    getFarPointer(SFX_1, &(sFXcollection.sfxBank[sFXcollection.len]), &(sFXcollection.sfxBase[sFXcollection.len]) ); sFXcollection.len++;
-    getFarPointer(SFX_2, &(sFXcollection.sfxBank[sFXcollection.len]), &(sFXcollection.sfxBase[sFXcollection.len]) ); sFXcollection.len++;
-    getFarPointer(SFX_3, &(sFXcollection.sfxBank[sFXcollection.len]), &(sFXcollection.sfxBase[sFXcollection.len]) ); sFXcollection.len++;
-    getFarPointer(test_sfx_1, &(sFXcollection.sfxBank[sFXcollection.len]), &(sFXcollection.sfxBase[sFXcollection.len]) ); sFXcollection.len++;
-    getFarPointer(test_sfx_2, &(sFXcollection.sfxBank[sFXcollection.len]), &(sFXcollection.sfxBase[sFXcollection.len]) ); sFXcollection.len++;
-    getFarPointer(test_sfx_3, &(sFXcollection.sfxBank[sFXcollection.len]), &(sFXcollection.sfxBase[sFXcollection.len]) ); sFXcollection.len++;
+    sFXcollection.sfxBank[sfx_num] = getBank(SFX_2);
+    sFXcollection.sfxBase[sfx_num] = getAddress(SFX_2);
+    sfx_num++;
+
+    sFXcollection.sfxBank[sfx_num] = getBank(SFX_3);
+    sFXcollection.sfxBase[sfx_num] = getAddress(SFX_3);
+    sfx_num++;
+
+    sFXcollection.sfxBank[sfx_num] = getBank(SFX_4);
+    sFXcollection.sfxBase[sfx_num] = getAddress(SFX_4);
+    sfx_num++;
+
+    sFXcollection.len = sfx_num;
 
     for (x=0; x<6; x++) {
         sFXassign[x].status = SFX_OFF;
@@ -364,15 +292,14 @@ void initSFXcollections()
 int playSFX(int selectedChan, int sfxSelect)
 {
 
-    if ( HuTrackEngine_SFXmode(selectedChan) ) {
+    if ( HuTrackEngine_SFXmode(selectedChan) )
+    {
         sFXassign[selectedChan].status = SFX_ON;
         sFXassign[selectedChan].ptr = sfxSelect;
-        HuSFXplay(   selectedChan,
-                                sFXcollection.sfxBank[sfxSelect],
-                                sFXcollection.sfxBase[sfxSelect],
-                                sFXcollection.wfBank,
-                                sFXcollection.wfBase 
-                            );
+        HuSFXplay(  selectedChan,
+                    sFXcollection.sfxBank[sfxSelect],
+                    sFXcollection.sfxBase[sfxSelect]
+                    );
         put_string("    Set SFX ", 0, 19);
         put_number(sfxSelect,2,12,19);
         put_string("                   ", 14, 19); 

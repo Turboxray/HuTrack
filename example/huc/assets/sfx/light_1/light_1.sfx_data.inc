@@ -1,7 +1,0 @@
- .include "light_1.dataTable.inc"
- .include "light_1.chan0.inc"
- .include "light_1.chan1.inc"
- .include "light_1.chan2.inc"
- .include "light_1.chan3.inc"
- .include "light_1.chan4.inc"
- .include "light_1.chan5.inc"

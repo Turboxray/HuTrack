@@ -267,8 +267,8 @@ _HuTrackEngine_getCurrSongAuthor.1:
     rts
 
 
-; #pragma fastcall HuTrackEngine_chanSetSFX(byte __al);
-_HuTrackEngine_chanSetSFX.1:
+; #pragma fastcall HuTrackEngine_chanReserve(byte __al);
+_HuTrackEngine_chanReserve.1:
 
         ldx <__al
         cpx #06
@@ -306,8 +306,8 @@ _HuTrackEngine_chanSetSFX.1:
 .out
     rts
 
-; #pragma fastcall HuTrackEngine_chanReleaseSFX(byte __al);
-_HuTrackEngine_chanReleaseSFX.1:
+; #pragma fastcall HuTrackEngine_chanRelease(byte __al);
+_HuTrackEngine_chanRelease.1:
         ldx <__al
         cpx #06
       bcs .out
@@ -514,17 +514,6 @@ _getFarPointer.3
             lda __fptr+1
             sta [__bx],y
     rts
-
-_getFarPointer2.3 .macro
-            lda __fbank
-            sta [__ax]
-            cly
-            lda __fptr
-            sta [__bx],y
-            iny
-            lda __fptr+1
-            sta [__bx],y
-  .endm
 
 ;//.........................................................
 

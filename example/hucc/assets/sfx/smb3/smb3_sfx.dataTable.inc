@@ -5,9 +5,9 @@
 
   .dw $2       ; offset to bank table
 
-  .dw .data.chan0
+  .dw .data.chan5
 
 
 ; Banks
 
-  .db bank(.data.chan0)
+  .db bank(.data.chan5)

@@ -81,11 +81,13 @@ _HuSFX_Init_intf.2    .macro
       bne .loop\@
 
         lda __fbank
-        sta HuSFX.wf.bank
+        sta HuSFX.wf.bnk
 
         lda __fptr
         sta HuSFX.wf.lo
         lda __fptr + 1
+        and #$1f
+        ora #$40
         sta HuSFX.wf.hi
 
         lda #$1f
@@ -363,9 +365,9 @@ _HuSFXprocess_intf  .macro
           sty HuSFX.DMA + 2
 
         clc
-        adc HuSFX.wf.lo,x
+        adc HuSFX.wf.lo
         sta HuSFX.DMA + 1
-        lda HuSFX.wf.hi,x
+        lda HuSFX.wf.hi
         and #$1f
         ora #$40
         adc HuSFX.DMA + 2
@@ -381,7 +383,7 @@ _HuSFXprocess_intf  .macro
         lda #high(32)
         sta HuSFX.DMA + 6
 
-        lda HuSFX.wf.bnk,x
+        lda HuSFX.wf.bnk
 
         tam #$02
         inc a

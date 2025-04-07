@@ -21,8 +21,8 @@
 #incasmlabel(pcm5, "../assets/sfx/sample13/MissionFailed_b.inc", 2);
 
 // HuSFX
-#incasmlabel(SFX_1, "../assets/sfx/swiss/swiss.chan0.inc", 2);
-#incasmlabel(SFX_2, "../assets/sfx/swish/swish.chan5.inc", 2);
+#incasmlabel(SFX_1, "../assets/sfx/smb3/smb3_sfx.chan5.inc", 2);
+#incasmlabel(SFX_2, "../assets/sfx/swiss/swiss.chan0.inc", 2);
 #incasmlabel(SFX_3, "../assets/sfx/test1/test1.chan2.inc", 2);
 
 // HuSFX waveforms

@@ -5,6 +5,8 @@
 ;..........................
 ; frame 0
 
+  .db $aa, $0                                   ; Pattern Index # 0
+  .db $ab, $1                                   ; Pattern # 1
   .db $5f                                       ; 804 -> $5f
   .db $1f                                       ; 804 -> $1f
   .db $b0, $0                                   ; Waveform update #$0

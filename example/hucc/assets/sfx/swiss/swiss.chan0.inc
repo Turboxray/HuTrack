@@ -17,7 +17,7 @@
   .db $a7, $8d                                  ; 807 -> $8d
   .db $5f                                       ; 804 -> $5f
   .db $1f                                       ; 804 -> $1f
-  .db $b0, $0                                   ; Waveform update #$0
+  .db $b0, $2                                   ; Waveform update #$2
   .db $81                                       ; 804 -> $81
   .db $c6, $4e                                  ; 802 -> $6, 803 -> $4e
   .db $ff                                       ; Wait vblank

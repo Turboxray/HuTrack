@@ -1,197 +1,197 @@
-Opening [D:/Projects/PCE_DEV/HuTrack/utils/PSG_SFX/examples/swiss.vgm] ....
+Opening [examples/swiss.vgm] ....
 [369]
  DEBUG: op 0x90, operand ['0x0', '0x1b', '0x0', '0x6'], offset 0x105, current chan 0
-     NO STORE
+     90 NO STORE
  DEBUG: op 0x91, operand ['0x0', '0x5', '0x1', '0x0'], offset 0x10a, current chan 0
-     NO STORE
+     91 NO STORE
  DEBUG: op 0x92, operand ['0x0', '0x80', '0x3e', '0x0', '0x0'], offset 0x110, current chan 0
-     NO STORE
+     91 NO STORE
  DEBUG: op 0x90, operand ['0x1', '0x1b', '0x1', '0x6'], offset 0x115, current chan 0
-     NO STORE
+     90 NO STORE
  DEBUG: op 0x91, operand ['0x1', '0x5', '0x1', '0x0'], offset 0x11a, current chan 0
-     NO STORE
+     91 NO STORE
  DEBUG: op 0x92, operand ['0x1', '0x80', '0x3e', '0x0', '0x0'], offset 0x120, current chan 0
-     NO STORE
+     91 NO STORE
  DEBUG: op 0x90, operand ['0x2', '0x1b', '0x2', '0x6'], offset 0x125, current chan 0
-     NO STORE
+     90 NO STORE
  DEBUG: op 0x91, operand ['0x2', '0x5', '0x1', '0x0'], offset 0x12a, current chan 0
-     NO STORE
+     91 NO STORE
  DEBUG: op 0x92, operand ['0x2', '0x80', '0x3e', '0x0', '0x0'], offset 0x130, current chan 0
-     NO STORE
+     91 NO STORE
  DEBUG: op 0x90, operand ['0x3', '0x1b', '0x3', '0x6'], offset 0x135, current chan 0
-     NO STORE
+     90 NO STORE
  DEBUG: op 0x91, operand ['0x3', '0x5', '0x1', '0x0'], offset 0x13a, current chan 0
-     NO STORE
+     91 NO STORE
  DEBUG: op 0x92, operand ['0x3', '0x80', '0x3e', '0x0', '0x0'], offset 0x140, current chan 0
-     NO STORE
+     91 NO STORE
  DEBUG: op 0x90, operand ['0x4', '0x1b', '0x4', '0x6'], offset 0x145, current chan 0
-     NO STORE
+     90 NO STORE
  DEBUG: op 0x91, operand ['0x4', '0x5', '0x1', '0x0'], offset 0x14a, current chan 0
-     NO STORE
+     91 NO STORE
  DEBUG: op 0x92, operand ['0x4', '0x80', '0x3e', '0x0', '0x0'], offset 0x150, current chan 0
-     NO STORE
+     91 NO STORE
  DEBUG: op 0x90, operand ['0x5', '0x1b', '0x5', '0x6'], offset 0x155, current chan 0
-     NO STORE
+     90 NO STORE
  DEBUG: op 0x91, operand ['0x5', '0x5', '0x1', '0x0'], offset 0x15a, current chan 0
-     NO STORE
+     91 NO STORE
  DEBUG: op 0x92, operand ['0x5', '0x80', '0x3e', '0x0', '0x0'], offset 0x160, current chan 0
-     NO STORE
+     91 NO STORE
  DEBUG: op 0xb9, operand ['0x0', '0x0'], offset 0x163, current chan 0
 set channel: [0]
-     NO STORE
+     B9 NO STORE
  DEBUG: op 0xb9, operand ['0x4', '0x0'], offset 0x166, current chan 0
-    chan [0], Data: 4, 0
+    chan [0], Data: reg 4, val 0
  DEBUG: op 0xb9, operand ['0x0', '0x1'], offset 0x169, current chan 0
 set channel: [1]
-     NO STORE
+     B9 NO STORE
  DEBUG: op 0xb9, operand ['0x4', '0x0'], offset 0x16c, current chan 1
-    chan [1], Data: 4, 0
+    chan [1], Data: reg 4, val 0
  DEBUG: op 0xb9, operand ['0x0', '0x2'], offset 0x16f, current chan 1
 set channel: [2]
-     NO STORE
+     B9 NO STORE
  DEBUG: op 0xb9, operand ['0x4', '0x0'], offset 0x172, current chan 2
-    chan [2], Data: 4, 0
+    chan [2], Data: reg 4, val 0
  DEBUG: op 0xb9, operand ['0x0', '0x3'], offset 0x175, current chan 2
 set channel: [3]
-     NO STORE
+     B9 NO STORE
  DEBUG: op 0xb9, operand ['0x4', '0x0'], offset 0x178, current chan 3
-    chan [3], Data: 4, 0
+    chan [3], Data: reg 4, val 0
  DEBUG: op 0xb9, operand ['0x0', '0x4'], offset 0x17b, current chan 3
 set channel: [4]
-     NO STORE
+     B9 NO STORE
  DEBUG: op 0xb9, operand ['0x4', '0x0'], offset 0x17e, current chan 4
-    chan [4], Data: 4, 0
+    chan [4], Data: reg 4, val 0
  DEBUG: op 0xb9, operand ['0x0', '0x5'], offset 0x181, current chan 4
 set channel: [5]
-     NO STORE
+     B9 NO STORE
  DEBUG: op 0xb9, operand ['0x4', '0x0'], offset 0x184, current chan 5
-    chan [5], Data: 4, 0
+    chan [5], Data: reg 4, val 0
  DEBUG: op 0xb9, operand ['0x0', '0x0'], offset 0x187, current chan 5
 set channel: [0]
-     NO STORE
+     B9 NO STORE
  DEBUG: op 0xb9, operand ['0x1', '0xff'], offset 0x18a, current chan 0
-    chan [0], Data: 1, 255
+    chan [0], Data: reg 1, val 255
  DEBUG: op 0xb9, operand ['0x8', '0xff'], offset 0x18d, current chan 0
-    chan [0], Data: 8, 255
+    chan [0], Data: reg 8, val 255
  DEBUG: op 0xb9, operand ['0x9', '0x0'], offset 0x190, current chan 0
-    chan [0], Data: 9, 0
+    chan [0], Data: reg 9, val 0
  DEBUG: op 0xb9, operand ['0x0', '0x0'], offset 0x193, current chan 0
 set channel: [0]
-     NO STORE
+     B9 NO STORE
  DEBUG: op 0xb9, operand ['0x5', '0xff'], offset 0x196, current chan 0
-    chan [0], Data: 5, 255
+    chan [0], Data: reg 5, val 255
  DEBUG: op 0xb9, operand ['0x0', '0x1'], offset 0x199, current chan 0
 set channel: [1]
-     NO STORE
+     B9 NO STORE
  DEBUG: op 0xb9, operand ['0x5', '0xff'], offset 0x19c, current chan 1
-    chan [1], Data: 5, 255
+    chan [1], Data: reg 5, val 255
  DEBUG: op 0xb9, operand ['0x0', '0x2'], offset 0x19f, current chan 1
 set channel: [2]
-     NO STORE
+     B9 NO STORE
  DEBUG: op 0xb9, operand ['0x5', '0xff'], offset 0x1a2, current chan 2
-    chan [2], Data: 5, 255
+    chan [2], Data: reg 5, val 255
  DEBUG: op 0xb9, operand ['0x0', '0x3'], offset 0x1a5, current chan 2
 set channel: [3]
-     NO STORE
+     B9 NO STORE
  DEBUG: op 0xb9, operand ['0x5', '0xff'], offset 0x1a8, current chan 3
-    chan [3], Data: 5, 255
+    chan [3], Data: reg 5, val 255
  DEBUG: op 0xb9, operand ['0x0', '0x4'], offset 0x1ab, current chan 3
 set channel: [4]
-     NO STORE
+     B9 NO STORE
  DEBUG: op 0xb9, operand ['0x5', '0xff'], offset 0x1ae, current chan 4
-    chan [4], Data: 5, 255
+    chan [4], Data: reg 5, val 255
  DEBUG: op 0xb9, operand ['0x0', '0x5'], offset 0x1b1, current chan 4
 set channel: [5]
-     NO STORE
+     B9 NO STORE
  DEBUG: op 0xb9, operand ['0x5', '0xff'], offset 0x1b4, current chan 5
-    chan [5], Data: 5, 255
+    chan [5], Data: reg 5, val 255
  DEBUG: op 0xb9, operand ['0x0', '0x0'], offset 0x1b7, current chan 5
 set channel: [0]
-     NO STORE
+     B9 NO STORE
  DEBUG: op 0xb9, operand ['0x7', '0x80'], offset 0x1ba, current chan 0
-    chan [0], Data: 7, 128
+    chan [0], Data: reg 7, val 128
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x1bd, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x1c0, current chan 0
-    chan [0], Data: 4, 159
+    chan [0], Data: reg 4, val 159
  DEBUG: op 0xb9, operand ['0x4', '0x81'], offset 0x1c3, current chan 0
-    chan [0], Data: 4, 129
+    chan [0], Data: reg 4, val 129
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x1c6, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x4', '0x5f'], offset 0x1c9, current chan 0
-    chan [0], Data: 4, 95
+    chan [0], Data: reg 4, val 95
  DEBUG: op 0xb9, operand ['0x4', '0x1f'], offset 0x1cc, current chan 0
-    chan [0], Data: 4, 31
+    chan [0], Data: reg 4, val 31
  DEBUG: op 0xb9, operand ['0x6', '0x1f'], offset 0x1cf, current chan 0
-    chan [0], Data: 6, 31
+    chan [0], Data: reg 6, val 31
  DEBUG: op 0xb9, operand ['0x6', '0x1f'], offset 0x1d2, current chan 0
-    chan [0], Data: 6, 31
+    chan [0], Data: reg 6, val 31
  DEBUG: op 0xb9, operand ['0x6', '0x1f'], offset 0x1d5, current chan 0
-    chan [0], Data: 6, 31
+    chan [0], Data: reg 6, val 31
  DEBUG: op 0xb9, operand ['0x6', '0x1f'], offset 0x1d8, current chan 0
-    chan [0], Data: 6, 31
+    chan [0], Data: reg 6, val 31
  DEBUG: op 0xb9, operand ['0x6', '0x1f'], offset 0x1db, current chan 0
-    chan [0], Data: 6, 31
+    chan [0], Data: reg 6, val 31
  DEBUG: op 0xb9, operand ['0x6', '0x1f'], offset 0x1de, current chan 0
-    chan [0], Data: 6, 31
+    chan [0], Data: reg 6, val 31
  DEBUG: op 0xb9, operand ['0x6', '0x1f'], offset 0x1e1, current chan 0
-    chan [0], Data: 6, 31
+    chan [0], Data: reg 6, val 31
  DEBUG: op 0xb9, operand ['0x6', '0x1f'], offset 0x1e4, current chan 0
-    chan [0], Data: 6, 31
+    chan [0], Data: reg 6, val 31
  DEBUG: op 0xb9, operand ['0x6', '0x1f'], offset 0x1e7, current chan 0
-    chan [0], Data: 6, 31
+    chan [0], Data: reg 6, val 31
  DEBUG: op 0xb9, operand ['0x6', '0x1f'], offset 0x1ea, current chan 0
-    chan [0], Data: 6, 31
+    chan [0], Data: reg 6, val 31
  DEBUG: op 0xb9, operand ['0x6', '0x1f'], offset 0x1ed, current chan 0
-    chan [0], Data: 6, 31
+    chan [0], Data: reg 6, val 31
  DEBUG: op 0xb9, operand ['0x6', '0x1f'], offset 0x1f0, current chan 0
-    chan [0], Data: 6, 31
+    chan [0], Data: reg 6, val 31
  DEBUG: op 0xb9, operand ['0x6', '0x1f'], offset 0x1f3, current chan 0
-    chan [0], Data: 6, 31
+    chan [0], Data: reg 6, val 31
  DEBUG: op 0xb9, operand ['0x6', '0x1f'], offset 0x1f6, current chan 0
-    chan [0], Data: 6, 31
+    chan [0], Data: reg 6, val 31
  DEBUG: op 0xb9, operand ['0x6', '0x1f'], offset 0x1f9, current chan 0
-    chan [0], Data: 6, 31
+    chan [0], Data: reg 6, val 31
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1fc, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1ff, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x202, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x205, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x208, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x20b, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x20e, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x211, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x214, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x217, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x21a, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x21d, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x220, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x223, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x226, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x229, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x22c, current chan 0
-    chan [0], Data: 6, 0
+    chan [0], Data: reg 6, val 0
  DEBUG: op 0xb9, operand ['0x4', '0x81'], offset 0x22f, current chan 0
-    chan [0], Data: 4, 129
+    chan [0], Data: reg 4, val 129
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x232, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x235, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x236, current chan 0
 
 
@@ -200,13 +200,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x86'], offset 0x239, current chan 0
-    chan [0], Data: 4, 134
+    chan [0], Data: reg 4, val 134
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x23c, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x23f, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x242, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x243, current chan 0
 
 
@@ -215,13 +215,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x8b'], offset 0x246, current chan 0
-    chan [0], Data: 4, 139
+    chan [0], Data: reg 4, val 139
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x249, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x24c, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x24f, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x250, current chan 0
 
 
@@ -230,13 +230,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x93'], offset 0x253, current chan 0
-    chan [0], Data: 4, 147
+    chan [0], Data: reg 4, val 147
  DEBUG: op 0xb9, operand ['0x7', '0x8f'], offset 0x256, current chan 0
-    chan [0], Data: 7, 143
+    chan [0], Data: reg 7, val 143
  DEBUG: op 0xb9, operand ['0x2', '0xf4'], offset 0x259, current chan 0
-    chan [0], Data: 2, 244
+    chan [0], Data: reg 2, val 244
  DEBUG: op 0xb9, operand ['0x3', '0x5'], offset 0x25c, current chan 0
-    chan [0], Data: 3, 5
+    chan [0], Data: reg 3, val 5
  DEBUG: op 0x62, operand [], offset 0x25d, current chan 0
 
 
@@ -245,13 +245,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x95'], offset 0x260, current chan 0
-    chan [0], Data: 4, 149
+    chan [0], Data: reg 4, val 149
  DEBUG: op 0xb9, operand ['0x7', '0x92'], offset 0x263, current chan 0
-    chan [0], Data: 7, 146
+    chan [0], Data: reg 7, val 146
  DEBUG: op 0xb9, operand ['0x2', '0x9e'], offset 0x266, current chan 0
-    chan [0], Data: 2, 158
+    chan [0], Data: reg 2, val 158
  DEBUG: op 0xb9, operand ['0x3', '0x5'], offset 0x269, current chan 0
-    chan [0], Data: 3, 5
+    chan [0], Data: reg 3, val 5
  DEBUG: op 0x62, operand [], offset 0x26a, current chan 0
 
 
@@ -260,13 +260,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x98'], offset 0x26d, current chan 0
-    chan [0], Data: 4, 152
+    chan [0], Data: reg 4, val 152
  DEBUG: op 0xb9, operand ['0x7', '0x92'], offset 0x270, current chan 0
-    chan [0], Data: 7, 146
+    chan [0], Data: reg 7, val 146
  DEBUG: op 0xb9, operand ['0x2', '0x9e'], offset 0x273, current chan 0
-    chan [0], Data: 2, 158
+    chan [0], Data: reg 2, val 158
  DEBUG: op 0xb9, operand ['0x3', '0x5'], offset 0x276, current chan 0
-    chan [0], Data: 3, 5
+    chan [0], Data: reg 3, val 5
  DEBUG: op 0x62, operand [], offset 0x277, current chan 0
 
 
@@ -275,13 +275,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x9a'], offset 0x27a, current chan 0
-    chan [0], Data: 4, 154
+    chan [0], Data: reg 4, val 154
  DEBUG: op 0xb9, operand ['0x7', '0x92'], offset 0x27d, current chan 0
-    chan [0], Data: 7, 146
+    chan [0], Data: reg 7, val 146
  DEBUG: op 0xb9, operand ['0x2', '0x9e'], offset 0x280, current chan 0
-    chan [0], Data: 2, 158
+    chan [0], Data: reg 2, val 158
  DEBUG: op 0xb9, operand ['0x3', '0x5'], offset 0x283, current chan 0
-    chan [0], Data: 3, 5
+    chan [0], Data: reg 3, val 5
  DEBUG: op 0x62, operand [], offset 0x284, current chan 0
 
 
@@ -290,13 +290,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x9b'], offset 0x287, current chan 0
-    chan [0], Data: 4, 155
+    chan [0], Data: reg 4, val 155
  DEBUG: op 0xb9, operand ['0x7', '0x92'], offset 0x28a, current chan 0
-    chan [0], Data: 7, 146
+    chan [0], Data: reg 7, val 146
  DEBUG: op 0xb9, operand ['0x2', '0x9e'], offset 0x28d, current chan 0
-    chan [0], Data: 2, 158
+    chan [0], Data: reg 2, val 158
  DEBUG: op 0xb9, operand ['0x3', '0x5'], offset 0x290, current chan 0
-    chan [0], Data: 3, 5
+    chan [0], Data: reg 3, val 5
  DEBUG: op 0x62, operand [], offset 0x291, current chan 0
 
 
@@ -305,13 +305,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x9d'], offset 0x294, current chan 0
-    chan [0], Data: 4, 157
+    chan [0], Data: reg 4, val 157
  DEBUG: op 0xb9, operand ['0x7', '0x92'], offset 0x297, current chan 0
-    chan [0], Data: 7, 146
+    chan [0], Data: reg 7, val 146
  DEBUG: op 0xb9, operand ['0x2', '0x9e'], offset 0x29a, current chan 0
-    chan [0], Data: 2, 158
+    chan [0], Data: reg 2, val 158
  DEBUG: op 0xb9, operand ['0x3', '0x5'], offset 0x29d, current chan 0
-    chan [0], Data: 3, 5
+    chan [0], Data: reg 3, val 5
  DEBUG: op 0x62, operand [], offset 0x29e, current chan 0
 
 
@@ -320,13 +320,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x9d'], offset 0x2a1, current chan 0
-    chan [0], Data: 4, 157
+    chan [0], Data: reg 4, val 157
  DEBUG: op 0xb9, operand ['0x7', '0x92'], offset 0x2a4, current chan 0
-    chan [0], Data: 7, 146
+    chan [0], Data: reg 7, val 146
  DEBUG: op 0xb9, operand ['0x2', '0x9e'], offset 0x2a7, current chan 0
-    chan [0], Data: 2, 158
+    chan [0], Data: reg 2, val 158
  DEBUG: op 0xb9, operand ['0x3', '0x5'], offset 0x2aa, current chan 0
-    chan [0], Data: 3, 5
+    chan [0], Data: reg 3, val 5
  DEBUG: op 0x62, operand [], offset 0x2ab, current chan 0
 
 
@@ -335,13 +335,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x9d'], offset 0x2ae, current chan 0
-    chan [0], Data: 4, 157
+    chan [0], Data: reg 4, val 157
  DEBUG: op 0xb9, operand ['0x7', '0x92'], offset 0x2b1, current chan 0
-    chan [0], Data: 7, 146
+    chan [0], Data: reg 7, val 146
  DEBUG: op 0xb9, operand ['0x2', '0x9e'], offset 0x2b4, current chan 0
-    chan [0], Data: 2, 158
+    chan [0], Data: reg 2, val 158
  DEBUG: op 0xb9, operand ['0x3', '0x5'], offset 0x2b7, current chan 0
-    chan [0], Data: 3, 5
+    chan [0], Data: reg 3, val 5
  DEBUG: op 0x62, operand [], offset 0x2b8, current chan 0
 
 
@@ -350,13 +350,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x9b'], offset 0x2bb, current chan 0
-    chan [0], Data: 4, 155
+    chan [0], Data: reg 4, val 155
  DEBUG: op 0xb9, operand ['0x7', '0x8f'], offset 0x2be, current chan 0
-    chan [0], Data: 7, 143
+    chan [0], Data: reg 7, val 143
  DEBUG: op 0xb9, operand ['0x2', '0xf4'], offset 0x2c1, current chan 0
-    chan [0], Data: 2, 244
+    chan [0], Data: reg 2, val 244
  DEBUG: op 0xb9, operand ['0x3', '0x5'], offset 0x2c4, current chan 0
-    chan [0], Data: 3, 5
+    chan [0], Data: reg 3, val 5
  DEBUG: op 0x62, operand [], offset 0x2c5, current chan 0
 
 
@@ -365,13 +365,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x98'], offset 0x2c8, current chan 0
-    chan [0], Data: 4, 152
+    chan [0], Data: reg 4, val 152
  DEBUG: op 0xb9, operand ['0x7', '0x8f'], offset 0x2cb, current chan 0
-    chan [0], Data: 7, 143
+    chan [0], Data: reg 7, val 143
  DEBUG: op 0xb9, operand ['0x2', '0xf4'], offset 0x2ce, current chan 0
-    chan [0], Data: 2, 244
+    chan [0], Data: reg 2, val 244
  DEBUG: op 0xb9, operand ['0x3', '0x5'], offset 0x2d1, current chan 0
-    chan [0], Data: 3, 5
+    chan [0], Data: reg 3, val 5
  DEBUG: op 0x62, operand [], offset 0x2d2, current chan 0
 
 
@@ -380,13 +380,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x94'], offset 0x2d5, current chan 0
-    chan [0], Data: 4, 148
+    chan [0], Data: reg 4, val 148
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x2d8, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x2db, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x2de, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x2df, current chan 0
 
 
@@ -395,13 +395,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x87'], offset 0x2e2, current chan 0
-    chan [0], Data: 4, 135
+    chan [0], Data: reg 4, val 135
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x2e5, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x2e8, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x2eb, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x2ec, current chan 0
 
 
@@ -410,13 +410,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x84'], offset 0x2ef, current chan 0
-    chan [0], Data: 4, 132
+    chan [0], Data: reg 4, val 132
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x2f2, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x2f5, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x2f8, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x2f9, current chan 0
 
 
@@ -425,13 +425,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x82'], offset 0x2fc, current chan 0
-    chan [0], Data: 4, 130
+    chan [0], Data: reg 4, val 130
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x2ff, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x302, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x305, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x306, current chan 0
 
 
@@ -440,13 +440,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x80'], offset 0x309, current chan 0
-    chan [0], Data: 4, 128
+    chan [0], Data: reg 4, val 128
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x30c, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x30f, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x312, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x313, current chan 0
 
 
@@ -455,13 +455,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x80'], offset 0x316, current chan 0
-    chan [0], Data: 4, 128
+    chan [0], Data: reg 4, val 128
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x319, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x31c, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x31f, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x320, current chan 0
 
 
@@ -470,13 +470,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x80'], offset 0x323, current chan 0
-    chan [0], Data: 4, 128
+    chan [0], Data: reg 4, val 128
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x326, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x329, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x32c, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x32d, current chan 0
 
 
@@ -485,13 +485,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x80'], offset 0x330, current chan 0
-    chan [0], Data: 4, 128
+    chan [0], Data: reg 4, val 128
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x333, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x336, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x339, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x33a, current chan 0
 
 
@@ -500,13 +500,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x80'], offset 0x33d, current chan 0
-    chan [0], Data: 4, 128
+    chan [0], Data: reg 4, val 128
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x340, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x343, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x346, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x347, current chan 0
 
 
@@ -515,13 +515,13 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x4', '0x80'], offset 0x34a, current chan 0
-    chan [0], Data: 4, 128
+    chan [0], Data: reg 4, val 128
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x34d, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x350, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x353, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x354, current chan 0
 
 
@@ -530,11 +530,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x357, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x35a, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x35d, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x35e, current chan 0
 
 
@@ -543,11 +543,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x361, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x364, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x367, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x368, current chan 0
 
 
@@ -556,11 +556,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x36b, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x36e, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x371, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x372, current chan 0
 
 
@@ -569,11 +569,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x375, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x378, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x37b, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x37c, current chan 0
 
 
@@ -582,11 +582,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x37f, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x382, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x385, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x386, current chan 0
 
 
@@ -595,11 +595,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x389, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x38c, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x38f, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x390, current chan 0
 
 
@@ -608,11 +608,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x393, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x396, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x399, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x39a, current chan 0
 
 
@@ -621,11 +621,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x39d, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x3a0, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x3a3, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x3a4, current chan 0
 
 
@@ -634,11 +634,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x3a7, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x3aa, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x3ad, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x3ae, current chan 0
 
 
@@ -647,11 +647,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x3b1, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x3b4, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x3b7, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x3b8, current chan 0
 
 
@@ -660,11 +660,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x3bb, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x3be, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x3c1, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x3c2, current chan 0
 
 
@@ -673,11 +673,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x3c5, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x3c8, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x3cb, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x3cc, current chan 0
 
 
@@ -686,11 +686,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x3cf, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x3d2, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x3d5, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x3d6, current chan 0
 
 
@@ -699,11 +699,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x3d9, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x3dc, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x3df, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x3e0, current chan 0
 
 
@@ -712,11 +712,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x3e3, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x3e6, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x3e9, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x3ea, current chan 0
 
 
@@ -725,11 +725,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x3ed, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x3f0, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x3f3, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x3f4, current chan 0
 
 
@@ -738,11 +738,11 @@ set channel: [0]
 
 ###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  DEBUG: op 0xb9, operand ['0x7', '0x8d'], offset 0x3f7, current chan 0
-    chan [0], Data: 7, 141
+    chan [0], Data: reg 7, val 141
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x3fa, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x3fd, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0x62, operand [], offset 0x3fe, current chan 0
 
 
@@ -754,13 +754,13 @@ set channel: [0]
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& found op 0x94 at offset 0x400, [0], chan 0
 PCM PCM PCM    chan [0], Data: 148, 0
  DEBUG: op 0xb9, operand ['0x7', '0x0'], offset 0x403, current chan 0
-    chan [0], Data: 7, 0
+    chan [0], Data: reg 7, val 0
  DEBUG: op 0xb9, operand ['0x2', '0x4e'], offset 0x406, current chan 0
-    chan [0], Data: 2, 78
+    chan [0], Data: reg 2, val 78
  DEBUG: op 0xb9, operand ['0x3', '0x6'], offset 0x409, current chan 0
-    chan [0], Data: 3, 6
+    chan [0], Data: reg 3, val 6
  DEBUG: op 0xb9, operand ['0x4', '0x0'], offset 0x40c, current chan 0
-    chan [0], Data: 4, 0
+    chan [0], Data: reg 4, val 0
  DEBUG: op 0x62, operand [], offset 0x40d, current chan 0
 
 
@@ -1055,12 +1055,213 @@ PCM PCM PCM    chan [0], Data: 148, 0
 
 
 
+reg    [4], channel [0]
+reg    [1], channel [0]
+reg    [8], channel [0]
+reg    [9], channel [0]
+reg    [5], channel [0]
+reg    [7], channel [0]
+reg    [7], channel [0]
+reg    [4], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [4], channel [0]
+reg    [4], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [4], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [148], channel [0]
+reg    [7], channel [0]
+reg    [2], channel [0]
+reg    [3], channel [0]
+reg    [4], channel [0]
+reg    [4], channel [1]
+reg    [5], channel [1]
+reg    [4], channel [2]
+reg    [5], channel [2]
+reg    [4], channel [3]
+reg    [5], channel [3]
+reg    [4], channel [4]
+reg    [5], channel [4]
+reg    [4], channel [5]
+reg    [5], channel [5]
 ############################################### waveform prep
 
  
 [31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 {3840, 4096, 4352, 4608, 4864, 5120, 5376, 5632, 5888, 6144, 3615, 287, 1311, 2335, 3359, 543, 31, 1567, 2079, 2591, 3103, 799, 1055, 6400, 6656, 1823, 6912, 7168, 7424, 7680, 2847, 7936}
-waveform list len 1
+waveform list len 3
 ############################################### waveform list
 
  
@@ -1088,8 +1289,8 @@ waveform list len 1
        reg convert: reg 0x5f , data [95]
 @@@@@@@@@ reg convert: reg 0x4 , data [31], frame 0, chan 0
        reg convert: reg 0x1f , data [31]
-@@@@@@@@@ reg convert: reg 0x10 , data [0], frame 0, chan 0
-       reg convert: reg 0xb0 , data 0
+@@@@@@@@@ reg convert: reg 0x10 , data [2], frame 0, chan 0
+       reg convert: reg 0xb0 , data 2
 @@@@@@@@@ reg convert: reg 0x4 , data [129], frame 0, chan 0
        reg convert: reg 0x81 , data [129]
 @@@@@@@@@ reg convert: reg 0x2 , data [78, 6], frame 0, chan 0
@@ -1762,7 +1963,7 @@ waveform list len 1
 @@@@@@@@@ reg convert: ** empty ** , frame 78, chan 5
 @@@@@@@@@ reg convert: ** empty ** , frame 79, chan 5
 @@@@@@@@@ reg convert: ** empty ** , frame 80, chan 5
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% bin len 223 , 255
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% bin len 223 , 319
 289
 Channel: 0
 
@@ -1780,7 +1981,7 @@ Channel: 0
             Reg: 7, data: ['0x8d']
             Reg: 4, data: ['0x5f']
             Reg: 4, data: ['0x1f']
-            Reg: 16, data: ['0x0']
+            Reg: 16, data: ['0x2']
             Reg: 4, data: ['0x81']
             Reg: 2, data: ['0x4e', '0x6']
     Frame: 1
@@ -2837,10 +3038,4 @@ Channel: 5
         ... empty
     Frame: 80
         ... empty
- saving 0: [0, 161, 255, 168, 255, 169, 0, 165, 255, 167, 128, 167, 141, 159, 129, 167, 141, 95, 31, 176, 0, 129, 198, 78, 65535, 134, 167, 141, 198, 78, 65535, 139, 167, 141, 198, 78, 65535, 147, 167, 143, 197, 244, 65535, 149, 167, 146, 197, 158, 65535, 152, 167, 146, 197, 158, 65535, 154, 167, 146, 197, 158, 65535, 155, 167, 146, 197, 158, 65535, 157, 167, 146, 197, 158, 65535, 157, 167, 146, 197, 158, 65535, 157, 167, 146, 197, 158, 65535, 155, 167, 143, 197, 244, 65535, 152, 167, 143, 197, 244, 65535, 148, 167, 141, 198, 78, 65535, 135, 167, 141, 198, 78, 65535, 132, 167, 141, 198, 78, 65535, 130, 167, 141, 198, 78, 65535, 128, 167, 141, 198, 78, 65535, 128, 167, 141, 198, 78, 65535, 128, 167, 141, 198, 78, 65535, 128, 167, 141, 198, 78, 65535, 128, 167, 141, 198, 78, 65535, 128, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 167, 141, 198, 78, 65535, 253, 167, 0, 198, 78, 0, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535]
- saving 1: [0, 165, 255, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535]
- saving 2: [0, 165, 255, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535]
- saving 3: [0, 165, 255, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535]
- saving 4: [0, 165, 255, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535]
- saving 5: [0, 165, 255, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535]
 Done

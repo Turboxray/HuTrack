@@ -32,6 +32,20 @@
                    |
                    |-> (0xA0 to 0xAF) & 0x0f + $800 to create "resolved register number"
 
+0xAA 
+-===========-
+                (dummy) destination    one byte operand
+                   |                         |
+                   |                         |->  Pattern Index #
+                   |
+
+0xAB
+-===========-
+                (dummy) destination    one byte operand
+                   |                         |
+                   |                         |->  Pattern #
+                   |
+
 0xB0
 -===-
                 waveform update         one byte operand.   NOTE: This is a pseudo instruction, not a register write.

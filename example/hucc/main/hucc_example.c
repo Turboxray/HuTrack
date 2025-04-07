@@ -24,6 +24,7 @@
 #incasmlabel(SFX_1, "../assets/sfx/smb3/smb3_sfx.chan5.inc", 2);
 #incasmlabel(SFX_2, "../assets/sfx/swiss/swiss.chan0.inc", 2);
 #incasmlabel(SFX_3, "../assets/sfx/test1/test1.chan2.inc", 2);
+#incasmlabel(SFX_4, "../assets/sfx/l1/light_1.chan0.inc", 2);
 
 // HuSFX waveforms
 #incasmlabel(sfx_waveforms, "../assets/sfx/main.wf.inc", 2);
@@ -271,6 +272,9 @@ void initSFXcollections()
     sFXcollection.sfxBase[sfx_num] = getAddress(SFX_3);
     sfx_num++;
 
+    sFXcollection.sfxBank[sfx_num] = getBank(SFX_4);
+    sFXcollection.sfxBase[sfx_num] = getAddress(SFX_4);
+    sfx_num++;
 
     sFXcollection.len = sfx_num;
 

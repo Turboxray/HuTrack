@@ -1,7 +1,0 @@
- .include "test1.dataTable.inc"
- .include "test1.chan0.inc"
- .include "test1.chan1.inc"
- .include "test1.chan2.inc"
- .include "test1.chan3.inc"
- .include "test1.chan4.inc"
- .include "test1.chan5.inc"

@@ -10,11 +10,23 @@
 // ;
 // ;
 
+#asm
+HuSFX_RETURN .macro
+
+  .ifdef HUCC
+      sax
+      sxy
+  .endif
+
+  .endm
+
+#endasm
+
 //..........................................................................
 //..........................................................................
 //..........................................................................
 //..........................................................................
-void __fastcall __macro HuSFXstop_intf( char channel<__al> );
+int __fastcall __macro HuSFXstop_intf( char channel<__al> );
 #asm
 _HuSFXstop_intf.1   .macro
 
@@ -38,18 +50,17 @@ _HuSFXstop_intf.1   .macro
         stx $800
         stz $807
             plp
-
-        lda #$01
-        tax
-        clc
+                        ; HU_SFX_OK
+        ldx #$01
       bra .return\@
-    
+
 .error\@
+                        ; HU_SFX_ERROR
         clx
-        cla
-        sec
 
 .return\@
+        cla
+        HuSFX_RETURN
 .endm
 
 #endasm   
@@ -58,16 +69,31 @@ _HuSFXstop_intf.1   .macro
 //..........................................................................
 //..........................................................................
 //..........................................................................
-void __fastcall __macro HuSFX_Init_intf(void);
+void __fastcall __macro HuSFX_Init_intf( unsigned char bank1<__fbank>, unsigned int addr1<__fptr> );
 #asm
-_HuSFX_Init_intf    .macro
+_HuSFX_Init_intf.2    .macro
         clx
         lda #$ff
-.loop
+.loop\@
         sta HuSFX.stream.bnk,x
         inx
         cpx #$06
-      bne .loop
+      bne .loop\@
+
+        lda __fbank
+        sta HuSFX.wf.bnk
+
+        lda __fptr
+        sta HuSFX.wf.lo
+        lda __fptr + 1
+        and #$1f
+        ora #$40
+        sta HuSFX.wf.hi
+
+        lda #$1f
+        sta HuSFX.vol.chan
+        lda #$ff
+        sta HuSFX.vol.pan
 .endm
 
 #endasm   
@@ -77,9 +103,9 @@ _HuSFX_Init_intf    .macro
 //..........................................................................
 //..........................................................................
 // HuSFXplay
-int __fastcall __macro HuSFXplay_intf( char channel<__al>, unsigned char bank1<__fbank>, unsigned int addr1<__fptr>, unsigned char bank2<__cl>, unsigned int addr2<__bx>);
+int __fastcall __macro HuSFXplay_intf( char channel<__al>, unsigned char bank1<__fbank>, unsigned int addr1<__fptr> );
 #asm
-_HuSFXplay_intf.5 .macro
+_HuSFXplay_intf.3 .macro
         ldx <__al
         cpx #$06
       bcs .error\@
@@ -90,12 +116,6 @@ _HuSFXplay_intf.5 .macro
         sta HuSFX.stream.lo,x
         lda <__fptr + 1
         sta HuSFX.stream.hi,x
-        lda <__cl
-        sta HuSFX.wf.bnk,x
-        lda <__bx
-        sta HuSFX.wf.lo,x
-        lda <__bx + 1
-        sta HuSFX.wf.hi,x
 
             php
         sei
@@ -110,18 +130,77 @@ _HuSFXplay_intf.5 .macro
         stx $800
         stz $808
             plp
-
-        lda #$01
-        tax
-        clc
+                        ; HU_SFX_OK
+        ldx #$01
       bra .return\@
 
 .error\@
+                        ; HU_SFX_ERROR
         clx
-        cla
-        sec
 
 .return\@
+        cla
+        HuSFX_RETURN
+.endm
+
+#endasm
+
+//..........................................................................
+//..........................................................................
+//..........................................................................
+//..........................................................................
+// HuSFXchanVol
+int __fastcall __macro HuSFXchanVol_intf( char channel<__al>, unsigned char vol<__bl> );
+#asm
+_HuSFXchanVol_intf.2 .macro
+        ldx <__al
+        cpx #$06
+      bcs .error\@
+
+        lda <__bl
+        sta HuSFX.vol.chan,x
+
+                        ; HU_SFX_OK
+        ldx #$01
+      bra .return\@
+
+.error\@
+                        ; HU_SFX_ERROR
+        clx
+
+.return\@
+        cla
+        HuSFX_RETURN
+.endm
+
+#endasm
+
+//..........................................................................
+//..........................................................................
+//..........................................................................
+//..........................................................................
+// HuSFXchanVol
+int __fastcall __macro HuSFXchanPan_intf( char channel<__al>, unsigned char pan<__bl> );
+#asm
+_HuSFXchanPan_intf.2 .macro
+        ldx <__al
+        cpx #$06
+      bcs .error\@
+
+        lda <__bl
+        sta HuSFX.vol.pan,x
+
+                        ; HU_SFX_OK
+        ldx #$01
+      bra .return\@
+
+.error\@
+                        ; HU_SFX_ERROR
+        clx
+
+.return\@
+        cla
+        HuSFX_RETURN
 .endm
 
 #endasm
@@ -131,7 +210,7 @@ _HuSFXplay_intf.5 .macro
 //..........................................................................
 //..........................................................................
 // HuSFXprocess
-int __fastcall __macro HuSFXprocess_intf();
+void __fastcall __macro HuSFXprocess_intf();
 #asm
 _HuSFXprocess_intf  .macro
 
@@ -286,9 +365,9 @@ _HuSFXprocess_intf  .macro
           sty HuSFX.DMA + 2
 
         clc
-        adc HuSFX.wf.lo,x
+        adc HuSFX.wf.lo
         sta HuSFX.DMA + 1
-        lda HuSFX.wf.hi,x
+        lda HuSFX.wf.hi
         and #$1f
         ora #$40
         adc HuSFX.DMA + 2
@@ -304,7 +383,7 @@ _HuSFXprocess_intf  .macro
         lda #high(32)
         sta HuSFX.DMA + 6
 
-        lda HuSFX.wf.bnk,x
+        lda HuSFX.wf.bnk
 
         tam #$02
         inc a
@@ -468,9 +547,9 @@ _HuSFXprocess_intf  .macro
 //..........................................................................
 //..........................................................................
 // HuSFXstatus
-int __fastcall __macro HuSFXstatus_intf( char channel<__al> );
+int __fastcall __macro HuSFXstate_intf( char channel<__al> );
 #asm
-_HuSFXstatus_intf.1 .macro
+_HuSFXstate_intf.1 .macro
 
         ldx <__al
         cpx #$06
@@ -478,18 +557,23 @@ _HuSFXstatus_intf.1 .macro
 
         lda HuSFX.stream.bnk,x
         cmp #$ff
-      bra .noplay\@
-        tax
-        clc
+      beq .noplay\@
+                        ; HU_SFX_PLAYING
+        ldx #1
       bra .return\@
 
 .noplay\@
+                        ; HU_SFX_STOPPED
+        ldx #$02
+      bra .return\@  
+
 .error\@
+                        ; HU_SFX_ERROR
         clx
-        cla
-        sec
 
 .return\@
+        cla
+        HuSFX_RETURN
 .endm
 
 #endasm

@@ -16,9 +16,90 @@ INT_MIN = (INT_MAX) / -2 - 1
 
 runOptions = {}
 components = {}
-filterValues    = ['kaiser_best','kaiser_fast','sinc_window_32','sinc_window_Hann']
+filterValues    = ['kaiser_best','kaiser_fast']
 bitdepthValues  = ['5bit']
 playerateValues = ['6960','6991','7020','9279','10440','11090','12180','13920','14040','no resample']
+
+class CmdInterface():
+    
+    def __init__(self,args):
+        self.args = args
+
+    def process(self):
+
+        args = self.args
+        
+        if not args.filein:
+            print("Error: file required for CLI mode")
+            sys.exit(1)
+
+        result, convertInfo, pcmHeader, pcmData = WavRead(args.filein).readFile()
+
+        if not result:
+            print(f'Error: {convertInfo}')
+            sys.exit(1)
+        
+        print(f'Wav/RIFF Info: {convertInfo}')
+        filename = pathlib.Path(args.filein).stem
+
+        saveDir = args.destinationPath
+        playbackRate = args.playback
+        pcmHeader['resampleFilter'] = args.resampleFilter
+        pcmHeader['playbackRate']   = int( (playbackRate,pcmHeader['SamplesPerSec'])[playbackRate == "no_resample"] )
+        print(f"New sample rate: {pcmHeader['playbackRate']}")
+
+        message, newSampleData, eightBitData = ConvertWave().convertPCMData(pcmHeader,pcmData)
+
+        newSampleData = newSampleData + [0x80]
+
+        tk.messagebox.showinfo(title=None, message='HuPCM file saved.')
+
+        filename = (args.overridename.strip(),filename)[args.overridename == ""]
+        includePath = args.includePath
+
+        with open(f'{os.path.join(saveDir,filename)}.inc','w') as f:
+
+            # TODO needs to be a GUI option
+            f.write(f'\n')
+            f.write(f'  .db bank(.sample)\n')
+            f.write(f'  .dw .sample\n\n')
+            f.write(f'.sample\n\n')
+            f.write (f'  .page {2}\n\n')
+            f.write(f'  .include \"{os.path.join(includePath,filename)}.data.inc\"\n\n')
+
+        with open(f'{os.path.join(saveDir,filename)}.data.inc','w') as f:
+            columnBytes = 0
+            sampleCount = 0
+            for idx, val in enumerate(newSampleData):
+                valString = hex(val)[2:]
+                valString = '$'+('','0')[len(valString) == 1] + valString
+                if columnBytes == 0:
+                    f.write("  .db ")
+                f.write(f'{valString}')
+                columnBytes += 1
+                if columnBytes > 15:
+                    f.write("\n")
+                    columnBytes = 0
+                    if sampleCount >= 16384:
+                        f.write(f'\n\n  .page {2}\n\n')
+                        sampleCount = 0
+                elif idx == len(newSampleData)-1:
+                    f.write("\n")
+                else:
+                    f.write(", ")
+                sampleCount += 1
+
+        if args.debug:
+            with open(f'{os.path.join(saveDir,filename)}.debug.8bit.bin','wb') as f:
+                f.write(bytearray(eightBitData))
+
+            with open(f'{os.path.join(saveDir,filename)}.debug.5it_as_8bit.bin','wb') as f:
+                [ ((sample) >> 3)<<3 for sample in eightBitData ]
+                f.write(bytearray([ ((sample) >> 3)<<3 for sample in eightBitData ]))
+
+            with open(f'{os.path.join(saveDir,filename)}.debug.5bit.bin','wb') as f:
+                f.write(bytearray(newSampleData))
+
 
 
 class ConvertWave():
@@ -426,6 +507,15 @@ parser = argparse.ArgumentParser(description='Convert WAV to PCE PCM.',
                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 runOptionsGroup = parser.add_argument_group('Run options', 'Run options for DMF converter')
+runOptionsGroup.add_argument('--filein',
+                                '-f',
+                                required=False,
+                                default="",
+                                help='File input for CLI mode.')
+runOptionsGroup.add_argument('--overridename',
+                                required=False,
+                                default="",
+                                help='Provides a new file name for the pcm export.')
 runOptionsGroup.add_argument('--destinationPath',
                                 '-destpth',
                                 required=False,
@@ -458,7 +548,7 @@ runOptionsGroup.add_argument('--alignPCM256',
                                 help='Forces all samples to take up a multiple of 256 bytes and block aligns to 256byte boundaries - remaining values will be 0.')
 runOptionsGroup.add_argument('--resampleFilter',
                                 '-refil',
-                                choices=['kaiser_best','kaiser_fast','sinc_window_32','sinc_window_Hann','default'],
+                                choices=['kaiser_best','kaiser_fast','no_resample'],
                                 default='kaiser_best',
                                 help='See https://resampy.readthedocs.io/ documentation for info on filters.')
 runOptionsGroup.add_argument('--bitDepth',
@@ -492,4 +582,4 @@ runOptions['debug']           = args.debug
 if not args.noGui:
     GuiFrontend(args).process()
 else:
-    print(f'Only GUI mode is operational')
+    CmdInterface(args).process()

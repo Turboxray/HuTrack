@@ -484,17 +484,19 @@ class HuTrackExportPCE():
                 hu_out.write(f'\n\n')
 
             # Pattern data
+            totalSongdataBinsize = 0
             for channel in range(HuTrackContainer.SYSTEM_TOTAL_CHANNELS):
                 hu_out.write(f';........................................................................\n')
                 hu_out.write(f';........................................................................\n')
                 hu_out.write(f'\n')
+                chanSongdataBinsize = 0
                 for pattern in set(self.huTrack.PatternMatrixCompressed[channel]):
                     hu_out.write(f';......................................\n')
                     hu_out.write(f'.pattern.table.chan{channel}.pattern{pattern}\n')
                     hu_out.write(f'\n')
                     for row in self.huTrack.patternData[channel][pattern].patternData:
-
                         byteNum = 0
+                        chanSongdataBinsize += len(row)
                         for byte in row:
                             if byteNum == 0:
                                 hu_out.write(f'  .db ${hex(byte).split("0x")[1]}')
@@ -503,7 +505,10 @@ class HuTrackExportPCE():
                             byteNum += 1
                         hu_out.write(f'\n')
                     hu_out.write(f'\n\n')
+                print(f'  - Chan {channel} song data in binary size: {chanSongdataBinsize}')
+                totalSongdataBinsize += chanSongdataBinsize
             hu_out.write(f'\n\n')
+            print(f'  - Total channel song data in binary size: {totalSongdataBinsize}')
 
 
     def writeWaveforms(self):

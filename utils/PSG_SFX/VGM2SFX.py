@@ -249,7 +249,7 @@ class ConvertVGM():
     def process(self, wf_block=[]):
 
         if wf_block != []:
-            self.wf_block = [set([num<<8|val for num,val in enumerate(wf_set)]) for wf_set in wf_block]
+            self.wf_block = [[val for val in wf_set] for wf_set in wf_block]
         self.debugPrint(f'Opening [{self.args.filein}] ....')
         content = None
         try:
@@ -424,7 +424,7 @@ class ConvertVGM():
                 self.reg_list['num_frames'] += 1
                 # Do not reset the channel on frame end!
                 self.debugPrint(f'###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-                print(f"frame end: {self.reg_list['num_frames'] }")
+                # print(f"frame end: {self.reg_list['num_frames'] }")
 
                 if op == 0x66:
                     break
@@ -465,7 +465,7 @@ class ConvertVGM():
         # Flatten waveform block
         waveform_block = []
         for idx, waveform in enumerate(waveforms):
-            waveform = sorted(list(waveform))
+            waveform = list(waveform)
             waveform_block = waveform_block + [val&0xff for val in waveform]
 
         if self.args.debugBin:
@@ -486,7 +486,7 @@ class ConvertVGM():
         wf_list_file = (self.args.waveformlist,f"{self.args.destfolder}/{self.args.sfxname}.wf.inc")[self.args.waveformlist=='']
         with open(wf_list_file, 'w') as f:
             for idx,waveform in enumerate(waveforms):
-                waveform = sorted(list(waveform))
+                waveform = list(waveform)
                 f.write(f'\n.wf.block{idx}\n')
                 waveform_labels.append(f'.wf.block{idx}')
                 output_str = self.asciiWaveform(waveform) + " "
@@ -511,6 +511,9 @@ class ConvertVGM():
         #
         # channel data
 
+        bin_pattern_channels = self.decodePatterns(bin_channels)
+
+        totalSongdataBinsize = 0
         data_labels = []
         for num, chan_block in bin_channels.items():
             print(f'chan mask: {self.args.chanproc }, {num}')
@@ -523,6 +526,8 @@ class ConvertVGM():
                     prep_block = [val&0xff for val in chan_block]
                     f.write(bytearray(prep_block))
                     f.write(bytearray([0xFB]))
+                print(f' - Chan {num} bin size: {len(chan_block)+1}.')
+                totalSongdataBinsize += len(chan_block)+1
 
             wait_frame = 0
             with open(f"{self.args.destfolder}/{self.args.sfxname}.chan{num}.inc",'w') as f:
@@ -620,7 +625,7 @@ class ConvertVGM():
                 output_str += self.commentDecode(0xfb, 0x00, len(build_str))
                 f.write(output_str)
 
-
+        print(f' - Total channel bin size: {totalSongdataBinsize} bytes.\n')
 
         #...........................................................................................................................
         #...........................................................................................................................
@@ -675,6 +680,117 @@ class ConvertVGM():
 
         self.debugPrint(f'Done')
         return True
+
+    def decodePatterns(self, bin_channels):
+
+        print("######################################################################################")
+        print("Processing compressed pattern sizes:")
+        channelPatterData = {}
+        for num, chan_block in bin_channels.items():
+            print(f'chan mask: {self.args.chanproc }, {num}')
+            if num not in self.args.chanproc:
+                print(f' - skipping')
+                continue
+
+            pattern_idx = -1
+            channelPatterData[num] = { }
+
+            if chan_block[0] != 0xaa:
+                print(f'\nVGM does not have Pattern index markers.\n')
+                self.debugPrint(f'\nVGM does not have Pattern index markers.\n')
+                return
+
+            skip_byte = 0
+            # print(f' chan {num} block: {[hex(val) for val in chan_block]} ')
+            for idx, val in enumerate(chan_block):
+
+                    # print(f"val = {hex(val)}. Index: {idx} | {hex(idx)}")
+
+                    if skip_byte > 0 :
+                        skip_byte -= 1
+                        continue
+
+                    if val == 0xffff:
+                        channelPatterData[num][pattern_idx].append(0xff)
+                        skip_byte = 0
+                        continue
+
+                    elif val >= 0x00 and val <= 0x1f:
+                        channelPatterData[num][pattern_idx].append(val)
+                        skip_byte = 0
+                    elif val >= 0x20 and val <= 0x3f:
+                        channelPatterData[num][pattern_idx].append(val)
+                        skip_byte = 0
+                    elif val >= 0x40 and val <= 0x5f:
+                        channelPatterData[num][pattern_idx].append(val)
+                        skip_byte = 0
+                    elif val >= 0x80 and val <= 0x9f:
+                        channelPatterData[num][pattern_idx].append(val)
+                        skip_byte = 0
+                    elif val >= 0xA0 and val <= 0xA9:
+                        channelPatterData[num][pattern_idx].append(val)
+                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
+                        skip_byte = 1
+                    elif val == 0xAA:
+                        skip_byte = 1
+                    elif val == 0xAB:
+                        pattern_idx += 1
+                        channelPatterData[num][pattern_idx] = []
+                        channelPatterData[num][pattern_idx].append(val)
+                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
+                        skip_byte = 1
+                    elif val >= 0xC0 and val <= 0xCf:
+                        channelPatterData[num][pattern_idx].append(val)
+                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
+                        skip_byte = 1
+                    elif val == 0xB0:
+                        channelPatterData[num][pattern_idx].append(val)
+                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
+                        skip_byte = 1
+                    elif val == 0xFC:
+                        channelPatterData[num][pattern_idx].append(val)
+                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
+                        skip_byte = 1
+                    elif val == 0xFD:
+                        channelPatterData[num][pattern_idx].append(val)
+                        skip_byte = 0
+                    elif val == 0xFE:
+                        channelPatterData[num][pattern_idx].append(val)
+                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
+                        skip_byte = 1
+                    else:
+                        error = (f'Error: cannot identify token command: chan {num}, offset {hex(idx)}, val {hex(val)}.')
+                        print(error)
+                        return False
+
+        # print(channelPatterData)
+        song_binary = []
+        for num, chan_block in bin_channels.items():
+            try:
+                pattern_blocks = channelPatterData[num]
+            except:
+                print(f'Skipping chan {num} blocks.')
+                continue
+            # print(channelPatterData[num][0])
+            pattern_list_order = []
+            pattern_list_tracking = []
+            pattern_block_data = {}
+            track_binary = []
+            for patt_num, pattern_data in pattern_blocks.items():
+                # print(f'data: {pattern_data}, {channelPatterData[num][patt_num]}')
+                # print(f' chan {num}: {hex(pattern_data[0])}, {hex(pattern_data[1])}')
+                pattern_list_order.append(pattern_data[1])
+                if pattern_data[1] not in pattern_list_tracking:
+                    pattern_list_tracking.append(pattern_data[1])
+                    pattern_block_data[patt_num] = pattern_data[:]
+                    track_binary = track_binary + pattern_data[:]
+            song_binary = song_binary + track_binary[:]
+            print(f' Chan {num}, plattern play list {pattern_list_order}')
+            print(f'  - binary size: {len(track_binary)}')
+
+        print(f' Song binary size: {len(song_binary)}')
+
+        pass
 
     def asciiWaveform(self, waveform):
 
@@ -810,7 +926,28 @@ class ConvertVGM():
 
         self.debugPrint(f"############################################### waveform prep\n\n ")
 
-        waveform_list = self.wf_block
+        waveform_list = self.wf_block[:]
+
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f' PRE PRE PRE wf_list:' )
+        for a_list in waveform_list:
+            self.debugPrint(a_list)
+
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f' PRE PRE PRE wf_list:' )
+
+        temp_list = []
+        # for num, waveform in enumerate(waveform_list):
+        #     temp = " ".join([hex(val&0xff)[2:] for val in waveform])
+        #     # print(f' Waveform {num}: [{temp}]')
         for chan,data_set in self.prep_reg_list.items():
             if chan == 'num_frames':
                 continue
@@ -823,12 +960,27 @@ class ConvertVGM():
                     reg = data_pair['reg']
                     data = data_pair['data']
                     if reg == 0x06 and len(data) == 32:
-                        self.debugPrint(f'{data}')
-                        waveform = set([idx<<8|val for idx,val in enumerate(data)])
-                        self.debugPrint(f'{waveform}')
+                        waveform = [val&0xff for val in data]
                         if not self.waveformCheck(waveform, waveform_list):
-                            waveform_list.append(waveform)
+                            temp_list.append(waveform[:])
+                            waveform_list.append(waveform[:])
 
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'temp_list: ' )
+        for a_list in temp_list:
+            self.debugPrint(a_list)
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'###########################################################################################################' )
+        self.debugPrint(f'wf_list:' )
+        for a_list in waveform_list:
+            self.debugPrint(a_list)
 
         self.debugPrint(f'waveform list len {len(waveform_list)}')
 
@@ -848,8 +1000,8 @@ class ConvertVGM():
                     reg = data_pair['reg']
                     data = data_pair['data']
                     if reg == 0x06 and len(data) == 32:
-                        waveform = set([idx<<8|val for idx,val in enumerate(data)])
-                        waveform_index = self.getWaveformIndex(waveform_list, waveform)
+                        waveform = [val&0xff for val in data]
+                        waveform_index = self.getWaveformIndex(waveform, waveform_list)
                         self.prep_reg_list[chan][frame][idx] = { 'reg' : 0x10, 'data' : [waveform_index] }
 
 
@@ -1023,31 +1175,44 @@ class ConvertVGM():
                     self.debugPrint(f'            Reg: {reg}, data: {[hex(val) for val in data]}')
 
 
-        return (waveform_list, bin_output)
+        return (waveform_list[:], bin_output)
 
-    def getWaveformIndex(self, waveform_list, waveform):
+    def getWaveformIndex(self, waveform, waveform_list):
         # try all 32 rotations
         for wf_idx, cmp_wf in enumerate(waveform_list):
             for i in range(32):
-                if cmp_wf == self.rotateWF(waveform, i):
+                if self.compare_wf(cmp_wf, self.rotateWF(waveform, i) ):
                     return wf_idx
 
         return False         
 
     def waveformCheck(self, waveform, waveform_list):
 
-        # try all 32 rotations
+        # try all 32 rotations\
         for cmp_wf in waveform_list:
             for i in range(32):
-                if cmp_wf == self.rotateWF(waveform, i):
+                if self.compare_wf(cmp_wf, self.rotateWF(waveform, i) ):
                     return True
 
         return False            
 
+    def compare_wf(self, wf_1, wf_2):
+        wf_1 = list(wf_1)
+        wf_2 = list(wf_2)
+        # print(f'set 1 {set(wf_1)} , set 2 {set(wf_2)}')
+        # if len(set(wf_1)) == 1 and len(set(wf_2)) == 1:
+        #     print(f'debug: {wf_1}. {wf_2}')
+            # sys.exit(1)
+        result = True
+        for i in range(32):
+            result &= wf_1[i] == wf_2[i]
+
+        return result
+
     def rotateWF(self,waveform, idx):
         waveform = list(waveform)
-        new_wf = waveform[idx:] + waveform[:idx]
-        return set(new_wf)
+        new_wf = waveform[-idx:] + waveform[:-idx]
+        return new_wf
 
     def get_decodeData(self, offset, content):
         op = content[offset]

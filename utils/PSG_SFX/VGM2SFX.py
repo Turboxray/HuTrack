@@ -424,7 +424,6 @@ class ConvertVGM():
                 self.reg_list['num_frames'] += 1
                 # Do not reset the channel on frame end!
                 self.debugPrint(f'###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-                # print(f"frame end: {self.reg_list['num_frames'] }")
 
                 if op == 0x66:
                     break
@@ -701,10 +700,7 @@ class ConvertVGM():
                 return
 
             skip_byte = 0
-            # print(f' chan {num} block: {[hex(val) for val in chan_block]} ')
             for idx, val in enumerate(chan_block):
-
-                    # print(f"val = {hex(val)}. Index: {idx} | {hex(idx)}")
 
                     if skip_byte > 0 :
                         skip_byte -= 1
@@ -771,14 +767,11 @@ class ConvertVGM():
             except:
                 print(f'Skipping chan {num} blocks.')
                 continue
-            # print(channelPatterData[num][0])
             pattern_list_order = []
             pattern_list_tracking = []
             pattern_block_data = {}
             track_binary = []
             for patt_num, pattern_data in pattern_blocks.items():
-                # print(f'data: {pattern_data}, {channelPatterData[num][patt_num]}')
-                # print(f' chan {num}: {hex(pattern_data[0])}, {hex(pattern_data[1])}')
                 pattern_list_order.append(pattern_data[1])
                 if pattern_data[1] not in pattern_list_tracking:
                     pattern_list_tracking.append(pattern_data[1])
@@ -884,11 +877,7 @@ class ConvertVGM():
                 self.prep_reg_list['num_frames'] = data_set
                 continue
 
-            # if chan > 1:
-            #     continue
             _806_run = []
-
-            #self.debugPrint(f' data set @ chan [{chan}]: {data_set}')
 
             for frame, data_frame in enumerate(data_set):
                 if data_frame == []:
@@ -928,26 +917,11 @@ class ConvertVGM():
 
         waveform_list = self.wf_block[:]
 
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f'###########################################################################################################' )
         self.debugPrint(f' PRE PRE PRE wf_list:' )
         for a_list in waveform_list:
             self.debugPrint(a_list)
 
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f' PRE PRE PRE wf_list:' )
-
         temp_list = []
-        # for num, waveform in enumerate(waveform_list):
-        #     temp = " ".join([hex(val&0xff)[2:] for val in waveform])
-        #     # print(f' Waveform {num}: [{temp}]')
         for chan,data_set in self.prep_reg_list.items():
             if chan == 'num_frames':
                 continue
@@ -965,19 +939,10 @@ class ConvertVGM():
                             temp_list.append(waveform[:])
                             waveform_list.append(waveform[:])
 
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f'###########################################################################################################' )
+
         self.debugPrint(f'temp_list: ' )
         for a_list in temp_list:
             self.debugPrint(a_list)
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f'###########################################################################################################' )
-        self.debugPrint(f'###########################################################################################################' )
         self.debugPrint(f'wf_list:' )
         for a_list in waveform_list:
             self.debugPrint(a_list)
@@ -1024,7 +989,6 @@ class ConvertVGM():
                     if reg == 0x02:
                         found_02 = True
                         period_02 = data[0]
-                        #print(f"found 0x02: {period_02}")
                         prev_idx = idx
                         continue
                     if reg == 0x03 and found_02:
@@ -1044,35 +1008,28 @@ class ConvertVGM():
 
                 rle_reg = []
                 rle_idx = []
-                #self.debugPrint(f'Frame {frame} ........................................................................................')
                 for idx,data_pair in enumerate(data_frame):
                     reg = data_pair['reg']
                     data = data_pair['data']
-                    # print(f'ddd reg {reg}, data {data}')
                     pair_set = set([(idx+1)<<8|val for idx, val in enumerate(data+[reg])])
 
-                    #print(idx)
                     if rle_reg == []:
                         rle_reg.append(pair_set)
                         rle_idx = [idx]
-                        #self.debugPrint(f'init reg pair:::::::: {[hex(val) for val in pair_set]},,,, {hex(reg)}, {[hex(val) for val in data]}')
                         continue
 
                     if pair_set in rle_reg:
                         rle_idx.append(idx)
-                        #self.debugPrint(f'found reg pair:::::::: {[hex(val) for val in pair_set]},,,, {hex(reg)}, {[hex(val) for val in data]}')
                         continue
 
                     for remove_idx in rle_idx[1:]:
                         self.prep_reg_list[chan][frame].pop(remove_idx)
-                        #self.debugPrint(f'Removing IDX: {remove_idx}')
                         rle_reg.append(pair_set)
                         rle_reg = []
                         rle_idx = []
 
                     rle_reg = [pair_set]
                     rle_idx = [idx]
-                    #self.debugPrint(f'init reg pair:::::::: {[hex(val) for val in pair_set]},,,, {hex(reg)}, {[hex(val) for val in data]}')
 
 
         bin_output = { 0:[], 1:[], 2:[], 3:[], 4:[], 5:[]}
@@ -1113,7 +1070,6 @@ class ConvertVGM():
                             reg  = 0xA4
                             data = data[0]
                             alt_volume = True
-                            #sys.exit(1)
 
                         bin_output[chan].append(reg)
                         bin_test.append(reg)
@@ -1147,14 +1103,11 @@ class ConvertVGM():
                         bin_test.append(reg)
                         bin_test.append(data)
                     self.debugPrint(f'       reg convert: reg {hex(reg)} , data {data}')
-                    # print(f'       reg convert: reg {hex(reg)} , data {data}')
 
                 bin_output[chan].append(0xffff)
 
         self.debugPrint(f'%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% bin len {len(bin_test)} , {len(bin_test)+(len(waveform_list)*32)}')
         self.debugPrint(f'{len(bin_output[0])}')
-
-        #print(f"\n\n\n{self.prep_reg_list}\n\n\n")
 
         #Print out data for debug
         for chan,data_set in self.prep_reg_list.items():
@@ -1169,7 +1122,6 @@ class ConvertVGM():
                     continue
 
                 for data_pair in data_frame:
-                    # self.debugPrint(f'data pair : {data_pair}')
                     reg = data_pair['reg']
                     data = data_pair['data']
                     self.debugPrint(f'            Reg: {reg}, data: {[hex(val) for val in data]}')
@@ -1199,10 +1151,6 @@ class ConvertVGM():
     def compare_wf(self, wf_1, wf_2):
         wf_1 = list(wf_1)
         wf_2 = list(wf_2)
-        # print(f'set 1 {set(wf_1)} , set 2 {set(wf_2)}')
-        # if len(set(wf_1)) == 1 and len(set(wf_2)) == 1:
-        #     print(f'debug: {wf_1}. {wf_2}')
-            # sys.exit(1)
         result = True
         for i in range(32):
             result &= wf_1[i] == wf_2[i]
@@ -1228,8 +1176,6 @@ class ConvertVGM():
 
         operand = content[offset + 1 : offset + 1 + self.op_len[op]]
         offset += len(operand)+1
-
-        # print(f'DEBUG: opr size [{self.op_len[op]}], oper = {operand} ')
 
         return (op, operand, offset)
 

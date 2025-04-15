@@ -2736,11 +2736,9 @@ HuTrackEngine.Channel.exeFX.semitone.UP
         adc HuTrack.channel.note,x
         cmp #12
       bcc .skip.octave.finished
-        inc HuTrack.channel.octave,x
-        lda HuTrack.channel.note,x
-        sec
         sbc #11
         clc
+        inc HuTrack.channel.octave,x
 .skip.octave.finished
         sta HuTrack.channel.note,x
         sta HuTrack.channel.appliedNote,x
@@ -2759,7 +2757,8 @@ HuTrackEngine.Channel.exeFX.semitone.UP
         adc HuTrack.channel.note,x
         cmp #12
       bcc .skip.octave.apply
-        cla
+        sbc #11
+        sec
 .skip.octave.apply
         sta HuTrack.channel.appliedNote,x
         lda HuTrack.channel.octave,x

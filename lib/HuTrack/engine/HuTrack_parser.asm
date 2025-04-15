@@ -2729,8 +2729,8 @@ HuTrackEngine.Channel.exeFX.semitone.UP
 .finished
         stz HuTrack.channel.semitoneUP.op,x
 
-        lda HuTrack.channel.noteCent,x
-        sta HuTrack.channel.appliedCent,x
+        ; lda HuTrack.channel.noteCent,x
+        ; sta HuTrack.channel.appliedCent,x
         lda HuTrack.channel.semitoneUP.note,x
         clc
         adc HuTrack.channel.note,x
@@ -2750,8 +2750,8 @@ HuTrackEngine.Channel.exeFX.semitone.UP
 
 .apply
         lda HuTrack.channel.noteCent,x
-        clc
-        adc HuTrack.channel.semitoneUP.cent,x
+        ; clc
+        ; adc HuTrack.channel.semitoneUP.cent,x
         sta HuTrack.channel.appliedCent,x
         lda HuTrack.channel.semitoneUP.note,x
         adc HuTrack.channel.note,x

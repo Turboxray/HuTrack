@@ -1,0 +1,2968 @@
+Opening [examples/test1.vgm] ....
+[369]
+ DEBUG: op 0x67, operand ['0x66', '0x5', '0x1a', '0x2', '0x0', '0x0'], offset 0x118, current chan 0
+ pcm operand [102, 5, 26, 2, 0, 0]
+^^^^^^^^^^^^^^^ get PCM 0x21a, 0x118
+     67 NO STORE: ['66', '5', '1a', '2', '0', '0']
+ DEBUG: op 0x67, operand ['0x66', '0x5', '0xed', '0x8', '0x0', '0x0'], offset 0x339, current chan 0
+ pcm operand [102, 5, 237, 8, 0, 0]
+^^^^^^^^^^^^^^^ get PCM 0x8ed, 0x339
+     67 NO STORE: ['66', '5', 'ed', '8', '0', '0']
+ DEBUG: op 0x67, operand ['0x66', '0x5', '0xca', '0x2', '0x0', '0x0'], offset 0xc2d, current chan 0
+ pcm operand [102, 5, 202, 2, 0, 0]
+^^^^^^^^^^^^^^^ get PCM 0x2ca, 0xc2d
+     67 NO STORE: ['66', '5', 'ca', '2', '0', '0']
+ DEBUG: op 0x67, operand ['0x66', '0x5', '0xa9', '0x4', '0x0', '0x0'], offset 0xefe, current chan 0
+ pcm operand [102, 5, 169, 4, 0, 0]
+^^^^^^^^^^^^^^^ get PCM 0x4a9, 0xefe
+     67 NO STORE: ['66', '5', 'a9', '4', '0', '0']
+ DEBUG: op 0x90, operand ['0x0', '0x1b', '0x0', '0x6'], offset 0x13ac, current chan 0
+     90 NO STORE
+ DEBUG: op 0x91, operand ['0x0', '0x5', '0x1', '0x0'], offset 0x13b1, current chan 0
+     91 NO STORE
+ DEBUG: op 0x92, operand ['0x0', '0x80', '0x3e', '0x0', '0x0'], offset 0x13b7, current chan 0
+     91 NO STORE
+ DEBUG: op 0x90, operand ['0x1', '0x1b', '0x1', '0x6'], offset 0x13bc, current chan 0
+     90 NO STORE
+ DEBUG: op 0x91, operand ['0x1', '0x5', '0x1', '0x0'], offset 0x13c1, current chan 0
+     91 NO STORE
+ DEBUG: op 0x92, operand ['0x1', '0x80', '0x3e', '0x0', '0x0'], offset 0x13c7, current chan 0
+     91 NO STORE
+ DEBUG: op 0x90, operand ['0x2', '0x1b', '0x2', '0x6'], offset 0x13cc, current chan 0
+     90 NO STORE
+ DEBUG: op 0x91, operand ['0x2', '0x5', '0x1', '0x0'], offset 0x13d1, current chan 0
+     91 NO STORE
+ DEBUG: op 0x92, operand ['0x2', '0x80', '0x3e', '0x0', '0x0'], offset 0x13d7, current chan 0
+     91 NO STORE
+ DEBUG: op 0x90, operand ['0x3', '0x1b', '0x3', '0x6'], offset 0x13dc, current chan 0
+     90 NO STORE
+ DEBUG: op 0x91, operand ['0x3', '0x5', '0x1', '0x0'], offset 0x13e1, current chan 0
+     91 NO STORE
+ DEBUG: op 0x92, operand ['0x3', '0x80', '0x3e', '0x0', '0x0'], offset 0x13e7, current chan 0
+     91 NO STORE
+ DEBUG: op 0x90, operand ['0x4', '0x1b', '0x4', '0x6'], offset 0x13ec, current chan 0
+     90 NO STORE
+ DEBUG: op 0x91, operand ['0x4', '0x5', '0x1', '0x0'], offset 0x13f1, current chan 0
+     91 NO STORE
+ DEBUG: op 0x92, operand ['0x4', '0x80', '0x3e', '0x0', '0x0'], offset 0x13f7, current chan 0
+     91 NO STORE
+ DEBUG: op 0x90, operand ['0x5', '0x1b', '0x5', '0x6'], offset 0x13fc, current chan 0
+     90 NO STORE
+ DEBUG: op 0x91, operand ['0x5', '0x5', '0x1', '0x0'], offset 0x1401, current chan 0
+     91 NO STORE
+ DEBUG: op 0x92, operand ['0x5', '0x80', '0x3e', '0x0', '0x0'], offset 0x1407, current chan 0
+     91 NO STORE
+ DEBUG: op 0x67, operand ['0x66', '0xfe', '0x9', '0x0', '0x0', '0x0'], offset 0x140e, current chan 0
+ block operand [102, 254, 9, 0, 0, 0]
+^^^^^^^^^^^^^^^ get pattern 0x9, data ['1', '0', '0', '1', '1', '1', '1', '1', '1'], offset 0x140e
+     67 PATTERN NO STORE: ['66', 'fe', '9', '0', '0', '0']
+    chan [0], Data: reg 10, val [1, 0, 0, 1, 1, 1, 1, 1, 1]
+    chan [0], Data: reg 11, val [1, 0, 0, 1, 1, 1, 1, 1, 1]
+    chan [0], Data: reg 10, val [1, 0, 0, 1, 1, 1, 1, 1, 1]
+    chan [0], Data: reg 11, val [1, 0, 0, 1, 1, 1, 1, 1, 1]
+    chan [0], Data: reg 10, val [1, 0, 0, 1, 1, 1, 1, 1, 1]
+    chan [0], Data: reg 11, val [1, 0, 0, 1, 1, 1, 1, 1, 1]
+    chan [0], Data: reg 10, val [1, 0, 0, 1, 1, 1, 1, 1, 1]
+    chan [0], Data: reg 11, val [1, 0, 0, 1, 1, 1, 1, 1, 1]
+    chan [0], Data: reg 10, val [1, 0, 0, 1, 1, 1, 1, 1, 1]
+    chan [0], Data: reg 11, val [1, 0, 0, 1, 1, 1, 1, 1, 1]
+    chan [0], Data: reg 10, val [1, 0, 0, 1, 1, 1, 1, 1, 1]
+    chan [0], Data: reg 11, val [1, 0, 0, 1, 1, 1, 1, 1, 1]
+ DEBUG: op 0xb9, operand ['0x0', '0x0'], offset 0x141a, current chan 0
+set channel: [0]
+     B9 NO STORE
+ DEBUG: op 0xb9, operand ['0x4', '0x5f'], offset 0x141d, current chan 0
+    chan [0], Data: reg 4, val 95
+ DEBUG: op 0xb9, operand ['0x4', '0x1f'], offset 0x1420, current chan 0
+    chan [0], Data: reg 4, val 31
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1423, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1426, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1429, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x142c, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x142f, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1432, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1435, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1438, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x143b, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x143e, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1441, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1444, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1447, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x144a, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x144d, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1450, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1453, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1456, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1459, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x145c, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x145f, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1462, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1465, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1468, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x146b, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x146e, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1471, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1474, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1477, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x147a, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x147d, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1480, current chan 0
+    chan [0], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x0', '0x1'], offset 0x1483, current chan 0
+set channel: [1]
+     B9 NO STORE
+ DEBUG: op 0xb9, operand ['0x4', '0x5f'], offset 0x1486, current chan 1
+    chan [1], Data: reg 4, val 95
+ DEBUG: op 0xb9, operand ['0x4', '0x1f'], offset 0x1489, current chan 1
+    chan [1], Data: reg 4, val 31
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x148c, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x148f, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1492, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1495, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1498, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x149b, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x149e, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14a1, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14a4, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14a7, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14aa, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14ad, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14b0, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14b3, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14b6, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14b9, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14bc, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14bf, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14c2, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14c5, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14c8, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14cb, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14ce, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14d1, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14d4, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14d7, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14da, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14dd, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14e0, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14e3, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14e6, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14e9, current chan 1
+    chan [1], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x0', '0x2'], offset 0x14ec, current chan 1
+set channel: [2]
+     B9 NO STORE
+ DEBUG: op 0xb9, operand ['0x4', '0x5f'], offset 0x14ef, current chan 2
+    chan [2], Data: reg 4, val 95
+ DEBUG: op 0xb9, operand ['0x4', '0x1f'], offset 0x14f2, current chan 2
+    chan [2], Data: reg 4, val 31
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14f5, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14f8, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14fb, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x14fe, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1501, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1504, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1507, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x150a, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x150d, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1510, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1513, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1516, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1519, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x151c, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x151f, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1522, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1525, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1528, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x152b, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x152e, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1531, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1534, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1537, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x153a, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x153d, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1540, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1543, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1546, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1549, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x154c, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x154f, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1552, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x0', '0x3'], offset 0x1555, current chan 2
+set channel: [3]
+     B9 NO STORE
+ DEBUG: op 0xb9, operand ['0x4', '0x5f'], offset 0x1558, current chan 3
+    chan [3], Data: reg 4, val 95
+ DEBUG: op 0xb9, operand ['0x4', '0x1f'], offset 0x155b, current chan 3
+    chan [3], Data: reg 4, val 31
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x155e, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1561, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1564, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1567, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x156a, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x156d, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1570, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1573, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1576, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1579, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x157c, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x157f, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1582, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1585, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1588, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x158b, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x158e, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1591, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1594, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1597, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x159a, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x159d, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15a0, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15a3, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15a6, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15a9, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15ac, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15af, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15b2, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15b5, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15b8, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15bb, current chan 3
+    chan [3], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x0', '0x4'], offset 0x15be, current chan 3
+set channel: [4]
+     B9 NO STORE
+ DEBUG: op 0xb9, operand ['0x4', '0x5f'], offset 0x15c1, current chan 4
+    chan [4], Data: reg 4, val 95
+ DEBUG: op 0xb9, operand ['0x4', '0x1f'], offset 0x15c4, current chan 4
+    chan [4], Data: reg 4, val 31
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15c7, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15ca, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15cd, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15d0, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15d3, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15d6, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15d9, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15dc, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15df, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15e2, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15e5, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15e8, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15eb, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15ee, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15f1, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15f4, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15f7, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15fa, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x15fd, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1600, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1603, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1606, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1609, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x160c, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x160f, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1612, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1615, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1618, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x161b, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x161e, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1621, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1624, current chan 4
+    chan [4], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x0', '0x5'], offset 0x1627, current chan 4
+set channel: [5]
+     B9 NO STORE
+ DEBUG: op 0xb9, operand ['0x4', '0x5f'], offset 0x162a, current chan 5
+    chan [5], Data: reg 4, val 95
+ DEBUG: op 0xb9, operand ['0x4', '0x1f'], offset 0x162d, current chan 5
+    chan [5], Data: reg 4, val 31
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1630, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1633, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1636, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1639, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x163c, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x163f, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1642, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1645, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1648, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x164b, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x164e, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1651, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1654, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1657, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x165a, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x165d, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1660, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1663, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1666, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1669, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x166c, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x166f, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1672, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1675, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1678, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x167b, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x167e, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1681, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1684, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1687, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x168a, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x168d, current chan 5
+    chan [5], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x0', '0x0'], offset 0x1690, current chan 5
+set channel: [0]
+     B9 NO STORE
+ DEBUG: op 0xb9, operand ['0x1', '0xff'], offset 0x1693, current chan 0
+    chan [0], Data: reg 1, val 255
+ DEBUG: op 0xb9, operand ['0x0', '0x0'], offset 0x1696, current chan 0
+set channel: [0]
+     B9 NO STORE
+ DEBUG: op 0xb9, operand ['0x5', '0xff'], offset 0x1699, current chan 0
+    chan [0], Data: reg 5, val 255
+ DEBUG: op 0xb9, operand ['0x0', '0x1'], offset 0x169c, current chan 0
+set channel: [1]
+     B9 NO STORE
+ DEBUG: op 0xb9, operand ['0x5', '0xff'], offset 0x169f, current chan 1
+    chan [1], Data: reg 5, val 255
+ DEBUG: op 0xb9, operand ['0x0', '0x2'], offset 0x16a2, current chan 1
+set channel: [2]
+     B9 NO STORE
+ DEBUG: op 0xb9, operand ['0x5', '0xff'], offset 0x16a5, current chan 2
+    chan [2], Data: reg 5, val 255
+ DEBUG: op 0xb9, operand ['0x0', '0x3'], offset 0x16a8, current chan 2
+set channel: [3]
+     B9 NO STORE
+ DEBUG: op 0xb9, operand ['0x5', '0xff'], offset 0x16ab, current chan 3
+    chan [3], Data: reg 5, val 255
+ DEBUG: op 0xb9, operand ['0x0', '0x4'], offset 0x16ae, current chan 3
+set channel: [4]
+     B9 NO STORE
+ DEBUG: op 0xb9, operand ['0x5', '0xff'], offset 0x16b1, current chan 4
+    chan [4], Data: reg 5, val 255
+ DEBUG: op 0xb9, operand ['0x0', '0x5'], offset 0x16b4, current chan 4
+set channel: [5]
+     B9 NO STORE
+ DEBUG: op 0xb9, operand ['0x5', '0xff'], offset 0x16b7, current chan 5
+    chan [5], Data: reg 5, val 255
+ DEBUG: op 0xb9, operand ['0x0', '0x2'], offset 0x16ba, current chan 5
+set channel: [2]
+     B9 NO STORE
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x16bd, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x16c0, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x5f'], offset 0x16c3, current chan 2
+    chan [2], Data: reg 4, val 95
+ DEBUG: op 0xb9, operand ['0x4', '0x1f'], offset 0x16c6, current chan 2
+    chan [2], Data: reg 4, val 31
+ DEBUG: op 0xb9, operand ['0x6', '0x1'], offset 0x16c9, current chan 2
+    chan [2], Data: reg 6, val 1
+ DEBUG: op 0xb9, operand ['0x6', '0x1'], offset 0x16cc, current chan 2
+    chan [2], Data: reg 6, val 1
+ DEBUG: op 0xb9, operand ['0x6', '0x1'], offset 0x16cf, current chan 2
+    chan [2], Data: reg 6, val 1
+ DEBUG: op 0xb9, operand ['0x6', '0x2'], offset 0x16d2, current chan 2
+    chan [2], Data: reg 6, val 2
+ DEBUG: op 0xb9, operand ['0x6', '0x2'], offset 0x16d5, current chan 2
+    chan [2], Data: reg 6, val 2
+ DEBUG: op 0xb9, operand ['0x6', '0x4'], offset 0x16d8, current chan 2
+    chan [2], Data: reg 6, val 4
+ DEBUG: op 0xb9, operand ['0x6', '0x7'], offset 0x16db, current chan 2
+    chan [2], Data: reg 6, val 7
+ DEBUG: op 0xb9, operand ['0x6', '0xb'], offset 0x16de, current chan 2
+    chan [2], Data: reg 6, val 11
+ DEBUG: op 0xb9, operand ['0x6', '0xf'], offset 0x16e1, current chan 2
+    chan [2], Data: reg 6, val 15
+ DEBUG: op 0xb9, operand ['0x6', '0x13'], offset 0x16e4, current chan 2
+    chan [2], Data: reg 6, val 19
+ DEBUG: op 0xb9, operand ['0x6', '0x14'], offset 0x16e7, current chan 2
+    chan [2], Data: reg 6, val 20
+ DEBUG: op 0xb9, operand ['0x6', '0x15'], offset 0x16ea, current chan 2
+    chan [2], Data: reg 6, val 21
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x16ed, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x16f0, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x16f3, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x16f6, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x16f9, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x16fc, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x16ff, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1702, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x18'], offset 0x1705, current chan 2
+    chan [2], Data: reg 6, val 24
+ DEBUG: op 0xb9, operand ['0x6', '0x17'], offset 0x1708, current chan 2
+    chan [2], Data: reg 6, val 23
+ DEBUG: op 0xb9, operand ['0x6', '0x14'], offset 0x170b, current chan 2
+    chan [2], Data: reg 6, val 20
+ DEBUG: op 0xb9, operand ['0x6', '0x11'], offset 0x170e, current chan 2
+    chan [2], Data: reg 6, val 17
+ DEBUG: op 0xb9, operand ['0x6', '0xd'], offset 0x1711, current chan 2
+    chan [2], Data: reg 6, val 13
+ DEBUG: op 0xb9, operand ['0x6', '0xa'], offset 0x1714, current chan 2
+    chan [2], Data: reg 6, val 10
+ DEBUG: op 0xb9, operand ['0x6', '0x6'], offset 0x1717, current chan 2
+    chan [2], Data: reg 6, val 6
+ DEBUG: op 0xb9, operand ['0x6', '0x3'], offset 0x171a, current chan 2
+    chan [2], Data: reg 6, val 3
+ DEBUG: op 0xb9, operand ['0x6', '0x1'], offset 0x171d, current chan 2
+    chan [2], Data: reg 6, val 1
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1720, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1723, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x6', '0x0'], offset 0x1726, current chan 2
+    chan [2], Data: reg 6, val 0
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x1729, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x2', '0xe0'], offset 0x172c, current chan 2
+    chan [2], Data: reg 2, val 224
+ DEBUG: op 0xb9, operand ['0x3', '0x0'], offset 0x172f, current chan 2
+    chan [2], Data: reg 3, val 0
+ DEBUG: op 0xb9, operand ['0x8', '0xff'], offset 0x1732, current chan 2
+    chan [2], Data: reg 8, val 255
+ DEBUG: op 0xb9, operand ['0x9', '0x0'], offset 0x1735, current chan 2
+    chan [2], Data: reg 9, val 0
+ DEBUG: op 0x62, operand [], offset 0x1736, current chan 2
+
+
+ frame0, adding {0: [(10, 0), (11, 1), (4, 95), (4, 31), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (1, 255), (5, 255)], 1: [(10, 0), (11, 1), (4, 95), (4, 31), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (5, 255)], 2: [(10, 0), (11, 1), (4, 95), (4, 31), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (5, 255), (4, 159), (4, 159), (4, 95), (4, 31), (6, 1), (6, 1), (6, 1), (6, 2), (6, 2), (6, 4), (6, 7), (6, 11), (6, 15), (6, 19), (6, 20), (6, 21), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 24), (6, 23), (6, 20), (6, 17), (6, 13), (6, 10), (6, 6), (6, 3), (6, 1), (6, 0), (6, 0), (6, 0), (4, 159), (2, 224), (3, 0), (8, 255), (9, 0)], 3: [(10, 0), (11, 1), (4, 95), (4, 31), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (5, 255)], 4: [(10, 0), (11, 1), (4, 95), (4, 31), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (5, 255)], 5: [(10, 0), (11, 1), (4, 95), (4, 31), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (5, 255)]} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x1737, current chan 2
+
+
+ frame1, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x1738, current chan 2
+
+
+ frame2, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x1739, current chan 2
+
+
+ frame3, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9c'], offset 0x173c, current chan 2
+    chan [2], Data: reg 4, val 156
+ DEBUG: op 0x62, operand [], offset 0x173d, current chan 2
+
+
+ frame4, adding {0: [], 1: [], 2: [(4, 156)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x99'], offset 0x1740, current chan 2
+    chan [2], Data: reg 4, val 153
+ DEBUG: op 0x62, operand [], offset 0x1741, current chan 2
+
+
+ frame5, adding {0: [], 1: [], 2: [(4, 153)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x96'], offset 0x1744, current chan 2
+    chan [2], Data: reg 4, val 150
+ DEBUG: op 0x62, operand [], offset 0x1745, current chan 2
+
+
+ frame6, adding {0: [], 1: [], 2: [(4, 150)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x93'], offset 0x1748, current chan 2
+    chan [2], Data: reg 4, val 147
+ DEBUG: op 0x62, operand [], offset 0x1749, current chan 2
+
+
+ frame7, adding {0: [], 1: [], 2: [(4, 147)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x174c, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x174f, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9c'], offset 0x1752, current chan 2
+    chan [2], Data: reg 4, val 156
+ DEBUG: op 0xb9, operand ['0x2', '0xfc'], offset 0x1755, current chan 2
+    chan [2], Data: reg 2, val 252
+ DEBUG: op 0xb9, operand ['0x3', '0x0'], offset 0x1758, current chan 2
+    chan [2], Data: reg 3, val 0
+ DEBUG: op 0x62, operand [], offset 0x1759, current chan 2
+
+
+ frame8, adding {0: [], 1: [], 2: [(4, 159), (4, 159), (4, 156), (2, 252), (3, 0)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x99'], offset 0x175c, current chan 2
+    chan [2], Data: reg 4, val 153
+ DEBUG: op 0x62, operand [], offset 0x175d, current chan 2
+
+
+ frame9, adding {0: [], 1: [], 2: [(4, 153)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x96'], offset 0x1760, current chan 2
+    chan [2], Data: reg 4, val 150
+ DEBUG: op 0x62, operand [], offset 0x1761, current chan 2
+
+
+ frame10, adding {0: [], 1: [], 2: [(4, 150)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x93'], offset 0x1764, current chan 2
+    chan [2], Data: reg 4, val 147
+ DEBUG: op 0x62, operand [], offset 0x1765, current chan 2
+
+
+ frame11, adding {0: [], 1: [], 2: [(4, 147)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x90'], offset 0x1768, current chan 2
+    chan [2], Data: reg 4, val 144
+ DEBUG: op 0x62, operand [], offset 0x1769, current chan 2
+
+
+ frame12, adding {0: [], 1: [], 2: [(4, 144)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x8d'], offset 0x176c, current chan 2
+    chan [2], Data: reg 4, val 141
+ DEBUG: op 0x62, operand [], offset 0x176d, current chan 2
+
+
+ frame13, adding {0: [], 1: [], 2: [(4, 141)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x176e, current chan 2
+
+
+ frame14, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x176f, current chan 2
+
+
+ frame15, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x1772, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x1775, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x1778, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x2', '0x1b'], offset 0x177b, current chan 2
+    chan [2], Data: reg 2, val 27
+ DEBUG: op 0xb9, operand ['0x3', '0x1'], offset 0x177e, current chan 2
+    chan [2], Data: reg 3, val 1
+ DEBUG: op 0x62, operand [], offset 0x177f, current chan 2
+
+
+ frame16, adding {0: [], 1: [], 2: [(4, 159), (4, 159), (4, 159), (2, 27), (3, 1)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x1780, current chan 2
+
+
+ frame17, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x1781, current chan 2
+
+
+ frame18, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x1782, current chan 2
+
+
+ frame19, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9c'], offset 0x1785, current chan 2
+    chan [2], Data: reg 4, val 156
+ DEBUG: op 0x62, operand [], offset 0x1786, current chan 2
+
+
+ frame20, adding {0: [], 1: [], 2: [(4, 156)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x99'], offset 0x1789, current chan 2
+    chan [2], Data: reg 4, val 153
+ DEBUG: op 0x62, operand [], offset 0x178a, current chan 2
+
+
+ frame21, adding {0: [], 1: [], 2: [(4, 153)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x178d, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x1790, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x1793, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x2', '0x2b'], offset 0x1796, current chan 2
+    chan [2], Data: reg 2, val 43
+ DEBUG: op 0xb9, operand ['0x3', '0x1'], offset 0x1799, current chan 2
+    chan [2], Data: reg 3, val 1
+ DEBUG: op 0x62, operand [], offset 0x179a, current chan 2
+
+
+ frame22, adding {0: [], 1: [], 2: [(4, 159), (4, 159), (4, 159), (2, 43), (3, 1)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x179b, current chan 2
+
+
+ frame23, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x179c, current chan 2
+
+
+ frame24, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x179d, current chan 2
+
+
+ frame25, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x179e, current chan 2
+
+
+ frame26, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x179f, current chan 2
+
+
+ frame27, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9c'], offset 0x17a2, current chan 2
+    chan [2], Data: reg 4, val 156
+ DEBUG: op 0x62, operand [], offset 0x17a3, current chan 2
+
+
+ frame28, adding {0: [], 1: [], 2: [(4, 156)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x99'], offset 0x17a6, current chan 2
+    chan [2], Data: reg 4, val 153
+ DEBUG: op 0x62, operand [], offset 0x17a7, current chan 2
+
+
+ frame29, adding {0: [], 1: [], 2: [(4, 153)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x17a8, current chan 2
+
+
+ frame30, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x17a9, current chan 2
+
+
+ frame31, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x17aa, current chan 2
+
+
+ frame32, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x17ab, current chan 2
+
+
+ frame33, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x17ae, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x17b1, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x17b4, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x2', '0xe0'], offset 0x17b7, current chan 2
+    chan [2], Data: reg 2, val 224
+ DEBUG: op 0xb9, operand ['0x3', '0x0'], offset 0x17ba, current chan 2
+    chan [2], Data: reg 3, val 0
+ DEBUG: op 0x62, operand [], offset 0x17bb, current chan 2
+
+
+ frame34, adding {0: [], 1: [], 2: [(4, 159), (4, 159), (4, 159), (2, 224), (3, 0)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x17bc, current chan 2
+
+
+ frame35, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9c'], offset 0x17bf, current chan 2
+    chan [2], Data: reg 4, val 156
+ DEBUG: op 0x62, operand [], offset 0x17c0, current chan 2
+
+
+ frame36, adding {0: [], 1: [], 2: [(4, 156)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x99'], offset 0x17c3, current chan 2
+    chan [2], Data: reg 4, val 153
+ DEBUG: op 0x62, operand [], offset 0x17c4, current chan 2
+
+
+ frame37, adding {0: [], 1: [], 2: [(4, 153)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x17c7, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x17ca, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x17cd, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x2', '0xe0'], offset 0x17d0, current chan 2
+    chan [2], Data: reg 2, val 224
+ DEBUG: op 0xb9, operand ['0x3', '0x0'], offset 0x17d3, current chan 2
+    chan [2], Data: reg 3, val 0
+ DEBUG: op 0x62, operand [], offset 0x17d4, current chan 2
+
+
+ frame38, adding {0: [], 1: [], 2: [(4, 159), (4, 159), (4, 159), (2, 224), (3, 0)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x17d5, current chan 2
+
+
+ frame39, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x17d8, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x17db, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x2', '0xfc'], offset 0x17de, current chan 2
+    chan [2], Data: reg 2, val 252
+ DEBUG: op 0xb9, operand ['0x3', '0x0'], offset 0x17e1, current chan 2
+    chan [2], Data: reg 3, val 0
+ DEBUG: op 0x62, operand [], offset 0x17e2, current chan 2
+
+
+ frame40, adding {0: [], 1: [], 2: [(4, 159), (4, 159), (2, 252), (3, 0)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x17e3, current chan 2
+
+
+ frame41, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9c'], offset 0x17e6, current chan 2
+    chan [2], Data: reg 4, val 156
+ DEBUG: op 0x62, operand [], offset 0x17e7, current chan 2
+
+
+ frame42, adding {0: [], 1: [], 2: [(4, 156)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x99'], offset 0x17ea, current chan 2
+    chan [2], Data: reg 4, val 153
+ DEBUG: op 0x62, operand [], offset 0x17eb, current chan 2
+
+
+ frame43, adding {0: [], 1: [], 2: [(4, 153)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x17ee, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x17f1, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x17f4, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x2', '0xfc'], offset 0x17f7, current chan 2
+    chan [2], Data: reg 2, val 252
+ DEBUG: op 0xb9, operand ['0x3', '0x0'], offset 0x17fa, current chan 2
+    chan [2], Data: reg 3, val 0
+ DEBUG: op 0x62, operand [], offset 0x17fb, current chan 2
+
+
+ frame44, adding {0: [], 1: [], 2: [(4, 159), (4, 159), (4, 159), (2, 252), (3, 0)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x17fc, current chan 2
+
+
+ frame45, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x17fd, current chan 2
+
+
+ frame46, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x17fe, current chan 2
+
+
+ frame47, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x1801, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x1804, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x2', '0x27'], offset 0x1807, current chan 2
+    chan [2], Data: reg 2, val 39
+ DEBUG: op 0xb9, operand ['0x3', '0x1'], offset 0x180a, current chan 2
+    chan [2], Data: reg 3, val 1
+ DEBUG: op 0x62, operand [], offset 0x180b, current chan 2
+
+
+ frame48, adding {0: [], 1: [], 2: [(4, 159), (4, 159), (2, 39), (3, 1)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x2', '0x23'], offset 0x180e, current chan 2
+    chan [2], Data: reg 2, val 35
+ DEBUG: op 0xb9, operand ['0x3', '0x1'], offset 0x1811, current chan 2
+    chan [2], Data: reg 3, val 1
+ DEBUG: op 0x62, operand [], offset 0x1812, current chan 2
+
+
+ frame49, adding {0: [], 1: [], 2: [(2, 35), (3, 1)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x2', '0x23'], offset 0x1815, current chan 2
+    chan [2], Data: reg 2, val 35
+ DEBUG: op 0xb9, operand ['0x3', '0x1'], offset 0x1818, current chan 2
+    chan [2], Data: reg 3, val 1
+ DEBUG: op 0x62, operand [], offset 0x1819, current chan 2
+
+
+ frame50, adding {0: [], 1: [], 2: [(2, 35), (3, 1)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x181a, current chan 2
+
+
+ frame51, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x181d, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x1820, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x2', '0x1b'], offset 0x1823, current chan 2
+    chan [2], Data: reg 2, val 27
+ DEBUG: op 0xb9, operand ['0x3', '0x1'], offset 0x1826, current chan 2
+    chan [2], Data: reg 3, val 1
+ DEBUG: op 0x62, operand [], offset 0x1827, current chan 2
+
+
+ frame52, adding {0: [], 1: [], 2: [(4, 159), (4, 159), (2, 27), (3, 1)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x1828, current chan 2
+
+
+ frame53, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x182b, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x182e, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x2', '0x2b'], offset 0x1831, current chan 2
+    chan [2], Data: reg 2, val 43
+ DEBUG: op 0xb9, operand ['0x3', '0x1'], offset 0x1834, current chan 2
+    chan [2], Data: reg 3, val 1
+ DEBUG: op 0x62, operand [], offset 0x1835, current chan 2
+
+
+ frame54, adding {0: [], 1: [], 2: [(4, 159), (4, 159), (2, 43), (3, 1)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x1836, current chan 2
+
+
+ frame55, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9c'], offset 0x1839, current chan 2
+    chan [2], Data: reg 4, val 156
+ DEBUG: op 0x62, operand [], offset 0x183a, current chan 2
+
+
+ frame56, adding {0: [], 1: [], 2: [(4, 156)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x99'], offset 0x183d, current chan 2
+    chan [2], Data: reg 4, val 153
+ DEBUG: op 0x62, operand [], offset 0x183e, current chan 2
+
+
+ frame57, adding {0: [], 1: [], 2: [(4, 153)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x183f, current chan 2
+
+
+ frame58, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x1840, current chan 2
+
+
+ frame59, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x1843, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x1846, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x4', '0x9f'], offset 0x1849, current chan 2
+    chan [2], Data: reg 4, val 159
+ DEBUG: op 0xb9, operand ['0x2', '0x1b'], offset 0x184c, current chan 2
+    chan [2], Data: reg 2, val 27
+ DEBUG: op 0xb9, operand ['0x3', '0x1'], offset 0x184f, current chan 2
+    chan [2], Data: reg 3, val 1
+ DEBUG: op 0x62, operand [], offset 0x1850, current chan 2
+
+
+ frame60, adding {0: [], 1: [], 2: [(4, 159), (4, 159), (4, 159), (2, 27), (3, 1)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x62, operand [], offset 0x1851, current chan 2
+
+
+ frame61, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x9c'], offset 0x1854, current chan 2
+    chan [2], Data: reg 4, val 156
+ DEBUG: op 0x62, operand [], offset 0x1855, current chan 2
+
+
+ frame62, adding {0: [], 1: [], 2: [(4, 156)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0xb9, operand ['0x4', '0x99'], offset 0x1858, current chan 2
+    chan [2], Data: reg 4, val 153
+ DEBUG: op 0x62, operand [], offset 0x1859, current chan 2
+
+
+ frame63, adding {0: [], 1: [], 2: [(4, 153)], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ DEBUG: op 0x66, operand [], offset 0x185a, current chan 2
+
+
+ frame64, adding {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} 
+
+
+###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+
+{0: [[(10, 0), (11, 1), (4, 95), (4, 31), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (1, 255), (5, 255)], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []], 1: [[(10, 0), (11, 1), (4, 95), (4, 31), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (5, 255)], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []], 2: [[(10, 0), (11, 1), (4, 95), (4, 31), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (5, 255), (4, 159), (4, 159), (4, 95), (4, 31), (6, 1), (6, 1), (6, 1), (6, 2), (6, 2), (6, 4), (6, 7), (6, 11), (6, 15), (6, 19), (6, 20), (6, 21), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 24), (6, 23), (6, 20), (6, 17), (6, 13), (6, 10), (6, 6), (6, 3), (6, 1), (6, 0), (6, 0), (6, 0), (4, 159), (2, 224), (3, 0), (8, 255), (9, 0)], [], [], [], [(4, 156)], [(4, 153)], [(4, 150)], [(4, 147)], [(4, 159), (4, 159), (4, 156), (2, 252), (3, 0)], [(4, 153)], [(4, 150)], [(4, 147)], [(4, 144)], [(4, 141)], [], [], [(4, 159), (4, 159), (4, 159), (2, 27), (3, 1)], [], [], [], [(4, 156)], [(4, 153)], [(4, 159), (4, 159), (4, 159), (2, 43), (3, 1)], [], [], [], [], [], [(4, 156)], [(4, 153)], [], [], [], [], [(4, 159), (4, 159), (4, 159), (2, 224), (3, 0)], [], [(4, 156)], [(4, 153)], [(4, 159), (4, 159), (4, 159), (2, 224), (3, 0)], [], [(4, 159), (4, 159), (2, 252), (3, 0)], [], [(4, 156)], [(4, 153)], [(4, 159), (4, 159), (4, 159), (2, 252), (3, 0)], [], [], [], [(4, 159), (4, 159), (2, 39), (3, 1)], [(2, 35), (3, 1)], [(2, 35), (3, 1)], [], [(4, 159), (4, 159), (2, 27), (3, 1)], [], [(4, 159), (4, 159), (2, 43), (3, 1)], [], [(4, 156)], [(4, 153)], [], [], [(4, 159), (4, 159), (4, 159), (2, 27), (3, 1)], [], [(4, 156)], [(4, 153)], []], 3: [[(10, 0), (11, 1), (4, 95), (4, 31), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (5, 255)], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []], 4: [[(10, 0), (11, 1), (4, 95), (4, 31), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (5, 255)], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []], 5: [[(10, 0), (11, 1), (4, 95), (4, 31), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (6, 0), (5, 255)], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []], 'num_frames': 65}
+
+
+
+reg    [10], channel [0]
+reg    [11], channel [0]
+reg    [4], channel [0]
+reg    [4], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [6], channel [0]
+reg    [1], channel [0]
+reg    [5], channel [0]
+reg    [10], channel [1]
+reg    [11], channel [1]
+reg    [4], channel [1]
+reg    [4], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [6], channel [1]
+reg    [5], channel [1]
+reg    [10], channel [2]
+reg    [11], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [5], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [6], channel [2]
+reg    [4], channel [2]
+reg    [2], channel [2]
+reg    [3], channel [2]
+reg    [8], channel [2]
+reg    [9], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [2], channel [2]
+reg    [3], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [2], channel [2]
+reg    [3], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [2], channel [2]
+reg    [3], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [2], channel [2]
+reg    [3], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [2], channel [2]
+reg    [3], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [2], channel [2]
+reg    [3], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [2], channel [2]
+reg    [3], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [2], channel [2]
+reg    [3], channel [2]
+reg    [2], channel [2]
+reg    [3], channel [2]
+reg    [2], channel [2]
+reg    [3], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [2], channel [2]
+reg    [3], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [2], channel [2]
+reg    [3], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [2], channel [2]
+reg    [3], channel [2]
+reg    [4], channel [2]
+reg    [4], channel [2]
+reg    [10], channel [3]
+reg    [11], channel [3]
+reg    [4], channel [3]
+reg    [4], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [6], channel [3]
+reg    [5], channel [3]
+reg    [10], channel [4]
+reg    [11], channel [4]
+reg    [4], channel [4]
+reg    [4], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [6], channel [4]
+reg    [5], channel [4]
+reg    [10], channel [5]
+reg    [11], channel [5]
+reg    [4], channel [5]
+reg    [4], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [6], channel [5]
+reg    [5], channel [5]
+############################################### waveform prep
+
+ 
+ PRE PRE PRE wf_list:
+temp_list: 
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+[1, 1, 1, 2, 2, 4, 7, 11, 15, 19, 20, 21, 0, 0, 0, 0, 0, 0, 0, 0, 24, 23, 20, 17, 13, 10, 6, 3, 1, 0, 0, 0]
+wf_list:
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+[1, 1, 1, 2, 2, 4, 7, 11, 15, 19, 20, 21, 0, 0, 0, 0, 0, 0, 0, 0, 24, 23, 20, 17, 13, 10, 6, 3, 1, 0, 0, 0]
+waveform list len 2
+############################################### waveform list
+
+ 
+@@@@@@@@@ reg convert: reg 0xa , data [0], frame 0, chan 0
+       reg convert: reg 0xaa , data 0
+@@@@@@@@@ reg convert: reg 0xb , data [1], frame 0, chan 0
+       reg convert: reg 0xab , data 1
+@@@@@@@@@ reg convert: reg 0x4 , data [95], frame 0, chan 0
+       reg convert: reg 0x5f , data [95]
+@@@@@@@@@ reg convert: reg 0x4 , data [31], frame 0, chan 0
+       reg convert: reg 0x1f , data [31]
+@@@@@@@@@ reg convert: reg 0x10 , data [0], frame 0, chan 0
+       reg convert: reg 0xb0 , data 0
+@@@@@@@@@ reg convert: reg 0x1 , data [255], frame 0, chan 0
+       reg convert: reg 0xa1 , data 255
+@@@@@@@@@ reg convert: reg 0x5 , data [255], frame 0, chan 0
+       reg convert: reg 0xa5 , data 255
+@@@@@@@@@ reg convert: ** empty ** , frame 1, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 2, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 3, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 4, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 5, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 6, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 7, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 8, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 9, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 10, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 11, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 12, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 13, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 14, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 15, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 16, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 17, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 18, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 19, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 20, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 21, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 22, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 23, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 24, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 25, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 26, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 27, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 28, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 29, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 30, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 31, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 32, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 33, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 34, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 35, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 36, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 37, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 38, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 39, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 40, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 41, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 42, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 43, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 44, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 45, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 46, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 47, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 48, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 49, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 50, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 51, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 52, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 53, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 54, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 55, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 56, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 57, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 58, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 59, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 60, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 61, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 62, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 63, chan 0
+@@@@@@@@@ reg convert: ** empty ** , frame 64, chan 0
+@@@@@@@@@ reg convert: reg 0xa , data [0], frame 0, chan 1
+       reg convert: reg 0xaa , data 0
+@@@@@@@@@ reg convert: reg 0xb , data [1], frame 0, chan 1
+       reg convert: reg 0xab , data 1
+@@@@@@@@@ reg convert: reg 0x4 , data [95], frame 0, chan 1
+       reg convert: reg 0x5f , data [95]
+@@@@@@@@@ reg convert: reg 0x4 , data [31], frame 0, chan 1
+       reg convert: reg 0x1f , data [31]
+@@@@@@@@@ reg convert: reg 0x10 , data [0], frame 0, chan 1
+       reg convert: reg 0xb0 , data 0
+@@@@@@@@@ reg convert: reg 0x5 , data [255], frame 0, chan 1
+       reg convert: reg 0xa5 , data 255
+@@@@@@@@@ reg convert: ** empty ** , frame 1, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 2, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 3, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 4, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 5, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 6, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 7, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 8, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 9, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 10, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 11, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 12, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 13, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 14, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 15, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 16, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 17, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 18, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 19, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 20, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 21, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 22, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 23, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 24, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 25, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 26, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 27, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 28, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 29, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 30, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 31, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 32, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 33, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 34, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 35, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 36, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 37, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 38, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 39, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 40, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 41, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 42, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 43, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 44, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 45, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 46, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 47, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 48, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 49, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 50, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 51, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 52, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 53, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 54, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 55, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 56, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 57, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 58, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 59, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 60, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 61, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 62, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 63, chan 1
+@@@@@@@@@ reg convert: ** empty ** , frame 64, chan 1
+@@@@@@@@@ reg convert: reg 0xa , data [0], frame 0, chan 2
+       reg convert: reg 0xaa , data 0
+@@@@@@@@@ reg convert: reg 0xb , data [1], frame 0, chan 2
+       reg convert: reg 0xab , data 1
+@@@@@@@@@ reg convert: reg 0x4 , data [95], frame 0, chan 2
+       reg convert: reg 0x5f , data [95]
+@@@@@@@@@ reg convert: reg 0x4 , data [31], frame 0, chan 2
+       reg convert: reg 0x1f , data [31]
+@@@@@@@@@ reg convert: reg 0x10 , data [0], frame 0, chan 2
+       reg convert: reg 0xb0 , data 0
+@@@@@@@@@ reg convert: reg 0x5 , data [255], frame 0, chan 2
+       reg convert: reg 0xa5 , data 255
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 0, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: reg 0x4 , data [95], frame 0, chan 2
+       reg convert: reg 0x5f , data [95]
+@@@@@@@@@ reg convert: reg 0x4 , data [31], frame 0, chan 2
+       reg convert: reg 0x1f , data [31]
+@@@@@@@@@ reg convert: reg 0x10 , data [1], frame 0, chan 2
+       reg convert: reg 0xb0 , data 1
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 0, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: reg 0x2 , data [224, 0], frame 0, chan 2
+       reg convert: reg 0xc0 , data 224
+@@@@@@@@@ reg convert: reg 0x8 , data [255], frame 0, chan 2
+       reg convert: reg 0xa8 , data 255
+@@@@@@@@@ reg convert: reg 0x9 , data [0], frame 0, chan 2
+       reg convert: reg 0xa9 , data 0
+@@@@@@@@@ reg convert: ** empty ** , frame 1, chan 2
+@@@@@@@@@ reg convert: ** empty ** , frame 2, chan 2
+@@@@@@@@@ reg convert: ** empty ** , frame 3, chan 2
+@@@@@@@@@ reg convert: reg 0x4 , data [156], frame 4, chan 2
+       reg convert: reg 0x9c , data [156]
+@@@@@@@@@ reg convert: reg 0x4 , data [153], frame 5, chan 2
+       reg convert: reg 0x99 , data [153]
+@@@@@@@@@ reg convert: reg 0x4 , data [150], frame 6, chan 2
+       reg convert: reg 0x96 , data [150]
+@@@@@@@@@ reg convert: reg 0x4 , data [147], frame 7, chan 2
+       reg convert: reg 0x93 , data [147]
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 8, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: reg 0x4 , data [156], frame 8, chan 2
+       reg convert: reg 0x9c , data [156]
+@@@@@@@@@ reg convert: reg 0x2 , data [252, 0], frame 8, chan 2
+       reg convert: reg 0xc0 , data 252
+@@@@@@@@@ reg convert: reg 0x4 , data [153], frame 9, chan 2
+       reg convert: reg 0x99 , data [153]
+@@@@@@@@@ reg convert: reg 0x4 , data [150], frame 10, chan 2
+       reg convert: reg 0x96 , data [150]
+@@@@@@@@@ reg convert: reg 0x4 , data [147], frame 11, chan 2
+       reg convert: reg 0x93 , data [147]
+@@@@@@@@@ reg convert: reg 0x4 , data [144], frame 12, chan 2
+       reg convert: reg 0x90 , data [144]
+@@@@@@@@@ reg convert: reg 0x4 , data [141], frame 13, chan 2
+       reg convert: reg 0x8d , data [141]
+@@@@@@@@@ reg convert: ** empty ** , frame 14, chan 2
+@@@@@@@@@ reg convert: ** empty ** , frame 15, chan 2
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 16, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 16, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: ** empty ** , frame 17, chan 2
+@@@@@@@@@ reg convert: ** empty ** , frame 18, chan 2
+@@@@@@@@@ reg convert: ** empty ** , frame 19, chan 2
+@@@@@@@@@ reg convert: reg 0x4 , data [156], frame 20, chan 2
+       reg convert: reg 0x9c , data [156]
+@@@@@@@@@ reg convert: reg 0x4 , data [153], frame 21, chan 2
+       reg convert: reg 0x99 , data [153]
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 22, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 22, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: ** empty ** , frame 23, chan 2
+@@@@@@@@@ reg convert: ** empty ** , frame 24, chan 2
+@@@@@@@@@ reg convert: ** empty ** , frame 25, chan 2
+@@@@@@@@@ reg convert: ** empty ** , frame 26, chan 2
+@@@@@@@@@ reg convert: ** empty ** , frame 27, chan 2
+@@@@@@@@@ reg convert: reg 0x4 , data [156], frame 28, chan 2
+       reg convert: reg 0x9c , data [156]
+@@@@@@@@@ reg convert: reg 0x4 , data [153], frame 29, chan 2
+       reg convert: reg 0x99 , data [153]
+@@@@@@@@@ reg convert: ** empty ** , frame 30, chan 2
+@@@@@@@@@ reg convert: ** empty ** , frame 31, chan 2
+@@@@@@@@@ reg convert: ** empty ** , frame 32, chan 2
+@@@@@@@@@ reg convert: ** empty ** , frame 33, chan 2
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 34, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 34, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: ** empty ** , frame 35, chan 2
+@@@@@@@@@ reg convert: reg 0x4 , data [156], frame 36, chan 2
+       reg convert: reg 0x9c , data [156]
+@@@@@@@@@ reg convert: reg 0x4 , data [153], frame 37, chan 2
+       reg convert: reg 0x99 , data [153]
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 38, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 38, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: ** empty ** , frame 39, chan 2
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 40, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: reg 0x2 , data [252, 0], frame 40, chan 2
+       reg convert: reg 0xc0 , data 252
+@@@@@@@@@ reg convert: ** empty ** , frame 41, chan 2
+@@@@@@@@@ reg convert: reg 0x4 , data [156], frame 42, chan 2
+       reg convert: reg 0x9c , data [156]
+@@@@@@@@@ reg convert: reg 0x4 , data [153], frame 43, chan 2
+       reg convert: reg 0x99 , data [153]
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 44, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 44, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: ** empty ** , frame 45, chan 2
+@@@@@@@@@ reg convert: ** empty ** , frame 46, chan 2
+@@@@@@@@@ reg convert: ** empty ** , frame 47, chan 2
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 48, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: reg 0x2 , data [39, 1], frame 48, chan 2
+       reg convert: reg 0xc1 , data 39
+@@@@@@@@@ reg convert: reg 0x2 , data [35, 1], frame 49, chan 2
+       reg convert: reg 0xc1 , data 35
+@@@@@@@@@ reg convert: reg 0x2 , data [35, 1], frame 50, chan 2
+       reg convert: reg 0xc1 , data 35
+@@@@@@@@@ reg convert: ** empty ** , frame 51, chan 2
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 52, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: reg 0x2 , data [27, 1], frame 52, chan 2
+       reg convert: reg 0xc1 , data 27
+@@@@@@@@@ reg convert: ** empty ** , frame 53, chan 2
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 54, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: reg 0x2 , data [43, 1], frame 54, chan 2
+       reg convert: reg 0xc1 , data 43
+@@@@@@@@@ reg convert: ** empty ** , frame 55, chan 2
+@@@@@@@@@ reg convert: reg 0x4 , data [156], frame 56, chan 2
+       reg convert: reg 0x9c , data [156]
+@@@@@@@@@ reg convert: reg 0x4 , data [153], frame 57, chan 2
+       reg convert: reg 0x99 , data [153]
+@@@@@@@@@ reg convert: ** empty ** , frame 58, chan 2
+@@@@@@@@@ reg convert: ** empty ** , frame 59, chan 2
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 60, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: reg 0x4 , data [159], frame 60, chan 2
+       reg convert: reg 0x9f , data [159]
+@@@@@@@@@ reg convert: ** empty ** , frame 61, chan 2
+@@@@@@@@@ reg convert: reg 0x4 , data [156], frame 62, chan 2
+       reg convert: reg 0x9c , data [156]
+@@@@@@@@@ reg convert: reg 0x4 , data [153], frame 63, chan 2
+       reg convert: reg 0x99 , data [153]
+@@@@@@@@@ reg convert: ** empty ** , frame 64, chan 2
+@@@@@@@@@ reg convert: reg 0xa , data [0], frame 0, chan 3
+       reg convert: reg 0xaa , data 0
+@@@@@@@@@ reg convert: reg 0xb , data [1], frame 0, chan 3
+       reg convert: reg 0xab , data 1
+@@@@@@@@@ reg convert: reg 0x4 , data [95], frame 0, chan 3
+       reg convert: reg 0x5f , data [95]
+@@@@@@@@@ reg convert: reg 0x4 , data [31], frame 0, chan 3
+       reg convert: reg 0x1f , data [31]
+@@@@@@@@@ reg convert: reg 0x10 , data [0], frame 0, chan 3
+       reg convert: reg 0xb0 , data 0
+@@@@@@@@@ reg convert: reg 0x5 , data [255], frame 0, chan 3
+       reg convert: reg 0xa5 , data 255
+@@@@@@@@@ reg convert: ** empty ** , frame 1, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 2, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 3, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 4, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 5, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 6, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 7, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 8, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 9, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 10, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 11, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 12, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 13, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 14, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 15, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 16, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 17, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 18, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 19, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 20, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 21, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 22, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 23, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 24, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 25, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 26, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 27, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 28, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 29, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 30, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 31, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 32, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 33, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 34, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 35, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 36, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 37, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 38, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 39, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 40, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 41, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 42, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 43, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 44, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 45, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 46, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 47, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 48, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 49, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 50, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 51, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 52, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 53, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 54, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 55, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 56, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 57, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 58, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 59, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 60, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 61, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 62, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 63, chan 3
+@@@@@@@@@ reg convert: ** empty ** , frame 64, chan 3
+@@@@@@@@@ reg convert: reg 0xa , data [0], frame 0, chan 4
+       reg convert: reg 0xaa , data 0
+@@@@@@@@@ reg convert: reg 0xb , data [1], frame 0, chan 4
+       reg convert: reg 0xab , data 1
+@@@@@@@@@ reg convert: reg 0x4 , data [95], frame 0, chan 4
+       reg convert: reg 0x5f , data [95]
+@@@@@@@@@ reg convert: reg 0x4 , data [31], frame 0, chan 4
+       reg convert: reg 0x1f , data [31]
+@@@@@@@@@ reg convert: reg 0x10 , data [0], frame 0, chan 4
+       reg convert: reg 0xb0 , data 0
+@@@@@@@@@ reg convert: reg 0x5 , data [255], frame 0, chan 4
+       reg convert: reg 0xa5 , data 255
+@@@@@@@@@ reg convert: ** empty ** , frame 1, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 2, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 3, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 4, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 5, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 6, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 7, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 8, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 9, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 10, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 11, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 12, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 13, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 14, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 15, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 16, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 17, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 18, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 19, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 20, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 21, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 22, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 23, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 24, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 25, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 26, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 27, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 28, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 29, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 30, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 31, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 32, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 33, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 34, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 35, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 36, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 37, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 38, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 39, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 40, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 41, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 42, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 43, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 44, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 45, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 46, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 47, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 48, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 49, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 50, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 51, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 52, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 53, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 54, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 55, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 56, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 57, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 58, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 59, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 60, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 61, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 62, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 63, chan 4
+@@@@@@@@@ reg convert: ** empty ** , frame 64, chan 4
+@@@@@@@@@ reg convert: reg 0xa , data [0], frame 0, chan 5
+       reg convert: reg 0xaa , data 0
+@@@@@@@@@ reg convert: reg 0xb , data [1], frame 0, chan 5
+       reg convert: reg 0xab , data 1
+@@@@@@@@@ reg convert: reg 0x4 , data [95], frame 0, chan 5
+       reg convert: reg 0x5f , data [95]
+@@@@@@@@@ reg convert: reg 0x4 , data [31], frame 0, chan 5
+       reg convert: reg 0x1f , data [31]
+@@@@@@@@@ reg convert: reg 0x10 , data [0], frame 0, chan 5
+       reg convert: reg 0xb0 , data 0
+@@@@@@@@@ reg convert: reg 0x5 , data [255], frame 0, chan 5
+       reg convert: reg 0xa5 , data 255
+@@@@@@@@@ reg convert: ** empty ** , frame 1, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 2, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 3, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 4, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 5, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 6, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 7, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 8, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 9, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 10, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 11, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 12, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 13, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 14, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 15, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 16, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 17, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 18, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 19, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 20, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 21, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 22, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 23, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 24, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 25, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 26, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 27, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 28, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 29, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 30, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 31, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 32, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 33, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 34, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 35, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 36, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 37, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 38, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 39, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 40, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 41, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 42, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 43, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 44, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 45, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 46, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 47, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 48, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 49, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 50, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 51, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 52, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 53, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 54, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 55, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 56, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 57, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 58, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 59, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 60, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 61, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 62, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 63, chan 5
+@@@@@@@@@ reg convert: ** empty ** , frame 64, chan 5
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% bin len 127 , 191
+77
+Channel: 0
+
+
+    Frame: 0
+            Reg: 10, data: ['0x0']
+            Reg: 11, data: ['0x1']
+            Reg: 4, data: ['0x5f']
+            Reg: 4, data: ['0x1f']
+            Reg: 16, data: ['0x0']
+            Reg: 1, data: ['0xff']
+            Reg: 5, data: ['0xff']
+    Frame: 1
+        ... empty
+    Frame: 2
+        ... empty
+    Frame: 3
+        ... empty
+    Frame: 4
+        ... empty
+    Frame: 5
+        ... empty
+    Frame: 6
+        ... empty
+    Frame: 7
+        ... empty
+    Frame: 8
+        ... empty
+    Frame: 9
+        ... empty
+    Frame: 10
+        ... empty
+    Frame: 11
+        ... empty
+    Frame: 12
+        ... empty
+    Frame: 13
+        ... empty
+    Frame: 14
+        ... empty
+    Frame: 15
+        ... empty
+    Frame: 16
+        ... empty
+    Frame: 17
+        ... empty
+    Frame: 18
+        ... empty
+    Frame: 19
+        ... empty
+    Frame: 20
+        ... empty
+    Frame: 21
+        ... empty
+    Frame: 22
+        ... empty
+    Frame: 23
+        ... empty
+    Frame: 24
+        ... empty
+    Frame: 25
+        ... empty
+    Frame: 26
+        ... empty
+    Frame: 27
+        ... empty
+    Frame: 28
+        ... empty
+    Frame: 29
+        ... empty
+    Frame: 30
+        ... empty
+    Frame: 31
+        ... empty
+    Frame: 32
+        ... empty
+    Frame: 33
+        ... empty
+    Frame: 34
+        ... empty
+    Frame: 35
+        ... empty
+    Frame: 36
+        ... empty
+    Frame: 37
+        ... empty
+    Frame: 38
+        ... empty
+    Frame: 39
+        ... empty
+    Frame: 40
+        ... empty
+    Frame: 41
+        ... empty
+    Frame: 42
+        ... empty
+    Frame: 43
+        ... empty
+    Frame: 44
+        ... empty
+    Frame: 45
+        ... empty
+    Frame: 46
+        ... empty
+    Frame: 47
+        ... empty
+    Frame: 48
+        ... empty
+    Frame: 49
+        ... empty
+    Frame: 50
+        ... empty
+    Frame: 51
+        ... empty
+    Frame: 52
+        ... empty
+    Frame: 53
+        ... empty
+    Frame: 54
+        ... empty
+    Frame: 55
+        ... empty
+    Frame: 56
+        ... empty
+    Frame: 57
+        ... empty
+    Frame: 58
+        ... empty
+    Frame: 59
+        ... empty
+    Frame: 60
+        ... empty
+    Frame: 61
+        ... empty
+    Frame: 62
+        ... empty
+    Frame: 63
+        ... empty
+    Frame: 64
+        ... empty
+Channel: 1
+
+
+    Frame: 0
+            Reg: 10, data: ['0x0']
+            Reg: 11, data: ['0x1']
+            Reg: 4, data: ['0x5f']
+            Reg: 4, data: ['0x1f']
+            Reg: 16, data: ['0x0']
+            Reg: 5, data: ['0xff']
+    Frame: 1
+        ... empty
+    Frame: 2
+        ... empty
+    Frame: 3
+        ... empty
+    Frame: 4
+        ... empty
+    Frame: 5
+        ... empty
+    Frame: 6
+        ... empty
+    Frame: 7
+        ... empty
+    Frame: 8
+        ... empty
+    Frame: 9
+        ... empty
+    Frame: 10
+        ... empty
+    Frame: 11
+        ... empty
+    Frame: 12
+        ... empty
+    Frame: 13
+        ... empty
+    Frame: 14
+        ... empty
+    Frame: 15
+        ... empty
+    Frame: 16
+        ... empty
+    Frame: 17
+        ... empty
+    Frame: 18
+        ... empty
+    Frame: 19
+        ... empty
+    Frame: 20
+        ... empty
+    Frame: 21
+        ... empty
+    Frame: 22
+        ... empty
+    Frame: 23
+        ... empty
+    Frame: 24
+        ... empty
+    Frame: 25
+        ... empty
+    Frame: 26
+        ... empty
+    Frame: 27
+        ... empty
+    Frame: 28
+        ... empty
+    Frame: 29
+        ... empty
+    Frame: 30
+        ... empty
+    Frame: 31
+        ... empty
+    Frame: 32
+        ... empty
+    Frame: 33
+        ... empty
+    Frame: 34
+        ... empty
+    Frame: 35
+        ... empty
+    Frame: 36
+        ... empty
+    Frame: 37
+        ... empty
+    Frame: 38
+        ... empty
+    Frame: 39
+        ... empty
+    Frame: 40
+        ... empty
+    Frame: 41
+        ... empty
+    Frame: 42
+        ... empty
+    Frame: 43
+        ... empty
+    Frame: 44
+        ... empty
+    Frame: 45
+        ... empty
+    Frame: 46
+        ... empty
+    Frame: 47
+        ... empty
+    Frame: 48
+        ... empty
+    Frame: 49
+        ... empty
+    Frame: 50
+        ... empty
+    Frame: 51
+        ... empty
+    Frame: 52
+        ... empty
+    Frame: 53
+        ... empty
+    Frame: 54
+        ... empty
+    Frame: 55
+        ... empty
+    Frame: 56
+        ... empty
+    Frame: 57
+        ... empty
+    Frame: 58
+        ... empty
+    Frame: 59
+        ... empty
+    Frame: 60
+        ... empty
+    Frame: 61
+        ... empty
+    Frame: 62
+        ... empty
+    Frame: 63
+        ... empty
+    Frame: 64
+        ... empty
+Channel: 2
+
+
+    Frame: 0
+            Reg: 10, data: ['0x0']
+            Reg: 11, data: ['0x1']
+            Reg: 4, data: ['0x5f']
+            Reg: 4, data: ['0x1f']
+            Reg: 16, data: ['0x0']
+            Reg: 5, data: ['0xff']
+            Reg: 4, data: ['0x9f']
+            Reg: 4, data: ['0x5f']
+            Reg: 4, data: ['0x1f']
+            Reg: 16, data: ['0x1']
+            Reg: 4, data: ['0x9f']
+            Reg: 2, data: ['0xe0', '0x0']
+            Reg: 8, data: ['0xff']
+            Reg: 9, data: ['0x0']
+    Frame: 1
+        ... empty
+    Frame: 2
+        ... empty
+    Frame: 3
+        ... empty
+    Frame: 4
+            Reg: 4, data: ['0x9c']
+    Frame: 5
+            Reg: 4, data: ['0x99']
+    Frame: 6
+            Reg: 4, data: ['0x96']
+    Frame: 7
+            Reg: 4, data: ['0x93']
+    Frame: 8
+            Reg: 4, data: ['0x9f']
+            Reg: 4, data: ['0x9c']
+            Reg: 2, data: ['0xfc', '0x0']
+    Frame: 9
+            Reg: 4, data: ['0x99']
+    Frame: 10
+            Reg: 4, data: ['0x96']
+    Frame: 11
+            Reg: 4, data: ['0x93']
+    Frame: 12
+            Reg: 4, data: ['0x90']
+    Frame: 13
+            Reg: 4, data: ['0x8d']
+    Frame: 14
+        ... empty
+    Frame: 15
+        ... empty
+    Frame: 16
+            Reg: 4, data: ['0x9f']
+            Reg: 4, data: ['0x9f']
+    Frame: 17
+        ... empty
+    Frame: 18
+        ... empty
+    Frame: 19
+        ... empty
+    Frame: 20
+            Reg: 4, data: ['0x9c']
+    Frame: 21
+            Reg: 4, data: ['0x99']
+    Frame: 22
+            Reg: 4, data: ['0x9f']
+            Reg: 4, data: ['0x9f']
+    Frame: 23
+        ... empty
+    Frame: 24
+        ... empty
+    Frame: 25
+        ... empty
+    Frame: 26
+        ... empty
+    Frame: 27
+        ... empty
+    Frame: 28
+            Reg: 4, data: ['0x9c']
+    Frame: 29
+            Reg: 4, data: ['0x99']
+    Frame: 30
+        ... empty
+    Frame: 31
+        ... empty
+    Frame: 32
+        ... empty
+    Frame: 33
+        ... empty
+    Frame: 34
+            Reg: 4, data: ['0x9f']
+            Reg: 4, data: ['0x9f']
+    Frame: 35
+        ... empty
+    Frame: 36
+            Reg: 4, data: ['0x9c']
+    Frame: 37
+            Reg: 4, data: ['0x99']
+    Frame: 38
+            Reg: 4, data: ['0x9f']
+            Reg: 4, data: ['0x9f']
+    Frame: 39
+        ... empty
+    Frame: 40
+            Reg: 4, data: ['0x9f']
+            Reg: 2, data: ['0xfc', '0x0']
+    Frame: 41
+        ... empty
+    Frame: 42
+            Reg: 4, data: ['0x9c']
+    Frame: 43
+            Reg: 4, data: ['0x99']
+    Frame: 44
+            Reg: 4, data: ['0x9f']
+            Reg: 4, data: ['0x9f']
+    Frame: 45
+        ... empty
+    Frame: 46
+        ... empty
+    Frame: 47
+        ... empty
+    Frame: 48
+            Reg: 4, data: ['0x9f']
+            Reg: 2, data: ['0x27', '0x1']
+    Frame: 49
+            Reg: 2, data: ['0x23', '0x1']
+    Frame: 50
+            Reg: 2, data: ['0x23', '0x1']
+    Frame: 51
+        ... empty
+    Frame: 52
+            Reg: 4, data: ['0x9f']
+            Reg: 2, data: ['0x1b', '0x1']
+    Frame: 53
+        ... empty
+    Frame: 54
+            Reg: 4, data: ['0x9f']
+            Reg: 2, data: ['0x2b', '0x1']
+    Frame: 55
+        ... empty
+    Frame: 56
+            Reg: 4, data: ['0x9c']
+    Frame: 57
+            Reg: 4, data: ['0x99']
+    Frame: 58
+        ... empty
+    Frame: 59
+        ... empty
+    Frame: 60
+            Reg: 4, data: ['0x9f']
+            Reg: 4, data: ['0x9f']
+    Frame: 61
+        ... empty
+    Frame: 62
+            Reg: 4, data: ['0x9c']
+    Frame: 63
+            Reg: 4, data: ['0x99']
+    Frame: 64
+        ... empty
+Channel: 3
+
+
+    Frame: 0
+            Reg: 10, data: ['0x0']
+            Reg: 11, data: ['0x1']
+            Reg: 4, data: ['0x5f']
+            Reg: 4, data: ['0x1f']
+            Reg: 16, data: ['0x0']
+            Reg: 5, data: ['0xff']
+    Frame: 1
+        ... empty
+    Frame: 2
+        ... empty
+    Frame: 3
+        ... empty
+    Frame: 4
+        ... empty
+    Frame: 5
+        ... empty
+    Frame: 6
+        ... empty
+    Frame: 7
+        ... empty
+    Frame: 8
+        ... empty
+    Frame: 9
+        ... empty
+    Frame: 10
+        ... empty
+    Frame: 11
+        ... empty
+    Frame: 12
+        ... empty
+    Frame: 13
+        ... empty
+    Frame: 14
+        ... empty
+    Frame: 15
+        ... empty
+    Frame: 16
+        ... empty
+    Frame: 17
+        ... empty
+    Frame: 18
+        ... empty
+    Frame: 19
+        ... empty
+    Frame: 20
+        ... empty
+    Frame: 21
+        ... empty
+    Frame: 22
+        ... empty
+    Frame: 23
+        ... empty
+    Frame: 24
+        ... empty
+    Frame: 25
+        ... empty
+    Frame: 26
+        ... empty
+    Frame: 27
+        ... empty
+    Frame: 28
+        ... empty
+    Frame: 29
+        ... empty
+    Frame: 30
+        ... empty
+    Frame: 31
+        ... empty
+    Frame: 32
+        ... empty
+    Frame: 33
+        ... empty
+    Frame: 34
+        ... empty
+    Frame: 35
+        ... empty
+    Frame: 36
+        ... empty
+    Frame: 37
+        ... empty
+    Frame: 38
+        ... empty
+    Frame: 39
+        ... empty
+    Frame: 40
+        ... empty
+    Frame: 41
+        ... empty
+    Frame: 42
+        ... empty
+    Frame: 43
+        ... empty
+    Frame: 44
+        ... empty
+    Frame: 45
+        ... empty
+    Frame: 46
+        ... empty
+    Frame: 47
+        ... empty
+    Frame: 48
+        ... empty
+    Frame: 49
+        ... empty
+    Frame: 50
+        ... empty
+    Frame: 51
+        ... empty
+    Frame: 52
+        ... empty
+    Frame: 53
+        ... empty
+    Frame: 54
+        ... empty
+    Frame: 55
+        ... empty
+    Frame: 56
+        ... empty
+    Frame: 57
+        ... empty
+    Frame: 58
+        ... empty
+    Frame: 59
+        ... empty
+    Frame: 60
+        ... empty
+    Frame: 61
+        ... empty
+    Frame: 62
+        ... empty
+    Frame: 63
+        ... empty
+    Frame: 64
+        ... empty
+Channel: 4
+
+
+    Frame: 0
+            Reg: 10, data: ['0x0']
+            Reg: 11, data: ['0x1']
+            Reg: 4, data: ['0x5f']
+            Reg: 4, data: ['0x1f']
+            Reg: 16, data: ['0x0']
+            Reg: 5, data: ['0xff']
+    Frame: 1
+        ... empty
+    Frame: 2
+        ... empty
+    Frame: 3
+        ... empty
+    Frame: 4
+        ... empty
+    Frame: 5
+        ... empty
+    Frame: 6
+        ... empty
+    Frame: 7
+        ... empty
+    Frame: 8
+        ... empty
+    Frame: 9
+        ... empty
+    Frame: 10
+        ... empty
+    Frame: 11
+        ... empty
+    Frame: 12
+        ... empty
+    Frame: 13
+        ... empty
+    Frame: 14
+        ... empty
+    Frame: 15
+        ... empty
+    Frame: 16
+        ... empty
+    Frame: 17
+        ... empty
+    Frame: 18
+        ... empty
+    Frame: 19
+        ... empty
+    Frame: 20
+        ... empty
+    Frame: 21
+        ... empty
+    Frame: 22
+        ... empty
+    Frame: 23
+        ... empty
+    Frame: 24
+        ... empty
+    Frame: 25
+        ... empty
+    Frame: 26
+        ... empty
+    Frame: 27
+        ... empty
+    Frame: 28
+        ... empty
+    Frame: 29
+        ... empty
+    Frame: 30
+        ... empty
+    Frame: 31
+        ... empty
+    Frame: 32
+        ... empty
+    Frame: 33
+        ... empty
+    Frame: 34
+        ... empty
+    Frame: 35
+        ... empty
+    Frame: 36
+        ... empty
+    Frame: 37
+        ... empty
+    Frame: 38
+        ... empty
+    Frame: 39
+        ... empty
+    Frame: 40
+        ... empty
+    Frame: 41
+        ... empty
+    Frame: 42
+        ... empty
+    Frame: 43
+        ... empty
+    Frame: 44
+        ... empty
+    Frame: 45
+        ... empty
+    Frame: 46
+        ... empty
+    Frame: 47
+        ... empty
+    Frame: 48
+        ... empty
+    Frame: 49
+        ... empty
+    Frame: 50
+        ... empty
+    Frame: 51
+        ... empty
+    Frame: 52
+        ... empty
+    Frame: 53
+        ... empty
+    Frame: 54
+        ... empty
+    Frame: 55
+        ... empty
+    Frame: 56
+        ... empty
+    Frame: 57
+        ... empty
+    Frame: 58
+        ... empty
+    Frame: 59
+        ... empty
+    Frame: 60
+        ... empty
+    Frame: 61
+        ... empty
+    Frame: 62
+        ... empty
+    Frame: 63
+        ... empty
+    Frame: 64
+        ... empty
+Channel: 5
+
+
+    Frame: 0
+            Reg: 10, data: ['0x0']
+            Reg: 11, data: ['0x1']
+            Reg: 4, data: ['0x5f']
+            Reg: 4, data: ['0x1f']
+            Reg: 16, data: ['0x0']
+            Reg: 5, data: ['0xff']
+    Frame: 1
+        ... empty
+    Frame: 2
+        ... empty
+    Frame: 3
+        ... empty
+    Frame: 4
+        ... empty
+    Frame: 5
+        ... empty
+    Frame: 6
+        ... empty
+    Frame: 7
+        ... empty
+    Frame: 8
+        ... empty
+    Frame: 9
+        ... empty
+    Frame: 10
+        ... empty
+    Frame: 11
+        ... empty
+    Frame: 12
+        ... empty
+    Frame: 13
+        ... empty
+    Frame: 14
+        ... empty
+    Frame: 15
+        ... empty
+    Frame: 16
+        ... empty
+    Frame: 17
+        ... empty
+    Frame: 18
+        ... empty
+    Frame: 19
+        ... empty
+    Frame: 20
+        ... empty
+    Frame: 21
+        ... empty
+    Frame: 22
+        ... empty
+    Frame: 23
+        ... empty
+    Frame: 24
+        ... empty
+    Frame: 25
+        ... empty
+    Frame: 26
+        ... empty
+    Frame: 27
+        ... empty
+    Frame: 28
+        ... empty
+    Frame: 29
+        ... empty
+    Frame: 30
+        ... empty
+    Frame: 31
+        ... empty
+    Frame: 32
+        ... empty
+    Frame: 33
+        ... empty
+    Frame: 34
+        ... empty
+    Frame: 35
+        ... empty
+    Frame: 36
+        ... empty
+    Frame: 37
+        ... empty
+    Frame: 38
+        ... empty
+    Frame: 39
+        ... empty
+    Frame: 40
+        ... empty
+    Frame: 41
+        ... empty
+    Frame: 42
+        ... empty
+    Frame: 43
+        ... empty
+    Frame: 44
+        ... empty
+    Frame: 45
+        ... empty
+    Frame: 46
+        ... empty
+    Frame: 47
+        ... empty
+    Frame: 48
+        ... empty
+    Frame: 49
+        ... empty
+    Frame: 50
+        ... empty
+    Frame: 51
+        ... empty
+    Frame: 52
+        ... empty
+    Frame: 53
+        ... empty
+    Frame: 54
+        ... empty
+    Frame: 55
+        ... empty
+    Frame: 56
+        ... empty
+    Frame: 57
+        ... empty
+    Frame: 58
+        ... empty
+    Frame: 59
+        ... empty
+    Frame: 60
+        ... empty
+    Frame: 61
+        ... empty
+    Frame: 62
+        ... empty
+    Frame: 63
+        ... empty
+    Frame: 64
+        ... empty
+Done

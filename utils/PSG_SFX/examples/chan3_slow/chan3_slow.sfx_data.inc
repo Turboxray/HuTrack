@@ -1,0 +1,7 @@
+ .include "chan3_slow.dataTable.inc"
+ .include "chan3_slow.chan0.inc"
+ .include "chan3_slow.chan1.inc"
+ .include "chan3_slow.chan2.inc"
+ .include "chan3_slow.chan3.inc"
+ .include "chan3_slow.chan4.inc"
+ .include "chan3_slow.chan5.inc"

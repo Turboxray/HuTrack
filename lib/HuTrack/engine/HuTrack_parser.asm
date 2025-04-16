@@ -1328,15 +1328,21 @@ HuTrack.channel.FX.handler:
 ; E1xx
 .extFX.NoteSlideUp
           plx
+            ;// The number of semitones total to advance up-wards
             lda HuTrack.channel.current.fxArg
             and #$0f
             sta HuTrack.channel.semitoneUP.op,x
-            sta HuTrack.channel.semitoneUP.cent,x
             stz HuTrack.channel.semitoneUP.note,x
+
+            ;// the speed, or number of ticks before a single up-ward semitone is applied
             lda HuTrack.channel.current.fxArg
             and #$f0
-            asl a
-            sta HuTrack.channel.semitoneUP.delta,x
+            lsr a
+            lsr a
+            lsr a
+            lsr a
+            sta HuTrack.channel.semitoneUP.cntr,x
+            sta HuTrack.channel.semitoneUP.speed,x
   rts
 
 ;...........................................................
@@ -1344,14 +1350,21 @@ HuTrack.channel.FX.handler:
 ; E2xx
 .extFX.NoteSlideDown
           plx
+            ;// The number of semitones total to advance down-wards
+            lda HuTrack.channel.current.fxArg
             and #$0f
             sta HuTrack.channel.semitoneDOWN.op,x
-            sta HuTrack.channel.semitoneDOWN.cent,x
             stz HuTrack.channel.semitoneDOWN.note,x
+
+            ;// the speed, or number of ticks before a single down-ward semitone is applied
             lda HuTrack.channel.current.fxArg
             and #$f0
-            asl a
-            sta HuTrack.channel.semitoneDOWN.delta,x
+            lsr a
+            lsr a
+            lsr a
+            lsr a
+            sta HuTrack.channel.semitoneDOWN.cntr,x
+            sta HuTrack.channel.semitoneDOWN.speed,x
   rts
 
 ;...........................................................
@@ -2274,8 +2287,15 @@ HuTrackEngine.Channel.arpEnv
 .period.done
         tay
         lda HuTrackEngine.tables.noteFromCombo,y
+        clc
+        adc HuTrack.channel.appliedNote,x
         sta HuTrack.channel.appliedNote,x
+        cmp #12
+      bcc .skip.octave.carry
+        stz HuTrack.channel.appliedNote,x
+.skip.octave.carry
         lda HuTrack.process.temp0
+        adc HuTrack.channel.appliedOctave,x
         sta HuTrack.channel.appliedOctave,x
 
 .out
@@ -2654,6 +2674,11 @@ HuTrackEngine.Process.envelopes
 ; These are for the on going FX like slides and LFOs
 HuTrackEngine.Channel.exeFX
 
+        lda HuTrack.channel.octave,x
+        sta HuTrack.channel.appliedOctave,x
+        lda HuTrack.channel.note,x
+        sta HuTrack.channel.appliedNote,x
+
 .semiToneSlide.up
         lda HuTrack.channel.semitoneUP.op,x
       beq .semiToneSlide.down
@@ -2717,51 +2742,73 @@ HuTrackEngine.Channel.exeFX
 
 HuTrackEngine.Channel.exeFX.semitone.UP
 
-        lda HuTrack.channel.semitoneUP.delta,x
-        clc
-        adc HuTrack.channel.semitoneUP.cent,x
-        sta HuTrack.channel.semitoneUP.cent,x
-      bcc .apply
-        inc HuTrack.channel.semitoneUP.note,x
-        lda HuTrack.channel.semitoneUP.note,x
-      cmp HuTrack.channel.semitoneUP.op,x
-        bcc .apply
-.finished
-        stz HuTrack.channel.semitoneUP.op,x
+        dec HuTrack.channel.semitoneUP.cntr,x
+      bne .out
+        lda HuTrack.channel.semitoneUP.speed,x
+        sta HuTrack.channel.semitoneUP.cntr,x
 
-        lda HuTrack.channel.noteCent,x
-        sta HuTrack.channel.appliedCent,x
-        lda HuTrack.channel.semitoneUP.note,x
-        clc
-        adc HuTrack.channel.note,x
+        dec HuTrack.channel.semitoneUP.op,x
+      beq .out
+        inc HuTrack.channel.note,x
+        lda HuTrack.channel.note,x
         cmp #12
-      bcc .skip.octave.finished
+      bcc .skip.octave.inc
+.octave.inc
         inc HuTrack.channel.octave,x
-        cla
-.skip.octave.finished
-        sta HuTrack.channel.note,x
-        sta HuTrack.channel.appliedNote,x
-        lda HuTrack.channel.octave,x
-        adc #$00
-        sta HuTrack.channel.octave,x
-        sta HuTrack.channel.appliedOctave,x
-      bra .out
+        stz HuTrack.channel.note,x
 
-.apply
-        lda HuTrack.channel.noteCent,x
-        clc
-        adc HuTrack.channel.semitoneUP.cent,x
-        sta HuTrack.channel.appliedCent,x
-        lda HuTrack.channel.semitoneUP.note,x
-        adc HuTrack.channel.note,x
-        cmp #12
-      bcc .skip.octave.apply
-        cla
-.skip.octave.apply
-        sta HuTrack.channel.appliedNote,x
+.skip.octave.inc
         lda HuTrack.channel.octave,x
-        adc #$00
         sta HuTrack.channel.appliedOctave,x
+        lda HuTrack.channel.note,x
+        sta HuTrack.channel.appliedNote,x
+
+
+;         lda HuTrack.channel.semitoneUP.delta,x
+;         clc
+;         adc HuTrack.channel.semitoneUP.cent,x
+;         sta HuTrack.channel.semitoneUP.cent,x
+;       bcc .apply
+;         inc HuTrack.channel.semitoneUP.note,x
+;         lda HuTrack.channel.semitoneUP.note,x
+;       cmp HuTrack.channel.semitoneUP.op,x
+;         bcc .apply
+; .finished
+;         stz HuTrack.channel.semitoneUP.op,x
+
+;         lda HuTrack.channel.noteCent,x
+;         sta HuTrack.channel.appliedCent,x
+;         lda HuTrack.channel.semitoneUP.note,x
+;         clc
+;         adc HuTrack.channel.note,x
+;         cmp #12
+;       bcc .skip.octave.finished
+;         inc HuTrack.channel.octave,x
+;         cla
+; .skip.octave.finished
+;         sta HuTrack.channel.note,x
+;         sta HuTrack.channel.appliedNote,x
+;         lda HuTrack.channel.octave,x
+;         adc #$00
+;         sta HuTrack.channel.octave,x
+;         sta HuTrack.channel.appliedOctave,x
+;       bra .out
+
+; .apply
+;         lda HuTrack.channel.noteCent,x
+;         clc
+;         adc HuTrack.channel.semitoneUP.cent,x
+;         sta HuTrack.channel.appliedCent,x
+;         lda HuTrack.channel.semitoneUP.note,x
+;         adc HuTrack.channel.note,x
+;         cmp #12
+;       bcc .skip.octave.apply
+;         cla
+; .skip.octave.apply
+;         sta HuTrack.channel.appliedNote,x
+;         lda HuTrack.channel.octave,x
+;         adc #$00
+;         sta HuTrack.channel.appliedOctave,x
 
 .out
 
@@ -2773,47 +2820,69 @@ HuTrackEngine.Channel.exeFX.semitone.UP
 
 HuTrackEngine.Channel.exeFX.semitone.DOWN
 
-        lda HuTrack.channel.semitoneDOWN.delta,x
-        clc
-        adc HuTrack.channel.semitoneDOWN.cent,x
-        sta HuTrack.channel.semitoneDOWN.cent,x
-      bcc .apply
-        inc HuTrack.channel.semitoneDOWN.note,x
-        lda HuTrack.channel.semitoneDOWN.note,x
-      cmp HuTrack.channel.semitoneDOWN.op,x
-        bcc .apply
-.finished
-        stz HuTrack.channel.semitoneDOWN.op,x
+        dec HuTrack.channel.semitoneDOWN.cntr,x
+      bne .out
+        lda HuTrack.channel.semitoneDOWN.speed,x
+        sta HuTrack.channel.semitoneDOWN.cntr,x
 
-        lda HuTrack.channel.noteCent,x
-        sta HuTrack.channel.appliedCent,x
+        dec HuTrack.channel.semitoneDOWN.op,x
+      beq .out
+        dec HuTrack.channel.note,x
         lda HuTrack.channel.note,x
-        sbc HuTrack.channel.semitoneDOWN.note,x
-      bcs .skip.octave.finished
-        lda #11
-.skip.octave.finished
+        cmp #12
+      bcc .skip.octave.dec
+.octave.dec
+        dec HuTrack.channel.octave,x
+        lda #$11
         sta HuTrack.channel.note,x
-        sta HuTrack.channel.appliedNote,x
-        lda HuTrack.channel.octave,x
-        sbc #$00
-        sta HuTrack.channel.octave,x
-        sta HuTrack.channel.appliedOctave,x
-      bra .out
 
-.apply
-        lda HuTrack.channel.noteCent,x
-        sec
-        sbc HuTrack.channel.semitoneDOWN.cent,x
-        sta HuTrack.channel.appliedCent,x
-        lda HuTrack.channel.note,x
-        sbc HuTrack.channel.semitoneDOWN.note,x
-      bcs .skip.octave.apply
-        lda #11
-.skip.octave.apply
-        sta HuTrack.channel.appliedNote,x
+.skip.octave.dec
         lda HuTrack.channel.octave,x
-        sbc #$00
         sta HuTrack.channel.appliedOctave,x
+        lda HuTrack.channel.note,x
+        sta HuTrack.channel.appliedNote,x
+
+;         lda HuTrack.channel.semitoneDOWN.delta,x
+;         clc
+;         adc HuTrack.channel.semitoneDOWN.cent,x
+;         sta HuTrack.channel.semitoneDOWN.cent,x
+;       bcc .apply
+;         inc HuTrack.channel.semitoneDOWN.note,x
+;         lda HuTrack.channel.semitoneDOWN.note,x
+;       cmp HuTrack.channel.semitoneDOWN.op,x
+;         bcc .apply
+; .finished
+;         stz HuTrack.channel.semitoneDOWN.op,x
+
+;         lda HuTrack.channel.noteCent,x
+;         sta HuTrack.channel.appliedCent,x
+;         lda HuTrack.channel.note,x
+;         sbc HuTrack.channel.semitoneDOWN.note,x
+;       bcs .skip.octave.finished
+;         lda #11
+; .skip.octave.finished
+;         sta HuTrack.channel.note,x
+;         sta HuTrack.channel.appliedNote,x
+;         lda HuTrack.channel.octave,x
+;         sbc #$00
+;         sta HuTrack.channel.octave,x
+;         sta HuTrack.channel.appliedOctave,x
+;       bra .out
+
+; .apply
+;         lda HuTrack.channel.noteCent,x
+;         sec
+;         sbc HuTrack.channel.semitoneDOWN.cent,x
+;         sta HuTrack.channel.appliedCent,x
+;         lda HuTrack.channel.note,x
+;         sbc HuTrack.channel.semitoneDOWN.note,x
+;       bcs .skip.octave.apply
+;         lda #11
+; .skip.octave.apply
+;         sta HuTrack.channel.appliedNote,x
+;         lda HuTrack.channel.octave,x
+;         sbc #$00
+;         sta HuTrack.channel.appliedOctave,x
 
 .out
 

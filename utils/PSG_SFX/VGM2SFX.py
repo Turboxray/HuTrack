@@ -545,6 +545,12 @@ class ConvertVGM():
                         build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
                         output_str += build_str
                         output_str += self.commentDecode(val, 0 , len(build_str))
+                        try:
+                            if chan_block[idx+1] == 0xAA:
+                                wait_frame = -1
+                                output_str += f"\n\n;##################################################################################\n; Pattern Index {chan_block[idx+2]}\n"
+                        except:
+                            pass
                         wait_frame += 1
                         output_str += f"\n\n;..........................\n; frame {wait_frame}\n"
                         if skip_byte > 0:

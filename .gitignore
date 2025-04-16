@@ -8,3 +8,5 @@ S_log.txt
 *.s
 utils/wavs/
 .vscode
+internal_test.bat
+utils/PSG_SFX/internal_test/

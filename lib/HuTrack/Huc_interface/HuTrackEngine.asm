@@ -9,6 +9,15 @@
 
   ;// This is a quick fix because current version of HuC doesn't have the proper VDC mask hanlder code.
 
+HUTRACK_HUC_HUCC_RETURN .macro
+
+  .ifndef HUCC
+      sax
+      sxy
+  .endif
+
+  .endm
+
 
 ;...............................................
 ;
@@ -323,6 +332,33 @@ _HuTrackEngine_chanRelease.1:
 .out
     rts
 
+;//.........................................................
+; int __fastcall HuTrackEngine_PCMStatus(unsigned char channel<__al>);
+; NOTE: HuCC return style (Y:A). Return macro swaps back to HuC format (A:X).
+_HuTrackEngine_PCMStatus.1:
+      ldx <__al
+        cpx #$06
+      bcs .error
+        bit HuTrack.SFX.inProgress,x
+      bpl .error
+        lda <HuTrack.dda.bank,x
+        cmp #$80 
+      beq .nosfx      
+        lda #1
+        cly
+      bra .return
+.nosfx  
+        cla 
+        cly    
+      bra .return
+.error 
+        lda #2
+        cly 
+  
+.return
+HUTRACK_HUC_HUCC_RETURN
+ rts
+
 ; int __fastcall HuTrackEngine_stopPcm (unsigned char channel<__al>);
 _HuTrackEngine_stopPcm.1:
         ldx <__al
@@ -501,19 +537,6 @@ _HuTrackEngine_SFXmode.1:
         cla
         sec
   rts
-
-;//.........................................................
-_getFarPointer.3
-
-            lda __fbank
-            sta [__ax]
-            cly
-            lda __fptr
-            sta [__bx],y
-            iny
-            lda __fptr+1
-            sta [__bx],y
-    rts
 
 ;//.........................................................
 

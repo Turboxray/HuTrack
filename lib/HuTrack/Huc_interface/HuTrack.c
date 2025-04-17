@@ -48,6 +48,7 @@ int __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, char far *p
 int __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, unsigned char bank<__fbank>,   unsigned int addr<__fptr>);
 int __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, char far *pcm<__fbank:__fptr>);
 int __fastcall HuTrackEngine_stopPcm   (unsigned char channel<__al>);
+int __fastcall HuTrackEngine_PCMStatus(unsigned char channel<__al>); 	//Returns status of the PCM streaming
 int __fastcall HuTrackEngine_SFXmode(unsigned char channel<__al>);
 int __fastcall HuTrackEngine_SFXmode();
 int __fastcall HuTrackEngineSFXrest(unsigned char channel<__al>);

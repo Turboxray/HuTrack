@@ -323,6 +323,32 @@ _HuTrackEngine_chanRelease.1:
 .out
     rts
 
+;//.........................................................
+; int __fastcall HuTrackEngine_PCMStatus(unsigned char channel<__al>);
+_HuTrackEngine_PCMStatus.1:
+      ldx <__al
+        cpx #$06
+      bcs .error
+        bit HuTrack.SFX.inProgress,x
+      bpl .error
+        lda <HuTrack.dda.bank,x
+        cmp #$80 
+      beq .nosfx      
+        lda #1
+        cly
+        clc
+        rts
+.nosfx  
+      cla 
+      cly 
+      clc       
+      rts 
+.error 
+      lda #2
+      cly 
+      sec 
+      rts 
+
 ; int __fastcall HuTrackEngine_stopPcm (unsigned char channel<__al>);
 _HuTrackEngine_stopPcm.1:
         ldx <__al
@@ -501,19 +527,6 @@ _HuTrackEngine_SFXmode.1:
         cla
         sec
   rts
-
-;//.........................................................
-_getFarPointer.3
-
-            lda __fbank
-            sta [__ax]
-            cly
-            lda __fptr
-            sta [__bx],y
-            iny
-            lda __fptr+1
-            sta [__bx],y
-    rts
 
 ;//.........................................................
 

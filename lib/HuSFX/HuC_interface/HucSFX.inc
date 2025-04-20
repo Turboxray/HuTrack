@@ -312,6 +312,13 @@ _HuSFXprocess_intf  .macro
 
 ;..............
 .804\@
+        cmp #$60
+      bcc .804.direct.reg
+        cmp $80
+      bcs .804.direct.reg
+        ora #$c0
+
+.804.direct.reg
         sta HuSFX.control,x
             php
         sei

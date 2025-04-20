@@ -1,28 +1,22 @@
 
 
-0x00 to 0x1f
+0x00 to 0x5f
 -===========-
                 volume                  no operand
                    |
                    |-> Write this directly to $804
 
-0x20 to 0x3f
--===========-
-                volume (DDA)            no operand
-                   |
-                   |-> Write this directly to $804
-
-0x40 to 0x5f
+0x60 to 0x7f
 -===========-
                 volume                  no operand
                    |
-                   |-> Write this directly to $804 with OR $80
+                   |-> Write this directly to $804 | $C0. Note: DDA volume
 
 0x80 to 0x9f
 -===========-
                 volume (DDA)            no operand
                    |
-                   |-> Write this directly to $804 with OR $C0
+                   |-> Write this directly to $804
 
 0xA0 to 0xA9
 -===========-
@@ -32,12 +26,12 @@
                    |
                    |-> (0xA0 to 0xAF) & 0x0f + $800 to create "resolved register number"
 
-0xAA 
+0xAA
 -===========-
                 (dummy) destination    one byte operand
                    |                         |
                    |                         |->  Pattern Index #
-                   |
+                   | -> No Op
 
 0xAB
 -===========-
@@ -45,6 +39,17 @@
                    |                         |
                    |                         |->  Pattern #
                    |
+                   | -> No Op
+
+
+0xAC to 0xAF
+-===========-
+                wait frames            no operand.   NOTE: This is a pseudo instruction, not a register write.
+                   |
+                   |
+                   |
+                   |-> (0xAC to 0xAF) - > 2,3,4,5 Number of times to wait frame
+
 
 0xB0
 -===-
@@ -52,6 +57,12 @@
                    |
                    |-> Waveform block number. Used as an index into table of 32byte entries. Write all 32bytes to $806
 
+0xB1 to 0xBF
+                volume values           no operand.   NOTE: This is a pseudo instruction, not a register write.
+                   |
+                   |
+                   |
+                   |-> (0xB1 to 0xBF) & 0x0f - signed nybble for relative volume adjustment AND end frame. NOTE: There is no 0 value.
 
 0xC0 to 0xCF
 -===========-
@@ -60,6 +71,38 @@
                    |                         |->  Write this directly to $803
                    |
                    |-> (0xC0 to 0xCF) & 0x0f to $802
+
+0xD0 to 0xDF
+                volume values           one byte operand.   NOTE: This is a pseudo instruction, not a register write.
+                   |                         |
+                   |                         |->  signed byte for perdio adjustment
+                   |
+                   |-> (0xD0 to 0xDF) & 0x0f - signed nybble for relative volume adjustment AND end frame.
+
+
+0xE0 to 0xEF
+-===========-
+                RESERVED (16 bytes)
+
+
+0xF0
+-===-
+                repeat last "frame"     one byte operand.   NOTE: This is a pseudo instruction, not a register write.
+                   |
+                   |-> Number of times to repeat last frame.
+
+0xF1 to 0xF8
+                repeat values           no operand.   NOTE: This is a pseudo instruction, not a register write.
+                   |
+                   |
+                   |
+                   |-> (0xF1 to 0xF6) & 0x0f - > Number of times to repeat last frame.
+
+
+0xF9 to 0xFA
+-===========-
+                RESERVED (2 bytes)
+
 
 0xfb
 -===-

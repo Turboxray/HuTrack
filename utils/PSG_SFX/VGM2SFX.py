@@ -5,6 +5,8 @@ import sys
 import tkinter as tk
 import traceback
 
+import json
+
 from pathlib import Path
 from tkinter import filedialog as fd
 from tkinter import messagebox
@@ -510,11 +512,37 @@ class ConvertVGM():
         #
         # channel data
 
-        bin_pattern_channels = self.decodePatterns(bin_channels)
 
+        print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+        encode_delta_bin = self.firstPassPrep(bin_channels)
+
+        json_string = json.dumps(encode_delta_bin, indent=4)
+        with open(self.args.sfxname+'_ENC_chan.txt', 'w') as f:
+            f.write(json_string)
+
+        print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+        frame_rle_eof_data = self.compressFrameEOF(encode_delta_bin)
+
+        json_string = json.dumps(frame_rle_eof_data, indent=4)
+        with open(self.args.sfxname+'_RLE-EOF_chan.txt', 'w') as f:
+            f.write(json_string)
+
+        print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+        RLE_bin_channels = self.compressFrameRLE(frame_rle_eof_data)
+
+
+        json_string = json.dumps(RLE_bin_channels, indent=4)
+        with open(self.args.sfxname+'_RLE_chan.txt', 'w') as f:
+            f.write(json_string)
+
+        print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+        new_bin_pattern_channels = self.decodePatterns(RLE_bin_channels)
+
+
+        print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
         totalSongdataBinsize = 0
         data_labels = []
-        for num, chan_block in bin_channels.items():
+        for num, chan_block in RLE_bin_channels.items():
             print(f'chan mask: {self.args.chanproc }, {num}')
             if num not in self.args.chanproc:
                 continue
@@ -571,6 +599,11 @@ class ConvertVGM():
                         output_str += build_str
                         output_str += self.commentDecode(val, 0, len(build_str))
                         skip_byte = 0
+                    elif val >= 0x60 and val <= 0x7f:
+                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        output_str += build_str
+                        output_str += self.commentDecode(val, 0, len(build_str))
+                        skip_byte = 0
                     elif val >= 0x80 and val <= 0x9f:
                         build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
                         output_str += build_str
@@ -582,18 +615,40 @@ class ConvertVGM():
                         output_str += build_str
                         output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
                         skip_byte = 1
-                    elif val >= 0xC0 and val <= 0xCf:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        build_str  += f', ${hex(chan_block[idx+1]&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
-                        skip_byte = 1
                     elif val == 0xB0:
                         build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
                         build_str  += f', ${hex(chan_block[idx+1]&0xff)[2:]}'
                         output_str += build_str
                         output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
                         skip_byte = 1
+                    elif val >= 0xB1 and val <= 0xBF:
+                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        output_str += build_str
+                        output_str += self.commentDecode(val, 0, len(build_str))
+                        skip_byte = 0
+                    elif val >= 0xC0 and val <= 0xCF:
+                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        build_str  += f', ${hex(chan_block[idx+1]&0xff)[2:]}'
+                        output_str += build_str
+                        output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
+                        skip_byte = 1
+                    elif val >= 0xD0 and val <= 0xDF:
+                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        build_str  += f', ${hex(chan_block[idx+1]&0xff)[2:]}'
+                        output_str += build_str
+                        output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
+                        skip_byte = 1
+                    elif val == 0xF0:
+                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        build_str  += f', ${hex(chan_block[idx+1]&0xff)[2:]}'
+                        output_str += build_str
+                        output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
+                        skip_byte = 1
+                    elif val >= 0xF1 and val <= 0xF8:
+                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        output_str += build_str
+                        output_str += self.commentDecode(val, 0, len(build_str))
+                        skip_byte = 0
                     elif val == 0xFC:
                         build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
                         build_str  += f', ${hex((chan_block[idx+1]>>8)&0xff)[2:]}'
@@ -680,110 +735,700 @@ class ConvertVGM():
         self.debugPrint(f'Done')
         return True
 
-    def decodePatterns(self, bin_channels):
+    def firstPassPrep(self, bin_channels):
+        totalSongdataBinsize = 0
+        RLE_frame = 0
+        curr_frame = []
+        prev_frame = []
+        new_bin_chan_data = { 0 : [], 1: [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        reg_state_chan_data = { 0 : [], 1: [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        reg_chan_data = { 0 : [], 1: [], 2 : [], 3 : [], 4 : [], 5 : [] }
 
-        print("######################################################################################")
-        print("Processing compressed pattern sizes:")
-        channelPatterData = {}
+        json_string = json.dumps(bin_channels, indent=4)
+        with open(self.args.sfxname+'_bin_chan.txt', 'w') as f:
+            f.write(json_string)
+
+        # Group data into frames
+        raw_total_size = 0
         for num, chan_block in bin_channels.items():
-            print(f'chan mask: {self.args.chanproc }, {num}')
             if num not in self.args.chanproc:
-                print(f' - skipping')
                 continue
+            print(f'   --- (FP-pre) chan {num} RAW size: {len(chan_block)}')
+            raw_total_size += len(chan_block)
+        print(f'   --- (FP-pre) TOTAL RAW size: {raw_total_size}')
 
-            pattern_idx = -1
-            channelPatterData[num] = { }
-
-            if chan_block[0] != 0xaa:
-                print(f'\nVGM does not have Pattern index markers.\n')
-                self.debugPrint(f'\nVGM does not have Pattern index markers.\n')
-                return
+        # Convert to Reg updates and group as frames
+        for num, chan_block in bin_channels.items():
+            print(f' (FP-1) chan {num}')
+            if num not in self.args.chanproc:
+                print(f' - Skipping channel {num}')
+                continue
 
             skip_byte = 0
             for idx, val in enumerate(chan_block):
 
-                    if skip_byte > 0 :
-                        skip_byte -= 1
-                        continue
+                if skip_byte > 0 :
+                    skip_byte -= 1
+                    continue
 
-                    if val == 0xffff:
-                        channelPatterData[num][pattern_idx].append(0xff)
-                        skip_byte = 0
-                        continue
+                if val == 0xffff:
+                    reg_chan_data[num].append(curr_frame[:])
+                    curr_frame = []
+                else:
 
-                    elif val >= 0x00 and val <= 0x1f:
-                        channelPatterData[num][pattern_idx].append(val)
+                    if val >= 0x00 and val <= 0x1f:
+                        curr_frame.append( { hex(0x804)[2:] : hex(val) } )
                         skip_byte = 0
                     elif val >= 0x20 and val <= 0x3f:
-                        channelPatterData[num][pattern_idx].append(val)
+                        curr_frame.append( { hex(0x804)[2:] : hex(val) } )
                         skip_byte = 0
                     elif val >= 0x40 and val <= 0x5f:
-                        channelPatterData[num][pattern_idx].append(val)
+                        curr_frame.append( { hex(0x804)[2:] : hex(val) } )
                         skip_byte = 0
                     elif val >= 0x80 and val <= 0x9f:
-                        channelPatterData[num][pattern_idx].append(val)
+                        curr_frame.append( { hex(0x804)[2:] : hex(val) } )
                         skip_byte = 0
                     elif val >= 0xA0 and val <= 0xA9:
-                        channelPatterData[num][pattern_idx].append(val)
-                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
+                        curr_frame.append( { hex(0x800 | (val & 0x0f))[2:] : hex(chan_block[idx+1]) } )
                         skip_byte = 1
                     elif val == 0xAA:
+                        curr_frame.append( { hex(0x80A)[2:] : hex(chan_block[idx+1]) } )
                         skip_byte = 1
                     elif val == 0xAB:
-                        pattern_idx += 1
-                        channelPatterData[num][pattern_idx] = []
-                        channelPatterData[num][pattern_idx].append(val)
-                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
+                        curr_frame.append( { hex(0x80B)[2:] : hex(chan_block[idx+1]) } )
                         skip_byte = 1
                     elif val >= 0xC0 and val <= 0xCf:
-                        channelPatterData[num][pattern_idx].append(val)
-                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
+                        curr_frame.append( { hex(0x802)[2:] : hex(val & 0x0f) } )
+                        curr_frame.append( { hex(0x803)[2:] : hex(chan_block[idx+1]) } )
                         skip_byte = 1
                     elif val == 0xB0:
-                        channelPatterData[num][pattern_idx].append(val)
-                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
+                        curr_frame.append( { hex(0x80C)[2:] : hex(chan_block[idx+1]) } )
                         skip_byte = 1
                     elif val == 0xFC:
-                        channelPatterData[num][pattern_idx].append(val)
-                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
-                        skip_byte = 1
+                        print(f' ***** WARNING 0xFC ****** offset {idx}')
+                        curr_frame.append( { hex(0x80D)[2:] : hex(chan_block[idx+1] + chan_block[idx+2]<<8) } )
+                        skip_byte = 2
                     elif val == 0xFD:
-                        channelPatterData[num][pattern_idx].append(val)
+                        curr_frame.append( { hex(0x80E)[2:] : hex(-1) } )
                         skip_byte = 0
-                    elif val == 0xFE:
-                        channelPatterData[num][pattern_idx].append(val)
-                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
-                        skip_byte = 1
                     else:
                         error = (f'Error: cannot identify token command: chan {num}, offset {hex(idx)}, val {hex(val)}.')
                         print(error)
                         return False
 
-        # print(channelPatterData)
-        song_binary = []
-        for num, chan_block in bin_channels.items():
-            try:
-                pattern_blocks = channelPatterData[num]
-            except:
-                print(f'Skipping chan {num} blocks.')
+        # get reg "final state" in frame
+        final_reg_block = { ('frame_num' if i==-1 else 'r'+hex(0x800 + i)[2:]) : ('-0x2') for i in range (-1,16,1) }
+        last_reg_frame = final_reg_block
+        frame_counter = 0
+        for num, chan_block in reg_chan_data.items():
+            print(f' (FP-2) chan {num}')
+            if num not in self.args.chanproc:
+                print(f' - Skipping channel {num}')
                 continue
-            pattern_list_order = []
-            pattern_list_tracking = []
-            pattern_block_data = {}
-            track_binary = []
-            for patt_num, pattern_data in pattern_blocks.items():
-                pattern_list_order.append(pattern_data[1])
-                if pattern_data[1] not in pattern_list_tracking:
-                    pattern_list_tracking.append(pattern_data[1])
-                    pattern_block_data[patt_num] = pattern_data[:]
-                    track_binary = track_binary + pattern_data[:]
-            song_binary = song_binary + track_binary[:]
-            print(f' Chan {num}, plattern play list {pattern_list_order}')
-            print(f'  - binary size: {len(track_binary)}')
 
-        print(f' Song binary size: {len(song_binary)}')
+            for frame_idx, reg_block in enumerate(chan_block):
 
-        pass
+                for entry_num, container in enumerate(reg_block):
+                    for reg_key, reg_val in container.items():
+                        final_reg_block['r'+reg_key] = reg_val
+                curr_reg_frame = { reg : val for reg, val in final_reg_block.items() }
+                curr_reg_frame['frame_num'] = frame_counter
+                chan_block[frame_idx].append( { 'final_reg' : curr_reg_frame } )
+                chan_block[frame_idx].append( { 'diff_frame' : self.frame_reg_diff(curr_reg_frame, last_reg_frame) })
+                last_reg_frame = curr_reg_frame
+                frame_counter += 1
+
+        json_string = json.dumps(reg_chan_data, indent=4)
+        with open(self.args.sfxname+'_json.txt', 'w') as f:
+            f.write(json_string)
+
+        json_string = json.dumps(self.onlyRegFrame(reg_chan_data), indent=4)
+        with open(self.args.sfxname+'_reg_frame___1.txt', 'w') as f:
+            f.write(json_string)
+
+        final_reg_block = { ('frame_num' if i==-1 else 'r'+hex(0x800 + i)[2:]) : ('-0x2') for i in range (-1,16,1) }
+        frame_counter = 0
+        for num, chan_block in reg_chan_data.items():
+            print(f' (FP-3) chan {num}')
+            if num not in self.args.chanproc:
+                print(f' - Skipping channel {num}')
+                continue
+
+            for frame_idx, frame_block in enumerate(chan_block):
+
+                reg_writes = []
+                diff_frame = {}
+                state_frame = {}
+                for entry_num, reg_block in enumerate(frame_block):
+
+                    for reg_key, reg_val in reg_block.items():
+                        if reg_key == 'diff_frame':
+                            diff_frame = reg_val
+                        elif reg_key == 'final_reg':
+                            state_frame = reg_val
+                        else:
+                            reg_writes.append( [reg_key,reg_val] )
+                diff_frame_keys = list({ key[1:]: val for key,val in diff_frame.items() if val != '' }.keys())
+                new_frame = []
+                for key, val in reg_writes:
+                    if key == '80a':
+                        new_frame = [{key : val} for key, val in reg_writes]
+                        break
+                    if key in diff_frame_keys:
+                        new_frame.append({key : val})
+                for item in new_frame:
+                    for rkey, rval in item.items():
+                        final_reg_block['r'+rkey] = rval
+                curr_reg_frame = { reg : val for reg, val in final_reg_block.items() }
+                curr_reg_frame['frame_num'] = frame_counter
+                new_frame.append( { 'final_reg' : curr_reg_frame } )
+                # new_frame.append( { 'diff_frame' : diff_frame })
+                reg_chan_data[num][frame_idx] = new_frame[:]
+                frame_counter += 1
+
+        json_string = json.dumps(reg_chan_data, indent=4)
+        with open(self.args.sfxname+'_json___2.txt', 'w') as f:
+            f.write(json_string)
+
+        json_string = json.dumps(self.onlyRegFrame(reg_chan_data), indent=4)
+        with open(self.args.sfxname+'_reg_frame___2.txt', 'w') as f:
+            f.write(json_string)
+
+
+        # Re-encode
+
+        prev_state_frame = { ('frame_num' if i==-1 else 'r'+hex(0x800 + i)[2:]) : ('-0x2') for i in range (-1,16,1) }
+        chan_size = 0
+        total_size = 0
+        frame_counter = 0
+        encoded_chan_data = { 0 : [], 1: [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        return_for_RLE = { 0 : [], 1: [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        for num, chan_block in reg_chan_data.items():
+            print(f' (FP-3) chan {num}')
+            if num not in self.args.chanproc:
+                print(f' - Skipping channel {num}')
+                continue
+            chan_size = 0
+            for frame_idx, frame_block in enumerate(chan_block):
+
+                reg_writes = []
+                state_frame = {}
+                new_frame = []
+                for entry_num, reg_block in enumerate(frame_block):
+
+                    # all entries in the frame block
+                    for reg_key, reg_val in reg_block.items():
+                        if reg_key == 'final_reg':
+                            state_frame = reg_val
+                        else:
+                            reg_writes.append( [reg_key,reg_val] )
+                if state_frame == {}:
+                    print(f' $$$$$$$$$ Error: no frame reg found!')
+                    sys.exit(1)
+
+                reg_writes = self.encodeLevel2(reg_writes, state_frame, prev_state_frame)
+                encoded_chan_data[num] = encoded_chan_data[num] + reg_writes[:]
+                return_for_RLE[num].append(reg_writes[:])
+                chan_size += len(reg_writes)
+                new_frame.append( [hex(val)[3:] if val <0 else hex(val)[2:] for val in reg_writes] )
+                curr_frame = self.decodeFrame(reg_writes, prev_state_frame)
+                curr_frame['frame_num'] = frame_counter
+                new_frame.append( { 'final_reg' : curr_frame } )
+                reg_chan_data[num][frame_idx] = new_frame[:]
+                prev_state_frame = state_frame
+                frame_counter += 1
+            total_size += chan_size
+            print(f' ############# (FP-3) chan {num} size: {chan_size}')
+        print(f' ############## ----(FP-3) total size: {total_size}')
+
+        json_string = json.dumps(reg_chan_data, indent=4)
+        with open(self.args.sfxname+'_json___3.txt', 'w') as f:
+            f.write(json_string)
+
+        json_string = json.dumps(self.onlyRegFrame(reg_chan_data), indent=4)
+        with open(self.args.sfxname+'_reg_frame___3.txt', 'w') as f:
+            f.write(json_string)
+
+        json_string = json.dumps(encoded_chan_data, indent=4)
+        with open(self.args.sfxname+'_____encode_bin.txt', 'w') as f:
+            f.write(json_string)
+
+        # flatten chan data for return
+        return return_for_RLE #encoded_chan_data
+
+    def decodeFrame(self, encodedFrame, prev_state_frame):
+
+        diff_frame  = { ('frame_num' if i==-1 else 'r'+hex(0x800 + i)[2:]) : ('-0x2') for i in range (-1,16,1) }
+        state_frame = { reg : (val if reg=='frame_num' else int(val,16)) for reg,val in prev_state_frame.items() }     #deep copy
+
+        skipbyte = 0
+        for idx,val in enumerate(encodedFrame):
+            if skipbyte > 0:
+                skipbyte -= 1
+                continue
+
+            if val >= 0x00 and val <=0x5f:
+                state_frame['r804'] = val
+                skipbyte = 0
+            elif val >= 0x60 and val <=0x7f:
+                state_frame['r804'] = val | 0xC0
+                skipbyte = 0
+            elif val >= 0x80 and val <=0x9f:
+                state_frame['r804'] = val
+                skipbyte = 0
+            elif val >= 0xA0 and val <=0xA9:
+                state_frame['r80'+hex(val&0x0f)[2:]] = encodedFrame[idx+1]
+                skipbyte = 1
+            elif val == 0xAA:
+                state_frame['r80a'] = encodedFrame[idx+1]
+                skipbyte = 1
+            elif val == 0xAB:
+                state_frame['r80b'] = encodedFrame[idx+1]
+                skipbyte = 1
+            elif val == 0xB0:
+                state_frame['r80c'] = encodedFrame[idx+1]
+                skipbyte = 1
+            elif val >= 0xB1 and val <=0xBf:
+                state_frame['r804'] = state_frame['r804'] + self.signed4bit(val & 0x0f)
+                skipbyte = 0
+            elif val >= 0xC0 and val <=0xCf:
+                state_frame['r802'] = val & 0x0f
+                state_frame['r803'] = encodedFrame[idx+1]
+                skipbyte = 1
+            elif val >= 0xD0 and val <=0xDf:
+                state_frame['r804'] = state_frame['r804'] + self.signed4bit(val & 0x0f)
+                period = (state_frame['r802']<<8) + state_frame['r803']
+                period += self.signed8bit(encodedFrame[idx+1])
+                state_frame['r802'] = (period >> 8) & 0x0f
+                state_frame['r803'] = (period) & 0xff
+                skipbyte = 1
+            elif val == 0xF0:
+                pass
+                skipbyte = 1
+            elif val >= 0xF1 and val <=0xF8:
+                pass
+                skipbyte = 0
+            elif val == 0xFb:
+                pass
+                skipbyte = 0
+            elif val == 0xFc:
+                state_frame['r80c'] = (encodedFrame[idx+1]<<8) + encodedFrame[idx+2]
+                skipbyte = 2
+            elif val == 0xFd:
+                state_frame['r80e'] = -1
+                skipbyte = 0
+            elif val == 0xFe:
+                pass
+                skipbyte = 1
+            elif val == 0xFf:
+                pass
+                skipbyte = 0
+
+        return { reg : (val if reg=='frame_num' else hex(val)) for reg,val in state_frame.items() }
+
+    def signed4bit(self, val):
+        if val <=7:
+            return val
+        return (((val ^ 0xff) + 1) & 0x0f) * -1
+
+    def signed8bit(self, val):
+        if val <=127:
+            return val
+        return ((val ^ 0xff) + 1) * -1
+
+    def onlyRegFrame(self, bin_channel):
+        reg_chan_data = { 0 : [], 1: [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        for num, chan_block in bin_channel.items():
+            if num not in self.args.chanproc:
+                continue
+            for frame_idx, frame_block in enumerate(chan_block):
+                state_frame = {}
+                for entry_num, reg_block in enumerate(frame_block):
+                    try:
+                        for reg_key, reg_val in reg_block.items():
+                            if reg_key == 'final_reg':
+                                state_frame = reg_val
+                                break
+                    except:
+                        pass
+                reg_chan_data[num].append({reg: val for reg,val in state_frame.items()})
+
+        return reg_chan_data
+
+    def encodeLevel2(self, reg_writes, state_frame, prev_state_frame):
+
+        found_regs = { '801':[], '802':[], '803':[], '804':[], '805':[], '807':[], '808':[], '809':[], '80a':[], '80b':[], '80c':[], '80d':[],'80e':[] }
+
+        output = []
+        embedded_exit = False
+
+        for reg, val in reg_writes:
+            found_regs[reg].append(int(val,16))
+        prev_state_frame = { reg : (val if reg=='frame_num' else int(val,16)) for reg,val in prev_state_frame.items() }
+
+        # check for start of new pattern
+        if found_regs['80a'] != []:
+            # Do not encode as relative ops
+
+            output = output + [0xaa, found_regs['80a'][-1]]
+            output = output + [0xab, found_regs['80b'][-1]]
+
+            if found_regs['80d']:
+                upper = 0xFC
+                fist   = found_regs['80d'][-1]>>8 & 0xff
+                second = found_regs['80d'][-1] & 0xff
+                output = output + [upper, fist, second]
+
+            if found_regs['80e']:
+                upper = 0xFD
+                output = output + [upper]
+
+            if found_regs['80c']:
+                upper = 0xB0
+                lower = found_regs['80c'][-1]
+                output = output + [upper, lower]
+
+            if found_regs['805']:
+                upper = 0xA5
+                lower = found_regs['805'][-1]
+                output = output + [upper, lower]
+
+            if found_regs['801']:
+                upper = 0xA1
+                lower = found_regs['801'][-1]
+                output = output + [upper, lower]
+
+            if found_regs['807']:
+                upper = 0xA7
+                lower = found_regs['807'][-1]
+                output = output + [upper, lower]
+
+            if found_regs['808']:
+                upper = 0xA8
+                lower = found_regs['808'][-1]
+                output = output + [upper, lower]
+
+            if found_regs['809']:
+                upper = 0xA9
+                lower = found_regs['809'][-1]
+                output = output + [upper, lower]
+
+            if found_regs['802'] or found_regs['803']:
+                upper = ( found_regs['802'][-1] & 0x0f ) | 0xC0
+                lower = found_regs['803'][-1]
+                output = output + [upper, lower]
+
+            if found_regs['804']:
+                vol = found_regs['804'][-1]
+                if vol>= 0xC0 and vol <= 0xDF:
+                    vol = (vol - 0xC0) + 0x60
+                output = output + [vol]
+        else:
+            # Encode to relative ops
+
+            skip_vol = False
+
+            if found_regs['801']:
+                upper = 0xA1
+                lower = found_regs['801'][-1]
+                output = output + [upper, lower]
+
+            #..........................................................
+            if found_regs['80d']:
+                upper = 0xFC
+                fist   = found_regs['80d'][-1]>>8 & 0xff
+                second = found_regs['80d'][-1] & 0xff
+                output = output + [upper, fist, second]
+
+            #..........................................................
+            if found_regs['80e']:
+                upper = 0xFD
+                output = output + [upper]
+
+            #..........................................................
+            if found_regs['80c']:
+                upper = 0xB0
+                lower = found_regs['80c'][-1]
+                output = output + [upper, lower]
+
+            #..........................................................
+            if found_regs['805']:
+                upper = 0xA5
+                lower = found_regs['805'][-1]
+                output = output + [upper, lower]
+
+            #..........................................................
+            if found_regs['807']:
+                upper = 0xA7
+                lower = found_regs['807'][-1]
+                output = output + [upper, lower]
+
+            #..........................................................
+            if found_regs['808']:
+                upper = 0xA8
+                lower = found_regs['808'][-1]
+                output = output + [upper, lower]
+
+            #..........................................................
+            if found_regs['809']:
+                upper = 0xA9
+                lower = found_regs['809'][-1]
+                output = output + [upper, lower]
+
+            #..........................................................
+            if found_regs['802'] or found_regs['803']:
+
+                delta = 0xffff
+                if found_regs['802'] == []:
+                    upper = prev_state_frame['r802']
+                else:
+                    upper = found_regs['802'][-1]
+
+                if found_regs['803'] == []:
+                    lower = prev_state_frame['r803']
+                else:
+                    lower = found_regs['803'][-1]
+
+                prev_upper = prev_state_frame['r802']
+                prev_lower = prev_state_frame['r803']
+
+                if lower < 0:
+                    print(f" ===== Error: 803 is invalid: {lower}")
+                    sys.exit(1)
+                if upper < 0:
+                    print(f" ===== Error: 802 is invalid: {upper}")
+                    sys.exit(1)
+
+                if prev_lower < 0 and prev_upper < 0:
+                    # can't do relative encoding
+                    upper = ( upper & 0x0f ) | 0xC0
+                    lower = found_regs['803'][-1]
+                    output = output + [upper, lower]
+                    delta = 0xffff
+                else:
+                    prev_period = (prev_upper<<8) + prev_lower
+                    period = (upper<<8) + lower
+                    delta = period - prev_period
+
+                if delta != 0xffff:
+                    if delta >= -128 and delta <= 127:
+
+                        delta_period = delta
+                        delta_vol = None
+
+                        if found_regs['804']:
+                            vol = found_regs['804'][-1]
+                            if prev_state_frame['r804'] < 0:
+                                if vol>= 0xC0 and vol <= 0xDF:
+                                    vol = (vol - 0xC0) + 60
+                                output = output + [vol]
+                                skip_vol = True
+                            else:
+                                vol_detla = vol - prev_state_frame['r804']
+                                if vol_detla >= -8 and vol_detla <= 7:
+                                    delta_vol = vol_detla
+
+                        if delta_vol != None:
+                            upper = 0xD0 + (delta_vol & 0x0F)
+                            lower = delta_period
+                            output = output + [upper, lower]
+                            skip_vol = True
+                            embedded_exit = True
+                        else:
+                            # Do the volume update first, because the delta freq update is an embedded exit op
+                            if found_regs['804']:
+                                vol = found_regs['804'][-1]
+                                if vol>= 0xC0 and vol <= 0xDF:
+                                    vol = (vol - 0xC0) + 60
+                                output = output + [vol]
+                                skip_vol = True
+                            upper = 0xD0
+                            lower = delta_period
+                            output = output + [upper, lower]
+                            embedded_exit = True
+                    else:
+                        # can't do relative encoding
+                        upper = ( upper & 0x0f ) | 0xC0
+                        output = output + [upper, lower]
+                        skip_vol = False
+
+            #..........................................................
+            if found_regs['804'] and skip_vol == False:
+                vol = found_regs['804'][-1]
+                if prev_state_frame['r804'] < 0:
+                    # No delta available
+                    if vol>= 0xC0 and vol <= 0xDF:
+                        vol = (vol - 0xC0) + 60
+                    output = output + [vol]
+                else:
+                    vol_detla = vol - prev_state_frame['r804']
+                    if vol_detla == 0:
+                        pass
+                    if vol_detla >= -8 and vol_detla <= 7:
+                        vol = 0xB0 | (vol_detla & 0x0F)
+                        embedded_exit = True
+                    elif vol>= 0xC0 and vol <= 0xDF:
+                        vol = (vol - 0xC0) + 60
+                    output = output + [vol]
+
+        output = output + ([0xFF],[])[embedded_exit == True]
+
+        return output
+
+    def frame_reg_diff(self, curr_frame, last_frame):
+        diff_frame = { 'r'+hex(0x800 + i)[2:] : '' for i in range (16) }
+        for reg_key, val in curr_frame.items():
+            if val != last_frame[reg_key]:
+                diff_frame[reg_key] = val
+
+        return diff_frame
+
+    def compressFrameEOF(self, bin_channels):
+        RLE_frame = 0
+        curr_frame = []
+        prev_frame = []
+        new_bin_chan_data = { 0 : [], 1: [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        chan_size = 0
+        raw_chan_size = 0
+        raw_total_size = 0
+        total_size = 0
+        for num, chan_block in bin_channels.items():
+            if num not in self.args.chanproc:
+                continue
+
+            RLE_frame = 0
+
+            chan_size = 0
+            raw_chan_size = 0
+            for frame in chan_block:
+
+                curr_frame = frame[:]
+                raw_chan_size += len(curr_frame)
+                if len(curr_frame) == 1 and curr_frame[0] == 0xff:
+                    RLE_frame += 1
+                    if RLE_frame == 5:
+                        new_bin_chan_data[num].append([0xAC+(RLE_frame-2)])
+                        RLE_frame = 0
+                else:
+
+                    if RLE_frame > 0:
+                        # write original pending, then RLE frame
+                        if RLE_frame < 6:
+                            new_bin_chan_data[num].append([0xAC+(RLE_frame-2)])
+                            chan_size += 1
+                        else:
+                            print(f' ERROR!!! Internal EOF RLE pass limit!')
+                            sys.exit(1)
+
+                    new_bin_chan_data[num].append(curr_frame[:])
+                    chan_size += len(curr_frame[:])
+                    RLE_frame = 0
+            total_size += chan_size
+            raw_total_size += raw_chan_size
+
+            print(f'  --- Chan block raw size: {raw_chan_size}')
+            print(f' Post RLE_EOF Chan {num} size: {chan_size}')
+
+        print(f'  PRE Total size: {raw_total_size}')
+        print(f' POST RLE_EOF Total size: {total_size}')
+
+        return new_bin_chan_data
+
+    def compressFrameRLE(self, bin_channels):
+
+        RLE_frame = 0
+        curr_frame = []
+        prev_frame = []
+        new_bin_chan_data = { 0 : [], 1: [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        chan_size = 0
+        raw_chan_size = 0
+        raw_total_size = 0
+        total_size = 0
+        # print(json.dumps(bin_channels, indent=4))
+        for num, chan_block in bin_channels.items():
+            print(f'chan mask: {self.args.chanproc }, {num}')
+            if num not in self.args.chanproc:
+                print(f' - Skipping channel {num}')
+                continue
+
+            curr_frame = []
+            prev_frame = []
+            RLE_frame = 0
+
+            chan_size = 0
+            raw_chan_size = 0
+            for frame in chan_block:
+
+                curr_frame = frame[:]
+                raw_chan_size += len(curr_frame)
+                if self.compareFrames(curr_frame, prev_frame):
+                    RLE_frame += 1
+                    prev_frame = curr_frame[:]
+                    curr_frame = []
+                else:
+
+                    if RLE_frame > 0:
+                        # write original pending, then RLE frame
+                        if RLE_frame > 8:
+                            new_bin_chan_data[num].append([0xF0, RLE_frame])
+                            chan_size += 2
+                        else:
+                            new_bin_chan_data[num].append([0xF0 + RLE_frame])
+                            chan_size += 1
+                        prev_frame = []
+                    else:
+                        prev_frame = curr_frame[:]
+
+                    new_bin_chan_data[num].append(curr_frame[:])
+                    chan_size += len(curr_frame[:])
+                    RLE_frame = 0
+                    curr_frame = []
+            total_size += chan_size
+            raw_total_size += raw_chan_size
+
+            print(f'  --- Chan block raw size: {raw_chan_size}')
+            print(f' Post RLE Chan {num} size: {chan_size}')
+
+        print(f'  RAW Total size: {raw_total_size}')
+        print(f' POST RLE Total size: {total_size}')
+
+        return new_bin_chan_data
+
+    def compareFrames(self, alist, blist):
+        if len(alist) != len(blist):
+            return False
+        for a,b in zip(alist,blist):
+            if a != b:
+                return False
+        return True
+
+
+    def decodePatterns(self, bin_channels):
+
+        print("######################################################################################")
+        print("Processing compressed pattern sizes:")
+        channelPatterData = {}
+        pattern_index = { 0 : [], 1 : [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        # pattern_index = { 0 : [], 1 : [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        for num, chan_block in bin_channels.items():
+            if num not in self.args.chanproc:
+                continue
+
+            if chan_block[0][0] != 0xaa:
+                print(f'\nVGM does not have Pattern index markers.\n')
+                self.debugPrint(f'\nVGM does not have Pattern index markers.\n')
+                return
+
+            for frame_idx, frame in enumerate(chan_block):
+                    if frame[0] == 0xAA:
+                        print(frame)
+                        pattern_index[num].append([frame[1],frame[3],frame_idx])
+
+        for num, pattern_info in pattern_index.items():
+            print(f'  Chan {num} pattern list: {[block[1] for block in pattern_info]}')
+
+
+
 
     def asciiWaveform(self, waveform):
 
@@ -831,6 +1476,8 @@ class ConvertVGM():
             output_str += f" ; 804 -> ${hex(val-0x20+0xC0)[2:]}"
         elif val >= 0x40 and val <= 0x5f:
             output_str += f" ; 804 -> ${hex(val)[2:]}"
+        elif val >= 0x60 and val <= 0x7f:
+            output_str += f" ; 804 -> ${hex(val|0xC0)[2:]}"
         elif val >= 0x80 and val <= 0x9f:
             output_str += f" ; 804 -> ${hex(val)[2:]}"
         elif val >= 0xA0 and val <= 0xA9:
@@ -839,10 +1486,18 @@ class ConvertVGM():
             output_str += f" ; Pattern Index # {opr}"
         elif val == 0xAB:
             output_str += f" ; Pattern # {opr}"
-        elif val >= 0xC0 and val <= 0xCf:
+        elif val >= 0xC0 and val <= 0xCF:
             output_str += f" ; 802 -> ${hex(val)[2:][-1]}, 803 -> ${hex(opr)[2:]}"
+        elif val >= 0xD0 and val <= 0xDF:
+            output_str += f" ; 802:803 delta -> signed ${hex(opr)[2:][-1]}, 804 detla -> signed ${hex(val&0x0f)[2:]}"
         elif val == 0xB0:
             output_str += f" ; Waveform update #${hex(opr)[2:]}"
+        elif val >= 0xB1 and val <= 0xBF:
+            output_str += f" ; 804 detla -> signed ${hex(val&0x0f)[2:]}"
+        elif val == 0xF0:
+            output_str += f" ; Repeat last 'frame' for {opr} number of frames."
+        elif val >= 0xF1 and val <= 0xF8:
+            output_str += f" ; Repeat last 'frame' for {val & 0x0f} number of frames."
         elif val == 0xFB:
             output_str += f" ; End of channel stream"
         elif val == 0xFC:
@@ -852,7 +1507,7 @@ class ConvertVGM():
         elif val == 0xFE:
             output_str += f" ; Wait vblank {opr} frames."
         else:
-            error = (f'Error: cannot identify token command {val} .')
+            error = (f'Error: cannot identify token command {val} for comment.')
             if self.args.guiMode:
                 raise(error)
             print(error)
@@ -1136,7 +1791,7 @@ class ConvertVGM():
                 if self.compare_wf(cmp_wf, self.rotateWF(waveform, i) ):
                     return wf_idx
 
-        return False         
+        return False
 
     def waveformCheck(self, waveform, waveform_list):
 
@@ -1146,7 +1801,7 @@ class ConvertVGM():
                 if self.compare_wf(cmp_wf, self.rotateWF(waveform, i) ):
                     return True
 
-        return False            
+        return False
 
     def compare_wf(self, wf_1, wf_2):
         wf_1 = list(wf_1)

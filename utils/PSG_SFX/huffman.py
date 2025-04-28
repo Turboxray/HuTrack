@@ -43,8 +43,10 @@ def save_to_file(filename, compressed_data):
     for i in range(0, len(compressed_data), 8):
         byte = compressed_data[i:i+8]
         byte_data.append(int(byte, 2))
+    size = len(byte_data)
     with open(filename, "wb") as file:
         file.write(byte_data)
+    return size
 
 # Main function
 def main(args):
@@ -55,20 +57,28 @@ def main(args):
     with open(input_filename, "rb") as file:
         data = file.read()
 
+    raw_size = len(data)
     # Generate frequency dictionary
     frequency = calculate_frequency(data)
+    print(frequency)
+    # sorted_dictionaries = sorted(frequency, key=lambda x: x[''])
+    pairs = [(key,val) for key,val in frequency.items()]
+    pairs = sorted(pairs, key=lambda x: x[1])
+    print(pairs)
 
     # Build Huffman tree and codes
     huffman_tree = build_huffman_tree(frequency)
     huffman_codes = {symbol: code for symbol, code in huffman_tree}
+    print(huffman_tree)
 
     # Compress data using Huffman coding
     compressed_data = huffman_compress(data, huffman_codes)
 
     # Pad compressed data and save to file
     padded_data = pad_compressed_data(compressed_data)
-    save_to_file(output_filename, padded_data)
-    print(f"File compressed and saved to {output_filename}")
+    # comp_size = len(padded_data)
+    comp_size = save_to_file(output_filename, padded_data)
+    print(f"File compressed and saved to {output_filename}. Raw: {raw_size}, Comp: {comp_size}, ratio: {comp_size/raw_size}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=f'Convert VGM files to PCEAS source as Data. Ver: 1',

@@ -514,7 +514,7 @@ class ConvertVGM():
 
 
         print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-        encode_delta_bin = self.firstPassPrep(bin_channels)
+        encode_delta_bin = self.firstPassPrep(bin_channels, noEncode=False)
 
         json_string = json.dumps(encode_delta_bin, indent=4)
         with open(self.args.sfxname+'_ENC_chan.txt', 'w') as f:
@@ -536,143 +536,215 @@ class ConvertVGM():
             f.write(json_string)
 
         print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-        new_bin_pattern_channels = self.decodePatterns(RLE_bin_channels)
+        no_pattern_compress = False
+        if no_pattern_compress:
+            new_bin_pattern_channels = RLE_bin_channels
+        else:
+            new_bin_pattern_channels, chan_playlist, pattern_list_by_index = self.compressPatterns(RLE_bin_channels)
+
+            json_string = json.dumps(new_bin_pattern_channels, indent=4)
+            with open(self.args.sfxname+'_pattern-comp_chan.txt', 'w') as f:
+                f.write(json_string)
+
+            print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+            no_consolidate_pattern_chunk = False
+            if no_consolidate_pattern_chunk:
+                pass
+            else:
+                new_bin_pattern_channels = self.consolidatePatternBlocks(RLE_bin_channels, chan_playlist, pattern_list_by_index)
+
 
 
         print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
         totalSongdataBinsize = 0
         data_labels = []
-        for num, chan_block in RLE_bin_channels.items():
-            print(f'chan mask: {self.args.chanproc }, {num}')
+        # Convert any negative numbers into 2's compliment 8bit val
+        for num, chan_block in new_bin_pattern_channels.items():
             if num not in self.args.chanproc:
                 continue
+            for frame_num, frame_block in enumerate(chan_block):
+                for frame_idx, val in enumerate(frame_block):
+                    if val < 0:
+                        val = val * -1
+                        val = (val ^ 0xff) + 1
+                        new_bin_pattern_channels[num][frame_num][frame_idx] = val
 
+            # Output full binary of song data per channel
             if self.args.debugBin:
                 with open(f"{self.args.destfolder}/{self.args.sfxname}.chan{num}.bin",'wb') as f:
                     self.debugPrint(f' saving {num}: {chan_block}')
-                    prep_block = [val&0xff for val in chan_block]
-                    f.write(bytearray(prep_block))
+                    prep_block = []
+                    [[prep_block.append(val) for val in frame] for frame in chan_block]
+                    try:
+                        f.write(bytearray(prep_block))
+                    except Exception as e:
+                        print(e)
+                        print(prep_block)
                     f.write(bytearray([0xFB]))
-                print(f' - Chan {num} bin size: {len(chan_block)+1}.')
-                totalSongdataBinsize += len(chan_block)+1
+                print(f' - Chan {num} bin size: {len(prep_block)+1}.')
+                totalSongdataBinsize += len(prep_block)+1
+
+        # Separate patterns
+        # for num, chan_block in new_bin_pattern_channels.items():
+        #     if num not in self.args.chanproc:
+        #         continue
+        #     pattern_idx = -1
+        #     chan_patterns = []
+        #     new_data=False
+        #     for frame_num, frame_block in enumerate(chan_block):
+        #         if frame_block[0] == 0xAA:
+        #             pattern_idx +=1
+        #             if pattern_idx == 0:
+        #                 chan_patterns = chan_patterns + frame_block[:]
+        #                 continue
+        #             new_data=False
+        #             with open(f"{self.args.destfolder}/{self.args.sfxname}.chan{num}.pattern{pattern_idx}.pbin",'wb') as f:
+        #                 f.write(bytearray(chan_patterns))
+        #             print(f' Chan {num}: pattern {pattern_idx}. size: {len(chan_patterns)}')
+        #             chan_patterns = []
+        #         else:
+        #             chan_patterns = chan_patterns + frame_block[:]
+        #             new_data = True
+        #     if new_data:
+        #         with open(f"{self.args.destfolder}/{self.args.sfxname}.chan{num}.pattern{pattern_idx}.pbin",'wb') as f:
+        #             f.write(bytearray(chan_patterns))
+
+        # output full binary of song data
+        if self.args.debugBin:
+            with open(f"{self.args.destfolder}/{self.args.sfxname}.full.bin",'wb') as f:
+                for num, chan_block in new_bin_pattern_channels.items():
+                    if num not in self.args.chanproc:
+                        continue
+
+                    prep_block = []
+                    [[prep_block.append(val) for val in frame] for frame in chan_block]
+                    try:
+                        f.write(bytearray(prep_block))
+                    except Exception as e:
+                        print(e)
+                        print(prep_block)
+                    f.write(bytearray([0xFB]))
+
+
+        for num, chan_block in new_bin_pattern_channels.items():
+            print(f'chan mask: {self.args.chanproc }, {num}')
+            if num not in self.args.chanproc:
+                continue
 
             wait_frame = 0
             with open(f"{self.args.destfolder}/{self.args.sfxname}.chan{num}.inc",'w') as f:
                 output_str = f"\n.data.chan{num}\n"
                 data_labels.append(f".data.chan{num}")
-                output_str += f"\n\n;..........................\n; frame 0\n"
 
-                skip_byte  = 0
-                for idx, val in enumerate(chan_block):
+                for frame_num, frame_block in enumerate(chan_block):
+                    # print(f"frame num: {frame_num}.Size: {len(frame_block)}")
+                    output_str += f"\n\n;..........................\n; frame {frame_num}\n"
+                    skip_byte = 0
+                    for frame_idx, val in enumerate(frame_block):
+                        # print(f"     frame idx: {frame_idx}")
+                        if skip_byte > 0 :
+                            skip_byte -= 1
+                            continue
 
-                    if skip_byte > 0 :
-                        skip_byte -= 1
-                        continue
-
-                    if val == 0xffff:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, 0 , len(build_str))
-                        wait_frame += 1
-                        output_str += f"\n\n;..........................\n; frame {wait_frame}\n"
-                        if skip_byte > 0:
-                            error = (f'Error converting channel block {num}, offset {idx}.')
-                            if self.args.guiMode:
-                                raise(error)
+                        if val >= 0x00 and val <= 0x1f:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, 0, len(build_str))
+                            skip_byte = 0
+                        elif val >= 0x20 and val <= 0x3f:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, 0, len(build_str))
+                            skip_byte = 0
+                        elif val >= 0x40 and val <= 0x5f:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, 0, len(build_str))
+                            skip_byte = 0
+                        elif val >= 0x60 and val <= 0x7f:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, 0, len(build_str))
+                            skip_byte = 0
+                        elif val >= 0x80 and val <= 0x9f:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, 0, len(build_str))
+                            skip_byte = 0
+                        elif val >= 0xA0 and val <= 0xAB:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            build_str  += f', ${hex(frame_block[frame_idx+1]&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, frame_block[frame_idx+1], len(build_str))
+                            skip_byte = 1
+                        elif val >= 0xAC and val <= 0xAF:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, 0, len(build_str))
+                            skip_byte = 0
+                        elif val == 0xB0:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            build_str  += f', ${hex(frame_block[frame_idx+1]&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, frame_block[frame_idx+1], len(build_str))
+                            skip_byte = 1
+                        elif val >= 0xB1 and val <= 0xBF:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, 0, len(build_str))
+                            skip_byte = 0
+                        elif val >= 0xC0 and val <= 0xCF:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            build_str  += f', ${hex(frame_block[frame_idx+1]&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, frame_block[frame_idx+1], len(build_str))
+                            skip_byte = 1
+                        elif val >= 0xD0 and val <= 0xDF:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            build_str  += f', ${hex(frame_block[frame_idx+1]&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, frame_block[frame_idx+1], len(build_str))
+                            skip_byte = 1
+                        elif val == 0xF0:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            build_str  += f', ${hex(frame_block[frame_idx+1]&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, frame_block[frame_idx+1], len(build_str))
+                            skip_byte = 1
+                        elif val >= 0xF1 and val <= 0xF8:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, 0, len(build_str))
+                            skip_byte = 0
+                        elif val == 0xFC:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            build_str  += f', ${hex((frame_block[frame_idx+1]>>8)&0xff)[2:]}'
+                            build_str  += f', ${hex((frame_block[frame_idx+1]>>24)&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, frame_block[frame_idx+1], len(build_str))
+                            skip_byte = 1
+                        elif val == 0xFD:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, frame_block[frame_idx+1], len(build_str))
+                            skip_byte = 0
+                        elif val == 0xFE:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            build_str  += f', ${hex(frame_block[frame_idx+1]&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, frame_block[frame_idx+1], len(build_str))
+                            skip_byte = 1
+                        elif val == 0xFF:
+                            build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                            output_str += build_str
+                            output_str += self.commentDecode(val, 0, len(build_str))
+                            skip_byte = 0
+                        else:
+                            error = (f'Error: cannot identify token command: chan {num}, offset {hex(frame_idx)}, val {hex(val)}.')
+                            # if self.args.gui:
+                            #     raise(error)
                             print(error)
                             return False
-                        skip_byte = 0
-                        continue
-
-                    elif val >= 0x00 and val <= 0x1f:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, 0, len(build_str))
-                        skip_byte = 0
-                    elif val >= 0x20 and val <= 0x3f:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, 0, len(build_str))
-                        skip_byte = 0
-                    elif val >= 0x40 and val <= 0x5f:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, 0, len(build_str))
-                        skip_byte = 0
-                    elif val >= 0x60 and val <= 0x7f:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, 0, len(build_str))
-                        skip_byte = 0
-                    elif val >= 0x80 and val <= 0x9f:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, 0, len(build_str))
-                        skip_byte = 0
-                    elif val >= 0xA0 and val <= 0xAB:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        build_str  += f', ${hex(chan_block[idx+1]&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
-                        skip_byte = 1
-                    elif val == 0xB0:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        build_str  += f', ${hex(chan_block[idx+1]&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
-                        skip_byte = 1
-                    elif val >= 0xB1 and val <= 0xBF:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, 0, len(build_str))
-                        skip_byte = 0
-                    elif val >= 0xC0 and val <= 0xCF:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        build_str  += f', ${hex(chan_block[idx+1]&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
-                        skip_byte = 1
-                    elif val >= 0xD0 and val <= 0xDF:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        build_str  += f', ${hex(chan_block[idx+1]&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
-                        skip_byte = 1
-                    elif val == 0xF0:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        build_str  += f', ${hex(chan_block[idx+1]&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
-                        skip_byte = 1
-                    elif val >= 0xF1 and val <= 0xF8:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, 0, len(build_str))
-                        skip_byte = 0
-                    elif val == 0xFC:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        build_str  += f', ${hex((chan_block[idx+1]>>8)&0xff)[2:]}'
-                        build_str  += f', ${hex((chan_block[idx+1]>>24)&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
-                        skip_byte = 1
-                    elif val == 0xFD:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
-                        skip_byte = 0
-                    elif val == 0xFE:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
-                        build_str  += f', ${hex(chan_block[idx+1]&0xff)[2:]}'
-                        output_str += build_str
-                        output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
-                        skip_byte = 1
-                    else:
-                        error = (f'Error: cannot identify token command: chan {num}, offset {hex(idx)}, val {hex(val)}.')
-                        # if self.args.gui:
-                        #     raise(error)
-                        print(error)
-                        return False
 
                 build_str   = f'\n  .db $fb'
                 output_str += build_str
@@ -735,7 +807,7 @@ class ConvertVGM():
         self.debugPrint(f'Done')
         return True
 
-    def firstPassPrep(self, bin_channels):
+    def firstPassPrep(self, bin_channels, noEncode=False):
         totalSongdataBinsize = 0
         RLE_frame = 0
         curr_frame = []
@@ -926,7 +998,7 @@ class ConvertVGM():
                     print(f' $$$$$$$$$ Error: no frame reg found!')
                     sys.exit(1)
 
-                reg_writes = self.encodeLevel2(reg_writes, state_frame, prev_state_frame)
+                reg_writes = self.encodeLevel2(reg_writes, state_frame, prev_state_frame, noEncode)
                 encoded_chan_data[num] = encoded_chan_data[num] + reg_writes[:]
                 return_for_RLE[num].append(reg_writes[:])
                 chan_size += len(reg_writes)
@@ -1055,7 +1127,7 @@ class ConvertVGM():
 
         return reg_chan_data
 
-    def encodeLevel2(self, reg_writes, state_frame, prev_state_frame):
+    def encodeLevel2(self, reg_writes, state_frame, prev_state_frame, noEncode=False):
 
         found_regs = { '801':[], '802':[], '803':[], '804':[], '805':[], '807':[], '808':[], '809':[], '80a':[], '80b':[], '80c':[], '80d':[],'80e':[] }
 
@@ -1116,6 +1188,70 @@ class ConvertVGM():
             if found_regs['802'] or found_regs['803']:
                 upper = ( found_regs['802'][-1] & 0x0f ) | 0xC0
                 lower = found_regs['803'][-1]
+                output = output + [upper, lower]
+
+            if found_regs['804']:
+                vol = found_regs['804'][-1]
+                if vol>= 0xC0 and vol <= 0xDF:
+                    vol = (vol - 0xC0) + 0x60
+                output = output + [vol]
+        elif noEncode:
+            if found_regs['80d']:
+                upper = 0xFC
+                fist   = found_regs['80d'][-1]>>8 & 0xff
+                second = found_regs['80d'][-1] & 0xff
+                output = output + [upper, fist, second]
+
+            if found_regs['80e']:
+                upper = 0xFD
+                output = output + [upper]
+
+            if found_regs['80c']:
+                upper = 0xB0
+                lower = found_regs['80c'][-1]
+                output = output + [upper, lower]
+
+            if found_regs['805']:
+                upper = 0xA5
+                lower = found_regs['805'][-1]
+                output = output + [upper, lower]
+
+            if found_regs['801']:
+                upper = 0xA1
+                lower = found_regs['801'][-1]
+                output = output + [upper, lower]
+
+            if found_regs['807']:
+                upper = 0xA7
+                lower = found_regs['807'][-1]
+                output = output + [upper, lower]
+
+            if found_regs['808']:
+                upper = 0xA8
+                lower = found_regs['808'][-1]
+                output = output + [upper, lower]
+
+            if found_regs['809']:
+                upper = 0xA9
+                lower = found_regs['809'][-1]
+                output = output + [upper, lower]
+
+            if found_regs['802'] or found_regs['803']:
+                # upper = ( found_regs['802'][-1] & 0x0f ) | 0xC0
+                # lower = found_regs['803'][-1]
+                if found_regs['802'] == []:
+                    upper = prev_state_frame['r802']
+                else:
+                    upper = found_regs['802'][-1]
+
+                if found_regs['803'] == []:
+                    lower = prev_state_frame['r803']
+                else:
+                    lower = found_regs['803'][-1]
+
+                upper = ( upper & 0x0f ) | 0xC0
+                # lower = found_regs['803'][-1]
+
                 output = output + [upper, lower]
 
             if found_regs['804']:
@@ -1288,6 +1424,7 @@ class ConvertVGM():
         curr_frame = []
         prev_frame = []
         new_bin_chan_data = { 0 : [], 1: [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        final_bin_chan_data = { 0 : [], 1: [], 2 : [], 3 : [], 4 : [], 5 : [] }
         chan_size = 0
         raw_chan_size = 0
         raw_total_size = 0
@@ -1312,8 +1449,11 @@ class ConvertVGM():
                 else:
 
                     if RLE_frame > 0:
+                        if RLE_frame == 1:
+                            new_bin_chan_data[num].append([0xFF])
+                            chan_size += 1
                         # write original pending, then RLE frame
-                        if RLE_frame < 6:
+                        elif RLE_frame < 6:
                             new_bin_chan_data[num].append([0xAC+(RLE_frame-2)])
                             chan_size += 1
                         else:
@@ -1329,8 +1469,36 @@ class ConvertVGM():
             print(f'  --- Chan block raw size: {raw_chan_size}')
             print(f' Post RLE_EOF Chan {num} size: {chan_size}')
 
-        print(f'  PRE Total size: {raw_total_size}')
-        print(f' POST RLE_EOF Total size: {total_size}')
+        # print(f'  PRE Total size: {raw_total_size}')
+        # print(f' POST RLE_EOF Total size: {total_size}')
+
+        # for num, chan_block in new_bin_chan_data.items():
+        #     if num not in self.args.chanproc:
+        #         continue
+        #     for frame_idx, frame in enumerate(chan_block):
+        #         curr_frame = frame[:]
+        #         if len(curr_frame) == 1 and curr_frame[0] == 0xff:
+        #             if frame_idx > 0 and chan_block[frame_idx][-1] == 0xff:
+        #                 # print(chan_block[frame_idx-1])
+        #                 new_bin_chan_data[num][frame_idx-1][-1] = 0xAC+2
+        #                 new_bin_chan_data[num][frame_idx] = []
+
+        # chan_size = 0
+        # total_size = 0
+        # for num, chan_block in new_bin_chan_data.items():
+        #     if num not in self.args.chanproc:
+        #         continue
+        #     chan_size = 0
+        #     for frame_idx, frame in enumerate(chan_block):
+        #         curr_frame = frame[:]
+        #         if curr_frame != []:
+        #             final_bin_chan_data[num].append(curr_frame)
+        #             chan_size += len(frame)
+        #     total_size += chan_size
+
+        #     print(f' Final RLE_EOF Chan {num} size: {chan_size}')
+        # print(f' Final RLE_EOF Total size: {total_size}')
+
 
         return new_bin_chan_data
 
@@ -1402,14 +1570,111 @@ class ConvertVGM():
                 return False
         return True
 
+    def consolidatePatternBlocks(self, bin_channels, chan_playList, pattern_list_by_index):
+        new_bin_chan_data = { 0 : [], 1: [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        new_chan_playlist = { 0 : [], 1: [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        block_chan_playlist = { 0 : {}, 1: {}, 2 : {}, 3 : {}, 4 : {}, 5 : {} }
 
-    def decodePatterns(self, bin_channels):
+
+        for num, playList in chan_playList.items():
+            playList = [[0xffff,idx,val] for idx,val in enumerate(playList)]
+            marker = 0
+            for idx,ptrn in enumerate(playList):
+                new_found_match = False
+                for prev_idx, prev_ptrn in enumerate(playList[:idx]):
+                    if prev_ptrn[0] < 0:
+                        continue        # don't reference a reference
+                    if ptrn[2] == prev_ptrn[2]:
+                        ptrn[0] = -1 * prev_idx
+                        ptrn[1] = prev_idx
+                        if prev_ptrn[0] == 0xffff:
+                            prev_ptrn[0] = marker
+                            new_found_match = True
+                if not new_found_match:
+                    marker += 1
+            new_chan_playlist[num] = playList
+
+        # for num, playList in new_chan_playlist.items():
+            # print(f'COS - chan {num}: {playList}\n\n')
+
+        print("\n\n\n\n")
+
+        marker += 1000
+        for num, playList in new_chan_playlist.items():
+            for idx,ptrn in enumerate(playList):
+                if ptrn[0] == 0xFFFF:
+                    ptrn[0] = marker
+                else:
+                    marker += 1
+
+        for num, playList in new_chan_playlist.items():
+            marker_repeat = -1
+            for idx,ptrn in enumerate(playList):
+                if ptrn[0] < 0:
+                    ptrn[0] = marker_repeat
+                else:
+                    marker_repeat -= 1
+
+        for num, playList in new_chan_playlist.items():
+            for idx, ptrn in enumerate(playList):
+                if ptrn[0] < 0:
+                    try:
+                        block_chan_playlist[num][ptrn[0]].append(ptrn[2])
+                    except:
+                        block_chan_playlist[num][ptrn[0]] = [ptrn[2]]
+                else:
+                    try:
+                        block_chan_playlist[num][ptrn[0]].append(ptrn[2])
+                    except:
+                        block_chan_playlist[num][ptrn[0]] = [ptrn[2]]
+
+
+        # for num, playList in new_chan_playlist.items():
+        #     # playList = [[0xffff,idx,val] for idx,val in enumerate(playList)]
+        #     print(f'COS - chan {num}: {playList}\n\n')
+
+        for num, playList in new_chan_playlist.items():
+            # playList = [[0xffff,idx,val] for idx,val in enumerate(playList)]
+            print(f'COS - chan {num}: {block_chan_playlist[num]}\n\n')
+
+
+
+        sys.exit(1)
+
+        # for num, chan_block in bin_channels.items():
+        #     if num not in self.args.chanproc:
+        #         continue
+        #     pattern_idx = -1
+        #     chan_patterns = []
+        #     new_data=False
+        #     for frame_num, frame_block in enumerate(chan_block):
+        #         if frame_block[0] == 0xAA:
+        #             pattern_idx +=1
+        #             if pattern_idx == 0:
+        #                 chan_patterns = chan_patterns + frame_block[:]
+        #                 continue
+        #             new_data=False
+        #             with open(f"{self.args.destfolder}/{self.args.sfxname}.chan{num}.pattern{pattern_idx}.pbin",'wb') as f:
+        #                 f.write(bytearray(chan_patterns))
+        #             print(f' Chan {num}: pattern {pattern_idx}. size: {len(chan_patterns)}')
+        #             chan_patterns = []
+        #         else:
+        #             chan_patterns = chan_patterns + frame_block[:]
+        #             new_data = True
+        #     if new_data:
+        #         with open(f"{self.args.destfolder}/{self.args.sfxname}.chan{num}.pattern{pattern_idx}.pbin",'wb') as f:
+        #             f.write(bytearray(chan_patterns))        
+
+    def compressPatterns(self, bin_channels):
 
         print("######################################################################################")
         print("Processing compressed pattern sizes:")
         channelPatterData = {}
         pattern_index = { 0 : [], 1 : [], 2 : [], 3 : [], 4 : [], 5 : [] }
-        # pattern_index = { 0 : [], 1 : [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        final_playlist = { 0 : [], 1 : [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        pattern_compressed = { 0 : [], 1 : [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        chan_size = 0
+        total_size = 0
         for num, chan_block in bin_channels.items():
             if num not in self.args.chanproc:
                 continue
@@ -1421,14 +1686,31 @@ class ConvertVGM():
 
             for frame_idx, frame in enumerate(chan_block):
                     if frame[0] == 0xAA:
-                        print(frame)
+                        # print(frame)
                         pattern_index[num].append([frame[1],frame[3],frame_idx])
 
         for num, pattern_info in pattern_index.items():
-            print(f'  Chan {num} pattern list: {[block[1] for block in pattern_info]}')
+            print(f'  Chan {num} pattern list: {[block[1] for block in pattern_info]}. Size: {len(pattern_info)}')
+            final_playlist[num] = [block[1] for block in pattern_info]
+            pattern_track = []
+            chan_size = 0
+            for idx, ( play_inc, playorder_idx, pattern_idx) in enumerate(pattern_info):
+                if playorder_idx not in pattern_track:
+                    pattern_track.append(playorder_idx)
 
+                    try:
+                        next_idx = pattern_info[idx+1][2]
+                    except:
+                        next_idx = len(bin_channels[num])
+                    # print(f' p_index: {pattern_idx}. next: {next_idx}')
+                    for frame_idx in range(pattern_idx,next_idx,1):
+                        chan_size += len(bin_channels[num][frame_idx])
+                        pattern_compressed[num].append( bin_channels[num][frame_idx][:] )
+            total_size += chan_size
+            print(f" New RLE chan {num} size: {chan_size}")
+        print(f" New RLE total size: {total_size}")
 
-
+        return pattern_compressed, final_playlist, pattern_index
 
     def asciiWaveform(self, waveform):
 
@@ -1468,7 +1750,7 @@ class ConvertVGM():
             return ""
 
         output_str  = (48-length)*" "
-        if val == 0xffff:
+        if val == 0xff or val == 0xffff:
             output_str += f" ; Wait vblank"
         elif val >= 0x00 and val <= 0x1f:
             output_str += f" ; 804 -> ${hex(val)[2:]}"
@@ -1486,6 +1768,8 @@ class ConvertVGM():
             output_str += f" ; Pattern Index # {opr}"
         elif val == 0xAB:
             output_str += f" ; Pattern # {opr}"
+        elif val >= 0xAC and val <= 0xAF:
+            output_str += f" ; Wait vblank {(val-0xAC)+2} frames."
         elif val >= 0xC0 and val <= 0xCF:
             output_str += f" ; 802 -> ${hex(val)[2:][-1]}, 803 -> ${hex(opr)[2:]}"
         elif val >= 0xD0 and val <= 0xDF:
@@ -1493,7 +1777,7 @@ class ConvertVGM():
         elif val == 0xB0:
             output_str += f" ; Waveform update #${hex(opr)[2:]}"
         elif val >= 0xB1 and val <= 0xBF:
-            output_str += f" ; 804 detla -> signed ${hex(val&0x0f)[2:]}"
+            output_str += f" ; 804 detla -> signed ${hex(val&0x0f)[2:]} ({self.signed4bit(val & 0x0f)})"
         elif val == 0xF0:
             output_str += f" ; Repeat last 'frame' for {opr} number of frames."
         elif val >= 0xF1 and val <= 0xF8:

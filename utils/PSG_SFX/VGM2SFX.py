@@ -1574,7 +1574,10 @@ class ConvertVGM():
         new_bin_chan_data = { 0 : [], 1: [], 2 : [], 3 : [], 4 : [], 5 : [] }
         new_chan_playlist = { 0 : [], 1: [], 2 : [], 3 : [], 4 : [], 5 : [] }
         block_chan_playlist = { 0 : {}, 1: {}, 2 : {}, 3 : {}, 4 : {}, 5 : {} }
+        new_block_chan_playlist = { 0 : {}, 1: {}, 2 : {}, 3 : {}, 4 : {}, 5 : {} }
+        clean_block_chan_playlist = { 0 : {}, 1: {}, 2 : {}, 3 : {}, 4 : {}, 5 : {} }
 
+        chan_playList[0] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 17, 17, 17, 17, 17, 17, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 9, 10, 11, 12, 17,13, 14, 15, 16]
 
         for num, playList in chan_playList.items():
             playList = [[0xffff,idx,val] for idx,val in enumerate(playList)]
@@ -1636,6 +1639,115 @@ class ConvertVGM():
         for num, playList in new_chan_playlist.items():
             # playList = [[0xffff,idx,val] for idx,val in enumerate(playList)]
             print(f'COS - chan {num}: {block_chan_playlist[num]}\n\n')
+
+        for num, chanblock in block_chan_playlist.items():
+
+            for key, plist in chanblock.items():
+                if key > -1:
+                    new_block_chan_playlist[num][key] = plist[:]
+                else:
+                    # watch through the list of references
+                    found_match = False
+                    for s_key, s_plist in new_block_chan_playlist[num].items():
+                        if s_key > -1:
+                            if plist[0] == s_plist[0]:
+                                if len(s_plist) > len(plist):
+                                    print(f'Error: s:{s_plist}, p:{plist}')
+                                    sys.exit(1)
+                                elif len(s_plist) == len(plist):
+                                    if sum(1 for v1,v2 in zip(s_plist,plist) if v1 == v2) == len(s_plist):
+                                        print(f' chan {num}. Found match. s:{s_plist}, p:{plist}')
+                                        new_block_chan_playlist[num][key] = [plist[0] * -1]
+                                        found_match = True
+                                        break
+                                else:
+
+                                    print(f' chan {num}. NO match. s:{s_plist}, p:{plist}')
+                    if not found_match:
+                        new_block_chan_playlist[num][key] = plist[:]
+
+        for num, playList in new_block_chan_playlist.items():
+            # playList = [[0xffff,idx,val] for idx,val in enumerate(playList)]
+            print(f'pre step COS - chan {num}: {new_block_chan_playlist[num]}\n\n')
+
+        update_marker = -1000
+        for num, chanblock in new_block_chan_playlist.items():
+            for key, plist in chanblock.items():
+                if key > -1 or ( key < 0 and plist[0] < 0 ):
+                    # we already processed this.. just store it and move on.
+                    clean_block_chan_playlist[num][key] = plist[:]
+                else:
+                    # watch through the list of references
+                    found_match = False
+                    print(f'Checking: {plist}')
+                    save_plist = plist[:]
+                    while plist != []:
+                        found_match = False
+                        for s_key, s_plist in new_block_chan_playlist[num].items():
+                            if s_key > -1:
+                                print(f' searching: {s_key}, {s_plist}')
+                                min_pair = min(len(s_plist),len(plist))
+                                count_match = 0
+                                for i in range(min_pair):
+                                    if plist[i] == s_plist[i]:
+                                        count_match += 1
+                                    else:
+                                        if count_match == 0:
+                                            break
+                                        found_match = True
+                                        clean_block_chan_playlist[num][key + update_marker] = [plist[0] * -1]
+                                        plist = plist[count_match:]
+                                        print(f'Match: partial {clean_block_chan_playlist[num][key + update_marker]}, left over{plist}')
+                                        update_marker += -1000
+                                        break
+                                if count_match > 0 and found_match == False:
+                                    clean_block_chan_playlist[num][key + update_marker] = [plist[0] * -1]
+                                    plist = plist[count_match:]
+                                    print(f'Match: partial {clean_block_chan_playlist[num][key + update_marker]}, left over{plist}')
+                                    update_marker += -1000
+                        if len(save_plist) == len(plist):
+                            print(f'Error: ')
+                            sys.exit(1)
+
+        # Give the literal blocks an actual reference number
+        pre_final = { 0 : {}, 1: {}, 2 : {}, 3 : {}, 4 : {}, 5 : {} }
+        for num, chanblock in clean_block_chan_playlist.items():
+            update_marker = 0
+            for key, plist in chanblock.items():
+                if key > -1:
+                    # we already processed this.. just store it and move on.
+                    pre_final[num][update_marker] = plist[:]
+                    update_marker += 1
+                else:
+                    pre_final[num][key] = plist[:]
+
+        # Update reference blocks to match new literal IDs
+        for num, chanblock in pre_final.items():
+            update_marker = 0
+            for key, plist in chanblock.items():
+                if key < 0:
+                    for s_key, s_plist in pre_final[num].items():
+                        if s_key > -1 and (plist[0]*-1) == s_plist[0]:
+                            pre_final[num][key] = [s_key]
+
+        for num, playList in pre_final.items():
+            # playList = [[0xffff,idx,val] for idx,val in enumerate(playList)]
+            print(f'pre - final COS - chan {num}: {pre_final[num]}\n\n')
+
+
+        final_list = { 0 : [], 1: [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        for num, chanblock in pre_final.items():
+            for key, plist in chanblock.items():
+                if key < 0:
+                    final_list[num].append(plist[0])
+                else:
+                    final_list[num].append(key)
+
+
+
+        for num, playList in final_list.items():
+            # playList = [[0xffff,idx,val] for idx,val in enumerate(playList)]
+            print(f'final COS - chan {num}: {playList}\n\n')
 
 
 

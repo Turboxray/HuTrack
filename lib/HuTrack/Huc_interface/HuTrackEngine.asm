@@ -156,13 +156,15 @@ _HuTrackEngine_Stop:
         tam #$06
 
         ldx #05
-        lda #$DF
 .loop
+          php
+          sei
+          nop
         stx $800
-        sta $804
+        stz $804
         stz $807
-        stz $808
         stz $809
+          plp
       dex
         bpl .loop
   rts

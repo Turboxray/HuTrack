@@ -358,7 +358,7 @@ _HuTrackEngine_PCMStatus.1:
         cly 
   
 .return
-HUTRACK_HUC_HUCC_RETURN
+  HUTRACK_HUC_HUCC_RETURN
  rts
 
 ; int __fastcall HuTrackEngine_stopPcm (unsigned char channel<__al>);

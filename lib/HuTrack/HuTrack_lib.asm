@@ -409,7 +409,7 @@ HuTrackEngine.playSong:
         jsr HuTrackEngine.Reset
 
         lda <_hk.EAX0.m
-        sta song_repeat
+        sta force_no_repeat
 
         _htk.MOVE.b <_hk.EAX0.l, current_song
         _htk.MOVE.b <_hk.EAX0.l, REG_X

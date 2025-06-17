@@ -156,13 +156,15 @@ _HuTrackEngine_Stop:
         tam #$06
 
         ldx #05
-        lda #$DF
 .loop
+          php
+          sei
+          nop
         stx $800
-        sta $804
+        stz $804
         stz $807
-        stz $808
         stz $809
+          plp
       dex
         bpl .loop
   rts
@@ -356,7 +358,7 @@ _HuTrackEngine_PCMStatus.1:
         cly 
   
 .return
-HUTRACK_HUC_HUCC_RETURN
+  HUTRACK_HUC_HUCC_RETURN
  rts
 
 ; int __fastcall HuTrackEngine_stopPcm (unsigned char channel<__al>);

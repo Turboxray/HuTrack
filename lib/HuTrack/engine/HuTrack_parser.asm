@@ -121,11 +121,17 @@ HuTrackEngine.Parser:
 
         _htk.DEBUG_NOP
 
+
+        ldx HuTrack.current.channel
 .check.patternBreak
         lda HuTrack.channel.patternBreak
         cmp #$ff
       beq .pattern.break
+        cmp #$fe
+      bcc .contune.pattern.update
+        jmp .pattern_jmp_fx_0B
 
+.contune.pattern.update
         ; update offset
         lda HuTrack.channel.patternOffset.lo,x
         clc
@@ -138,8 +144,6 @@ HuTrackEngine.Parser:
         _htk.DEBUG_NOP
 
 .row.position.tracking
-
-        ldx HuTrack.current.channel
         inc HuTrack.channel.rowPos,x
         lda HuTrack.channel.rowPos,x
         cmp HuTrack.rowLen
@@ -147,17 +151,17 @@ HuTrackEngine.Parser:
         stz HuTrack.channel.rowPos,x
         stz HuTrack.channel.patternOffset.lo,x
         stz HuTrack.channel.patternOffset.hi,x
+        stz HuTrack.channel.rowSkip,x
 
-        ldx HuTrack.current.channel
         lda HuTrack.channel.pattern.num,x
         inc a
         cmp HuTrack.patternListlen
       bcc .skip
-        lda song_repeat
+          ; NOTE: The STZ is already taken care of from above.
+        cla       ; Reset the pattern playlist num back to the beginning
+        lda force_no_repeat
       beq .skip
-        ; TODO; disable channels or not???
         smb6 <HuTrack.Status
-        jmp .out
 .skip
         sta HuTrack.channel.pattern.num,x
 
@@ -166,12 +170,11 @@ HuTrackEngine.Parser:
         inc HuTrack.current.channel
         lda HuTrack.current.channel
         cmp #6
-        ;cpx HuTrack.NumChannels
-    bcs .out
+      bcs .parser.return
+.do.readTracks
         jmp .readTracks
 
-
-.out
+.parser.return
         _htk.PULLBANK.4 _htk.PAGE_4000
 
   rts
@@ -181,6 +184,7 @@ HuTrackEngine.Parser:
 .pattern.break
 
         stz HuTrack.channel.patternBreak
+        stz HuTrack.current.channel
         ldx #$05
 
 .pattern.break.loop
@@ -193,22 +197,83 @@ HuTrackEngine.Parser:
         inc a
         cmp HuTrack.patternListlen
       bcc .pattern.break.skip
-        lda song_repeat
-      beq .pattern.break.skip
-        ; TODO; disable channels or not???
+        lda force_no_repeat
+      beq .parser.return
         smb6 <HuTrack.Status
-        jmp .out
+        jmp .parser.return
 
 .pattern.break.skip
         sta HuTrack.channel.pattern.num,x
         dex
       bpl .pattern.break.loop
+        jmp .parser.return
 
-  jmp .out
+;.................................
+;.................................
+.pattern_jmp_fx_0B
+        stz HuTrack.channel.patternBreak
+        stz HuTrack.current.channel
 
+        lda HuTrack.channel.new_patt_num
+        sec
+        sbc HuTrack.channel.pattern.num,x
+        sta HuTrack.channel.patternBreak
 
+        lda HuTrack.channel.new_patt_num
 
+        sta HuTrack.channel.pattern.num+0
+        sta HuTrack.channel.pattern.num+1
+        sta HuTrack.channel.pattern.num+2
+        sta HuTrack.channel.pattern.num+3
+        sta HuTrack.channel.pattern.num+4
+        sta HuTrack.channel.pattern.num+5
 
+        stz HuTrack.channel.rowPos,x
+        stz HuTrack.channel.patternOffset.lo,x
+        stz HuTrack.channel.patternOffset.hi,x
+        stz HuTrack.channel.rowSkip,x
+
+        lda HuTrack.channel.patternBreak
+      bpl .pattern_jmp_fx_0B.skip             ; 0B was a jump forward, not backwards (loop). Don't block forward jumps
+        lda force_no_repeat
+      beq .pattern_jmp_fx_0B.skip
+        smb6 <HuTrack.Status
+        jsr Hutrack.internal.silence_chans
+
+.pattern_jmp_fx_0B.skip
+        jmp .parser.return
+
+;.................................
+;.................................
+Hutrack.internal.silence_chans:
+          phx
+        ldx #05
+.loop
+          php
+          sei
+          nop
+        stx $800
+        stz $804
+          plp
+
+          php
+          sei
+          nop
+        stx $800
+        stz $807
+          plp
+
+          php
+          sei
+          nop
+        stx $800
+        stz $809
+          plp
+
+      dex
+        bpl .loop
+          plx
+  rts
 
 ;@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
 ;@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
@@ -1260,14 +1325,10 @@ HuTrack.channel.FX.handler:
           plx
         lda HuTrack.channel.current.fxArg
         dec a
-        sta HuTrack.channel.pattern.num+0
-        sta HuTrack.channel.pattern.num+1
-        sta HuTrack.channel.pattern.num+2
-        sta HuTrack.channel.pattern.num+3
-        sta HuTrack.channel.pattern.num+4
-        sta HuTrack.channel.pattern.num+5
+        sta HuTrack.channel.new_patt_num
 
-        lda #$ff
+
+        lda #$fe
         sta HuTrack.channel.patternBreak
 
   rts

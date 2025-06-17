@@ -31,6 +31,7 @@ HuTrackEngine.EngineCall:
       bne .skip.song.parser
         HuTrack.CallFar HuTrackEngine.Parser
 .skip.song.parser
+        BBS6 <HuTrack.Status, .process.sfx      ; recheck if song stopped itself.
         HuTrack.CallFar HuTrackEngine.Process.envelopes
 
 .process.sfx

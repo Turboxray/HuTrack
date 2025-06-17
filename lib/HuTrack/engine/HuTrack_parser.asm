@@ -214,10 +214,10 @@ HuTrackEngine.Parser:
         stz HuTrack.channel.patternBreak
         stz HuTrack.current.channel
 
-        lda HuTrack.channel.pattern.num,x
+        lda HuTrack.channel.new_patt_num
         sec
-        sbc HuTrack.channel.new_patt_num
-        sta HuTrack.channel.pattern.num,x
+        sbc HuTrack.channel.pattern.num,x
+        sta HuTrack.channel.patternBreak
 
         lda HuTrack.channel.new_patt_num
 
@@ -234,13 +234,46 @@ HuTrackEngine.Parser:
         stz HuTrack.channel.rowSkip,x
 
         lda HuTrack.channel.patternBreak
-      bpl .pattern_jmp_fx_0B.skip             ; 0B was a jump forward, not backwards (loop)
+      bpl .pattern_jmp_fx_0B.skip             ; 0B was a jump forward, not backwards (loop). Don't block forward jumps
         lda force_no_repeat
       beq .pattern_jmp_fx_0B.skip
         smb6 <HuTrack.Status
+        jsr Hutrack.internal.silence_chans
 
 .pattern_jmp_fx_0B.skip
         jmp .parser.return
+
+;.................................
+;.................................
+Hutrack.internal.silence_chans:
+          phx
+        ldx #05
+.loop
+          php
+          sei
+          nop
+        stx $800
+        stz $804
+          plp
+
+          php
+          sei
+          nop
+        stx $800
+        stz $807
+          plp
+
+          php
+          sei
+          nop
+        stx $800
+        stz $809
+          plp
+
+      dex
+        bpl .loop
+          plx
+  rts
 
 ;@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
 ;@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#

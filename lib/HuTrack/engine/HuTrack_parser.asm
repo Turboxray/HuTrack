@@ -214,11 +214,32 @@ HuTrackEngine.Parser:
         stz HuTrack.channel.patternBreak
         stz HuTrack.current.channel
 
+        lda HuTrack.channel.pattern.num,x
+        sec
+        sbc HuTrack.channel.new_patt_num
+        sta HuTrack.channel.pattern.num,x
+
+        lda HuTrack.channel.new_patt_num
+
+        sta HuTrack.channel.pattern.num+0
+        sta HuTrack.channel.pattern.num+1
+        sta HuTrack.channel.pattern.num+2
+        sta HuTrack.channel.pattern.num+3
+        sta HuTrack.channel.pattern.num+4
+        sta HuTrack.channel.pattern.num+5
+
         stz HuTrack.channel.rowPos,x
         stz HuTrack.channel.patternOffset.lo,x
         stz HuTrack.channel.patternOffset.hi,x
         stz HuTrack.channel.rowSkip,x
 
+        lda HuTrack.channel.patternBreak
+      bpl .pattern_jmp_fx_0B.skip             ; 0B was a jump forward, not backwards (loop)
+        lda force_no_repeat
+      beq .pattern_jmp_fx_0B.skip
+        smb6 <HuTrack.Status
+
+.pattern_jmp_fx_0B.skip
         jmp .parser.return
 
 ;@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
@@ -1271,12 +1292,8 @@ HuTrack.channel.FX.handler:
           plx
         lda HuTrack.channel.current.fxArg
         dec a
-        sta HuTrack.channel.pattern.num+0
-        sta HuTrack.channel.pattern.num+1
-        sta HuTrack.channel.pattern.num+2
-        sta HuTrack.channel.pattern.num+3
-        sta HuTrack.channel.pattern.num+4
-        sta HuTrack.channel.pattern.num+5
+        sta HuTrack.channel.new_patt_num
+
 
         lda #$fe
         sta HuTrack.channel.patternBreak

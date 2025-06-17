@@ -121,11 +121,17 @@ HuTrackEngine.Parser:
 
         _htk.DEBUG_NOP
 
+
+        ldx HuTrack.current.channel
 .check.patternBreak
         lda HuTrack.channel.patternBreak
         cmp #$ff
       beq .pattern.break
+        cmp #$fe
+      bcc .contune.pattern.update
+        jmp .pattern_jmp_fx_0B
 
+.contune.pattern.update
         ; update offset
         lda HuTrack.channel.patternOffset.lo,x
         clc
@@ -138,8 +144,6 @@ HuTrackEngine.Parser:
         _htk.DEBUG_NOP
 
 .row.position.tracking
-
-        ldx HuTrack.current.channel
         inc HuTrack.channel.rowPos,x
         lda HuTrack.channel.rowPos,x
         cmp HuTrack.rowLen
@@ -147,17 +151,17 @@ HuTrackEngine.Parser:
         stz HuTrack.channel.rowPos,x
         stz HuTrack.channel.patternOffset.lo,x
         stz HuTrack.channel.patternOffset.hi,x
+        stz HuTrack.channel.rowSkip,x
 
-        ldx HuTrack.current.channel
         lda HuTrack.channel.pattern.num,x
         inc a
         cmp HuTrack.patternListlen
       bcc .skip
-        lda song_repeat
+          ; NOTE: The STZ is already taken care of from above.
+        cla       ; Reset the pattern playlist num back to the beginning
+        lda force_no_repeat
       beq .skip
-        ; TODO; disable channels or not???
         smb6 <HuTrack.Status
-        jmp .out
 .skip
         sta HuTrack.channel.pattern.num,x
 
@@ -166,12 +170,11 @@ HuTrackEngine.Parser:
         inc HuTrack.current.channel
         lda HuTrack.current.channel
         cmp #6
-        ;cpx HuTrack.NumChannels
-    bcs .out
+      bcs .parser.return
+.do.readTracks
         jmp .readTracks
 
-
-.out
+.parser.return
         _htk.PULLBANK.4 _htk.PAGE_4000
 
   rts
@@ -181,6 +184,7 @@ HuTrackEngine.Parser:
 .pattern.break
 
         stz HuTrack.channel.patternBreak
+        stz HuTrack.current.channel
         ldx #$05
 
 .pattern.break.loop
@@ -193,22 +197,29 @@ HuTrackEngine.Parser:
         inc a
         cmp HuTrack.patternListlen
       bcc .pattern.break.skip
-        lda song_repeat
-      beq .pattern.break.skip
-        ; TODO; disable channels or not???
+        lda force_no_repeat
+      beq .parser.return
         smb6 <HuTrack.Status
-        jmp .out
+        jmp .parser.return
 
 .pattern.break.skip
         sta HuTrack.channel.pattern.num,x
         dex
       bpl .pattern.break.loop
+        jmp .parser.return
 
-  jmp .out
+;.................................
+;.................................
+.pattern_jmp_fx_0B
+        stz HuTrack.channel.patternBreak
+        stz HuTrack.current.channel
 
+        stz HuTrack.channel.rowPos,x
+        stz HuTrack.channel.patternOffset.lo,x
+        stz HuTrack.channel.patternOffset.hi,x
+        stz HuTrack.channel.rowSkip,x
 
-
-
+        jmp .parser.return
 
 ;@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
 ;@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
@@ -1267,7 +1278,7 @@ HuTrack.channel.FX.handler:
         sta HuTrack.channel.pattern.num+4
         sta HuTrack.channel.pattern.num+5
 
-        lda #$ff
+        lda #$fe
         sta HuTrack.channel.patternBreak
 
   rts

@@ -62,7 +62,7 @@ song_slot:                          .ds 1
 ; Current to play or is playing
 current_song:                       .ds 1
 
-song_repeat:                        .ds 1
+force_no_repeat:                        .ds 1
 
 HuTrack.DDAprocessBackup:           .ds 1
 

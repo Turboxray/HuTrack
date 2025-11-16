@@ -160,7 +160,7 @@ HuTrackEngine.Parser:
         inc HuTrack.current.channel
         lda HuTrack.current.channel
         cmp #6
-      bcs .check.patternBreak
+      bcs .parser.return
 .do.readTracks
         jmp .readTracks
 

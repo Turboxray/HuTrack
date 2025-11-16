@@ -196,7 +196,6 @@ HuTrack.channel.patternOffset.lo:   .ds (1* 6)
 HuTrack.channel.patternOffset.hi:   .ds (1* 6)
 
 HuTrack.channel.patternBreak:       .ds 1
-HuTrack.channel.new_patt_num:       .ds 1
 
 
 HuTrack.channel.waveform.num:       .ds (1* 6)

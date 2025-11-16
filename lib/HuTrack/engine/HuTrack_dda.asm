@@ -84,6 +84,12 @@ HuTrackEngine.7khz.IRQ:
       beq .stop
         lda <HuTrack.dda.loop.bank,x
         sta <HuTrack.dda.bank,x
+        ;need to write a "zero" value to the DDA, not sufficient for it to be part of the waveform. 
+        lda #$10 
+        sei
+        stx _htk.WSG.ChannelSelect          ;5
+        sta _htk.WSG.DDAport                ;5
+        cli
         tam #$02
 
         lda <HuTrack.dda.addr.loop.hi,x

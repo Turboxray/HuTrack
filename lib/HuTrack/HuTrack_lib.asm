@@ -52,9 +52,10 @@ HuTrackEngine.Reset
         sta HuTrack.tickReload+1
         stz HuTrack.TickIdx
 
-        stz HuTrack.channel.patternBreak
+        
 
         lda #$ff
+        sta HuTrack.channel.patternBreak ;New tech
         sta $801
 
         clx
@@ -125,7 +126,7 @@ HuTrackEngine.Reset
         lda #$80
         sta <HuTrack.dda.bank,x
         lda #$8F
-        sta <HuTrack.dda.cntr1
+        sta <HuTrack.dda.cntr1,x
 
         lda #$ff
         sta HuTrack.channel.panState,x

@@ -160,7 +160,7 @@ HuTrackEngine.Parser:
         inc HuTrack.current.channel
         lda HuTrack.current.channel
         cmp #6
-      bcs .parser.return
+      bcs .check.patternBreak
 .do.readTracks
         jmp .readTracks
 
@@ -1294,7 +1294,7 @@ HuTrack.channel.FX.handler:
 ; 0Dxx
 .FX.break
           plx
-        lda #$ff
+        lda #$fe
         sta HuTrack.channel.patternBreak
   rts
 

@@ -52,9 +52,10 @@ HuTrackEngine.Reset
         sta HuTrack.tickReload+1
         stz HuTrack.TickIdx
 
-        stz HuTrack.channel.patternBreak
+        
 
         lda #$ff
+        sta HuTrack.channel.patternBreak
         sta $801
 
         clx

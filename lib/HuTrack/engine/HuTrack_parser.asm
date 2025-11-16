@@ -1405,6 +1405,7 @@ HuTrack.channel.FX.handler:
 ; E2xx
 .extFX.NoteSlideDown
           plx
+            lda HuTrack.channel.current.fxArg
             and #$0f
             sta HuTrack.channel.semitoneDOWN.op,x
             sta HuTrack.channel.semitoneDOWN.cent,x

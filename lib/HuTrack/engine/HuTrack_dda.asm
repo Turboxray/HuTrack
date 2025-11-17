@@ -30,8 +30,7 @@ HuTrackEngine.7khz.IRQ:
 .DDA.loop
       
       lda <HuTrack.dda.SamplePos,x 
-      beq .next                             ;2
-      inc <HuTrack.dda.SamplePos,x        
+      beq .next_skip_inc                             ;2             
       tay                                     
       lda HuTrack.dda.buffer,y    
       sei
@@ -40,7 +39,10 @@ HuTrackEngine.7khz.IRQ:
       cli            
       bpl .next 
       inc <HuTrack.dda.BufferReload  
-.next
+      bra .next_skip_inc      
+.next:
+ inc <HuTrack.dda.SamplePos,x
+ .next_skip_inc: 
       dex                                 ;2
       bpl .DDA.loop                       ;4 = 60
 
@@ -49,9 +51,8 @@ HuTrackEngine.7khz.IRQ:
         lda HuTrack.dda.BufferReload
         bne  .DDA_replenish
 .EndBuffer          
-          plx                               ;
-          ply
-.return
+        plx                               ;
+        ply
         pla                               ;4
         dec <HuTrack.DDAprocess             ;6
 .HuTrack.disabled
@@ -62,20 +63,24 @@ HuTrackEngine.7khz.IRQ:
 .DDA_replenish:   
     ldx #5   
 .replenish_loop:    
-    lda <HuTrack.dda.SamplePos,x         
-    beq .next_replenish                             ;2
-    tay                      
-    dey ;Need to remove extra bump after getting samples               
-    lda HuTrack.dda.buffer,y      
-    bit #$20 ;Compressed 
-    beq .DDA_checkend 
-    jmp .DDA_compressloop  
-.DDA_checkend   
-    bit #$40 ;end 
-    bne .DDA_uncompressed
+    lda <HuTrack.dda.SamplePos,x             
+    ;beq .next_replenish                             ;2    
+    jmp .DDA_uncompressed
+    tay                                       
+    lda HuTrack.dda.buffer,y            
+
+    bit #$40           ; end?
+    bne .DDA_end_skip
     stz <HuTrack.dda.SamplePos,x 
     bra .next_replenish
-.DDA_uncompressed:    
+
+.DDA_end_skip:
+    ; Now compressed flag (bit 5)
+    bit #$20           ; compressed?
+    beq .DDA_uncompressed  ; 0 uncompressed
+    jmp .DDA_compressloop  ; 1 compressed    
+    
+.DDA_uncompressed:      
     lda SamplePosMatrix,x ;Get the "Zero point" for that channel, i.e. 1,43,85,127,169,211
     sta <HuTrack.dda.SamplePos,x 
     tay

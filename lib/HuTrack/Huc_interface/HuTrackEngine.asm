@@ -285,8 +285,7 @@ _HuTrackEngine_chanReserve.1:
         cpx #06
       bcs .out
         lda #$80
-        sta HuTrack.SFX.inProgress, x
-        stz <HuTrack.dda.SamplePos,x        
+        sta HuTrack.SFX.inProgress, x              
 
         lda #$df
           php
@@ -367,9 +366,7 @@ _HuTrackEngine_stopPcm.1:
       bcs .error
         bit HuTrack.SFX.inProgress,x
       bpl .error
-
         stz <HuTrack.dda.SamplePos,x 
-
         ; No error
         lda #$01
         clx

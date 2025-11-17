@@ -1362,10 +1362,13 @@ HuTrack.channel.FX.handler:
 
             lda HuTrack.channel.current.fxArg
             and #$f0
-            asl a                                       ;// TODO. this is hack and needs to be fixed.
-            asl a
-            asl a
-            sta HuTrack.channel.semitoneUP.delta,x
+            lsr a
+            lsr a
+            lsr a
+            lsr a
+            tay
+            lda E1XX_E2XX.table,y         ;// TODO. this is hack and needs to be fixed.
+            sta HuTrack.channel.semitoneDOWN.delta,x
   rts
 
 ;...........................................................
@@ -1400,9 +1403,12 @@ HuTrack.channel.FX.handler:
 
             lda HuTrack.channel.current.fxArg
             and #$f0
-            asl a                                       ;// TODO. this is hack and needs to be fixed.
-            asl a
-            asl a
+            lsr a
+            lsr a
+            lsr a
+            lsr a
+            tay
+            lda E1XX_E2XX.table,y         ;// TODO. this is hack and needs to be fixed.
             sta HuTrack.channel.semitoneDOWN.delta,x
 
               pla
@@ -1759,7 +1765,15 @@ HuTrack.channel.FX.handler:
 
   rts
 
+;...................................................
+;E1xx and E2xx speed table
 
+E1XX_E2XX.table:
+
+  .db $00, $80, $88, $90
+  .db $98, $A0, $A8, $B0
+  .db $B8, $C0, $C8, $D0
+  .db $D8, $E0, $E8, $F0
 
 
 ;@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#
@@ -2857,7 +2871,7 @@ HuTrackEngine.Channel.exeFX.semitone.DOWN
 .check.cont
         lda HuTrack.channel.note,x
         cmp HuTrack.channel.semitoneDOWN.note,x
-      bcc .apply
+      bcs .apply
         lda HuTrack.channel.semitoneDOWN.note,x
         sta HuTrack.channel.note,x
         stz HuTrack.channel.noteCent,x

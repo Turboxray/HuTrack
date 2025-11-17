@@ -65,6 +65,7 @@ HuTrackEngine.7khz.IRQ:
 .HuTrack.disabled
 
 .in_progress
+        stz _htk.IRQ.ackTIRQ
     rti                                     ;7 = 30
 
 .overflow

@@ -31,12 +31,12 @@
 
  ;NOTE: time base =  1
  ;NOTE: frame mode =  1
- ;NOTE: custom mode =  0
+ ;NOTE: custom mode =  1
 
 .attributes.tick1
-  .db 16
+  .db 6
 .attributes.tick2
-  .db 16
+  .db 6
 .attributes.rowLength
   .db 48
 .attributes.patternListLen

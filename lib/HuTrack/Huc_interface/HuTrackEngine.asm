@@ -286,7 +286,7 @@ _HuTrackEngine_chanReserve.1:
       bcs .out
         lda #$80
         sta HuTrack.SFX.inProgress, x
-        sta <HuTrack.dda.bank, x
+        stz <HuTrack.dda.SamplePos,x        
 
         lda #$df
           php
@@ -323,7 +323,6 @@ _HuTrackEngine_chanRelease.1:
         cpx #06
       bcs .out
         stz HuTrack.SFX.inProgress, x
-
         lda HuTrack.channel.panState,x
           php
           sei

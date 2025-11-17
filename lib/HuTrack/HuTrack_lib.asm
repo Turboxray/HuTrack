@@ -548,7 +548,9 @@ HuTrackEngine.playSong:
 .loop
 
         lda #$80
-        sta 
+        sta HuTrack.dda.bank,x 
+        stz <HuTrack.dda.SamplePos,x
+        
 
         inx
         cpx #$06

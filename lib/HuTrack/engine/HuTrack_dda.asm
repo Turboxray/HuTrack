@@ -18,7 +18,7 @@ HuTrackEngine.7khz.IRQ:
 
           pha
           phy 
-        inc  <HuTrack.DDAprocess            ;6
+        inc <HuTrack.DDAprocess            ;6
         stz <HuTrack.dda.BufferReload
 
 .DDA
@@ -31,14 +31,13 @@ HuTrackEngine.7khz.IRQ:
       
       lda <HuTrack.dda.SamplePos,x 
       beq .next                             ;2
-      inc <HuTrack.dda.SamplePos,x  
+      inc <HuTrack.dda.SamplePos,x        
       tay                                     
       lda HuTrack.dda.buffer,y    
       sei
       stx _htk.WSG.ChannelSelect          ;5
       sta _htk.WSG.DDAport                ;5
-      cli      
-      
+      cli            
       bpl .next 
       inc <HuTrack.dda.BufferReload  
 .next
@@ -49,14 +48,11 @@ HuTrackEngine.7khz.IRQ:
 .finished
         lda HuTrack.dda.BufferReload
         bne  .DDA_replenish
-.EndBuffer
-          pla                               ;4
+.EndBuffer          
           plx                               ;
           ply
-
 .return
-
-          pla                               ;4
+        pla                               ;4
         dec <HuTrack.DDAprocess             ;6
 .HuTrack.disabled
 
@@ -66,15 +62,19 @@ HuTrackEngine.7khz.IRQ:
 .DDA_replenish:   
     ldx #5   
 .replenish_loop:    
-    lda <HuTrack.dda.SamplePos,x 
+    lda <HuTrack.dda.SamplePos,x         
     beq .next_replenish                             ;2
-    tay                                     
+    tay                      
+    dey ;Need to remove extra bump after getting samples               
     lda HuTrack.dda.buffer,y      
     bit #$20 ;Compressed 
-    bne .DDA_compressloop
+    beq .DDA_checkend 
+    jmp .DDA_compressloop  
+.DDA_checkend   
     bit #$40 ;end 
-    beq .DDA_uncompressed
-    jmp .DDA_end     
+    bne .DDA_uncompressed
+    stz <HuTrack.dda.SamplePos,x 
+    bra .next_replenish
 .DDA_uncompressed:    
     lda SamplePosMatrix,x ;Get the "Zero point" for that channel, i.e. 1,43,85,127,169,211
     sta <HuTrack.dda.SamplePos,x 
@@ -91,7 +91,7 @@ HuTrackEngine.7khz.IRQ:
     phx  ;save the channel for later   
     ldx #41 ;loop variable     
     dey ;We need to increment y after looping, so we start -1 
-.uncompressed_loop         
+.uncompressed_loop:
     iny 
     lda [HuTrack.dda.ptr]    
   bmi .FinishUncompressed 

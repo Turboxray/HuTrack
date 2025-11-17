@@ -15,7 +15,6 @@ HuTrackEngine.7khz.IRQ:
       bvs .in_progress                      ;2
         cli                                 ;2
       bmi .HuTrack.disabled                 ;2
-
           pha
           phy 
         inc <HuTrack.DDAprocess            ;6
@@ -44,33 +43,29 @@ HuTrackEngine.7khz.IRQ:
  inc <HuTrack.dda.SamplePos,x
  .next_skip_inc: 
       dex                                 ;2
-      bpl .DDA.loop                       ;4 = 60
-
+      bpl .DDA.loop                       ;4 = 60      
 
 .finished
+        dec <HuTrack.DDAprocess             ;6
         lda HuTrack.dda.BufferReload
         bne  .DDA_replenish
 .EndBuffer          
         plx                               ;
         ply
-        pla                               ;4
-        dec <HuTrack.DDAprocess             ;6
-.HuTrack.disabled
-
-.in_progress
+        pla                               ;4        
+.HuTrack.disabled:
+.in_progress:
     rti                                     ;7 = 30
 
 .DDA_replenish:   
     ldx #5   
 .replenish_loop:    
     lda <HuTrack.dda.SamplePos,x             
-    ;beq .next_replenish                             ;2    
-    jmp .DDA_uncompressed
+    beq .next_replenish                             ;2        
     tay                                       
     lda HuTrack.dda.buffer,y            
-
     bit #$40           ; end?
-    bne .DDA_end_skip
+    beq .DDA_end_skip
     stz <HuTrack.dda.SamplePos,x 
     bra .next_replenish
 

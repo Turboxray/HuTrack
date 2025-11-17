@@ -1927,9 +1927,9 @@ HuTrackEngine.Channel.setSample
 
       sei
     lda .temp.addr.lo
-    sta <HuTrack.dda.addr.lo,x
+    sta HuTrack.dda.addr.lo,x
     lda .temp.addr.hi
-    sta <HuTrack.dda.addr.hi,x
+    sta HuTrack.dda.addr.hi,x
     lda .temp.addr.bnk
     jsr HuTrackEngine._htk.WSG.DDA
       cli
@@ -3453,7 +3453,7 @@ HuTrackEngine._htk.WSG.DDA:
       bmi .out
 .cont
 
-        sta <HuTrack.dda.bank,x
+        sta HuTrack.dda.bank,x
 
 .out
 

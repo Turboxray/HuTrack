@@ -343,8 +343,8 @@ _HuTrackEngine_PCMStatus.1:
       bcs .error
         bit HuTrack.SFX.inProgress,x
       bpl .error
-        lda <HuTrack.dda.bank,x
-        cmp #$80 
+        lda <HuTrack.dda.SamplePos,x 
+        
       beq .nosfx      
         lda #1
         cly
@@ -369,8 +369,7 @@ _HuTrackEngine_stopPcm.1:
         bit HuTrack.SFX.inProgress,x
       bpl .error
 
-        lda #$80
-        sta <HuTrack.dda.bank,x
+        stz <HuTrack.dda.SamplePos,x 
 
         ; No error
         lda #$01
@@ -403,8 +402,8 @@ _HuTrackEngine_PcmRequest.5:
       bpl .error
 
         lda #$80
-        sta <HuTrack.dda.bank,x
-
+        sta HuTrack.dda.bank,x
+        stz <HuTrack.dda.SamplePos,x
         lda <__ch
         ora #$80
         sta <HuTrack.dda.cntr1,x
@@ -415,20 +414,24 @@ _HuTrackEngine_PcmRequest.5:
         lda <__fptr
         clc
         adc #$03
-        sta <HuTrack.dda.addr.lo,x
-        sta <HuTrack.dda.addr.loop.lo,x
+        sta HuTrack.dda.addr.lo,x
+        sta HuTrack.dda.addr.loop.lo,x
         lda <__fptr+1
         adc #$00
         and #$1f
         ora #$40
-        sta <HuTrack.dda.addr.hi,x
-        sta <HuTrack.dda.addr.loop.hi,x
+        sta HuTrack.dda.addr.hi,x
+        sta HuTrack.dda.addr.loop.hi,x
         lda <__fbank
         adc #$00
-        sta <HuTrack.dda.bank,x
-        sta <HuTrack.dda.loop.bank,x
+        sta HuTrack.dda.bank,x
+        sta HuTrack.dda.loop.bank,x
         rmb7 <HuTrack.DDAprocess
-
+        lda SamplePosMatrix,x 
+        sta <HuTrack.dda.SamplePos,x 
+        tax 
+        lda #$90 ;Force reload first call 
+        sta HuTrack.dda.buffer,x        
         ; No error
         lda #$01
         clx

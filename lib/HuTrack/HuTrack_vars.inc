@@ -2,6 +2,9 @@
 ; \file HuTrack_vars.inc
 ;TODO: Need to fix the name of these ZP vars for namespace collision
 
+SamplePosMatrix:
+      .db 1,43,85,127,169,211
+      
     .zp
 
 _hk.R1:        .ds 2
@@ -37,12 +40,10 @@ _hk.EAX0.u = _hk.EAX0+3
       .zp
 
 HuTrack.DDAprocess:                 .ds 1
-HuTrack.dda.bank:                   .ds (1* 6)
-HuTrack.dda.addr.lo:                .ds (1* 6)
-HuTrack.dda.addr.hi:                .ds (1* 6)
-HuTrack.dda.loop.bank:              .ds (1* 6)
-HuTrack.dda.addr.loop.lo:           .ds (1* 6)
-HuTrack.dda.addr.loop.hi:           .ds (1* 6)
+HuTrack.dda.BufferReload:           .ds 1
+HuTrack.dda.BufferHold1:             .ds 1
+HuTrack.dda.BufferHold2:             .ds 1
+HuTrack.dda.SamplePos:              .ds (1* 6)
 HuTrack.dda.ptr:                    .ds 2
 HuTrack.dda.cntr0:                  .ds (1* 6)
 HuTrack.dda.cntr1:                  .ds (1* 6)
@@ -52,6 +53,13 @@ HuTrack.dda.trackUsage:             .ds 1
 HuTrack.Status:                     .ds 1
       .bss
 
+HuTrack.dda.bank:                   .ds (1* 6)
+HuTrack.dda.addr.lo:                .ds (1* 6)
+HuTrack.dda.addr.hi:                .ds (1* 6)
+HuTrack.dda.loop.bank:              .ds (1* 6)
+HuTrack.dda.addr.loop.lo:           .ds (1* 6)
+HuTrack.dda.addr.loop.hi:           .ds (1* 6)
+HuTrack.dda.buffer                  .ds 255
 HuTrack.returnVec:                  .ds 2
 
 ; Song list

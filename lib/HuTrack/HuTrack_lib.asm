@@ -123,8 +123,9 @@ HuTrackEngine.Reset
         lda #$ff
         sta HuTrack.channel.lastEnvWaveform,x
 
+        stz <HuTrack.dda.SamplePos,x 
         lda #$80
-        sta <HuTrack.dda.bank,x
+        sta HuTrack.dda.bank,x
         lda #$8F
         sta <HuTrack.dda.cntr1,x
 
@@ -289,8 +290,9 @@ bcc .skip
         ldx #$05
 .skip
         lda #$80
-        sta HuTrack.SFX.inProgress,x
-        sta <HuTrack.dda.bank,x
+        sta HuTrack.SFX.inProgress,x        
+        sta HuTrack.dda.bank,x
+        stz <HuTrack.dda.SamplePos,x
 
         lda #$df
           php
@@ -357,15 +359,15 @@ HuTrackEngine.SfxPcmRequest:
         sta <HuTrack.dda.cntr0,x
         sta <HuTrack.dda.cntr1,x
 
-        sta <HuTrack.dda.bank,x
+        sta HuTrack.dda.bank,x
         lda <_hk.EAX0.m
-        sta <HuTrack.dda.addr.lo,x
+        sta HuTrack.dda.addr.lo,x
         lda <_hk.EAX0.h
         and #$1f
         ora #$40
-        sta <HuTrack.dda.addr.hi,x
+        sta HuTrack.dda.addr.hi,x
         lda <_hk.EAX0.l
-        sta <HuTrack.dda.bank,x
+        sta HuTrack.dda.bank,x
         rmb7 <HuTrack.DDAprocess
 .out
   rts
@@ -388,11 +390,11 @@ HuTrackEngine.SfxPcmStatus:
 
         ; No error
         clc
-        lda <HuTrack.dda.bank,x
-        sta <_hk.EAX0.l
-        lda <HuTrack.dda.addr.lo,x
-        sta <_hk.EAX0.m
-        lda <HuTrack.dda.addr.hi,x
+        lda HuTrack.dda.bank,x
+        sta _hk.EAX0.l
+        lda HuTrack.dda.addr.lo,x
+        sta _hk.EAX0.m
+        lda HuTrack.dda.addr.hi,x
         sta <_hk.EAX0.h
 .out
   rts
@@ -546,7 +548,7 @@ HuTrackEngine.playSong:
 .loop
 
         lda #$80
-        sta <HuTrack.dda.bank,x
+        sta 
 
         inx
         cpx #$06

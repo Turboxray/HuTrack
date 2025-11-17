@@ -670,7 +670,7 @@ init_video
 
   .page 2
 Song:
-    .include "../assets/song/test/test.song.inc"
+    .include "../assets/song/smb3_overworld/smb3_overworld.song.inc"
 Song.end
 
 ;/////////////////////////////////////////////////////////////////////////////////

@@ -1362,7 +1362,7 @@ HuTrack.channel.FX.handler:
 
             lda HuTrack.channel.current.fxArg
             and #$f0
-            asl a
+            asl a                                       ;// TODO. this is hack and needs to be fixed.
             asl a
             asl a
             sta HuTrack.channel.semitoneUP.delta,x
@@ -1400,7 +1400,7 @@ HuTrack.channel.FX.handler:
 
             lda HuTrack.channel.current.fxArg
             and #$f0
-            asl a
+            asl a                                       ;// TODO. this is hack and needs to be fixed.
             asl a
             asl a
             sta HuTrack.channel.semitoneDOWN.delta,x

@@ -9,7 +9,6 @@ cd /d "%~dp0"
 
 pushd
 
-
 del log.txt
 
 set PCE_INCLUDE=%CD%\..\lib;%CD%\..\..\..\lib

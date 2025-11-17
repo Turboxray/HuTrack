@@ -141,14 +141,12 @@ HuTrack.channel.instr:              .ds (1* 6)
 
 ;----------------------------------------------
 ; FX that need to persist over time
-HuTrack.channel.semitoneUP.op:      .ds (1* 6)
-HuTrack.channel.semitoneUP.delta:   .ds (1* 6)
-HuTrack.channel.semitoneUP.note:    .ds (1* 6)
-HuTrack.channel.semitoneUP.cent:    .ds (1* 6)
-HuTrack.channel.semitoneDOWN.op:    .ds (1* 6)
-HuTrack.channel.semitoneDOWN.delta: .ds (1* 6)
-HuTrack.channel.semitoneDOWN.note:  .ds (1* 6)
-HuTrack.channel.semitoneDOWN.cent:  .ds (1* 6)
+HuTrack.channel.semitoneUP.octave:   .ds (1* 6)
+HuTrack.channel.semitoneUP.delta:    .ds (1* 6)
+HuTrack.channel.semitoneUP.note:     .ds (1* 6)
+HuTrack.channel.semitoneDOWN.octave: .ds (1* 6)
+HuTrack.channel.semitoneDOWN.delta:  .ds (1* 6)
+HuTrack.channel.semitoneDOWN.note:   .ds (1* 6)
 
 HuTrack.channel.porta.up.lo:        .ds (1* 6)
 HuTrack.channel.porta.up.hi:        .ds (1* 6)

@@ -1368,7 +1368,7 @@ HuTrack.channel.FX.handler:
             lsr a
             tay
             lda E1XX_E2XX.table,y         ;// TODO. this is hack and needs to be fixed.
-            sta HuTrack.channel.semitoneDOWN.delta,x
+            sta HuTrack.channel.semitoneUP.delta,x
   rts
 
 ;...........................................................

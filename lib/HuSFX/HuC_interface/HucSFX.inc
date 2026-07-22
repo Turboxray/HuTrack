@@ -323,7 +323,7 @@ _HuSFXprocess_intf  .macro
 ;..............
 .wf_update\@
 
-        ;// This is a slow, but for now it works.
+    
 
         lda #(HuSFX.DMA.TINop)
         sta HuSFX.DMA + 0
@@ -335,38 +335,23 @@ _HuSFXprocess_intf  .macro
         tma #$03
         pha
 
-      jsr .fetch_byte\@
+      jsr .fetch_byte\@      ; A = waveform index
 
-          cly
-          asl a
-          say
-          rol a
-          say
-
-          asl a
-          say
-          rol a
-          say
-
-          asl a
-          say
-          rol a
-          say
-
-          asl a
-          say
-          rol a
-          say
-
-          asl a
-          say
-          rol a
-          say
-          sty HuSFX.DMA + 2
-
+        tay                  
+        asl a
+        asl a
+        asl a
+        asl a
+        asl a                 
         clc
         adc HuSFX.wf.lo
         sta HuSFX.DMA + 1
+        tya                  
+        lsr a
+        lsr a
+        lsr a                 
+        sta HuSFX.DMA + 2
+
         lda HuSFX.wf.hi
         and #$1f
         ora #$40

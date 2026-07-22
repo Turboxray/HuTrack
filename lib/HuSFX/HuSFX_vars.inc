@@ -13,9 +13,9 @@ HuSFX.inProgress:                   .ds (1* 6)
 HuSFX.stream.bnk:                   .ds 6
 HuSFX.stream.lo:                    .ds 6
 HuSFX.stream.hi:                    .ds 6
-HuSFX.wf.bnk:                       .ds 1
-HuSFX.wf.lo:                        .ds 1
-HuSFX.wf.hi:                        .ds 1
+HuSFX.wf.bnk:                       .ds 6
+HuSFX.wf.lo:                        .ds 6
+HuSFX.wf.hi:                        .ds 6
 HuSFX.delay:                        .ds 6
 HuSFX.control:                      .ds 6
 HuSFX.vol.chan:                     .ds 6

@@ -341,7 +341,7 @@ HuTrackEngine.ParseEntry:
 .decode.fx1
         lda HuTrack.entryParse
         bit #$10
-      beq .skip.fx1.arg
+      beq .skip.fx1 ;This was originally skipping both 
         lda [HuTrack.currentPattern],y
         sta HuTrack.channel.temp.fx1,x
         iny
@@ -505,15 +505,11 @@ HuTrackEngine.FX.disabled.store:
     rts
 .skip1
         cmp #$0D        ; Pattern break
-      bne .skip2
-      lda HuTrack.channel.current.fxArg
-      sta HuTrack.channel.panState,x
+      bne .skip2      
     jmp .out
 .skip2
         cmp #$0B        ; Position jump
-      bne .skip3
-      lda HuTrack.channel.current.fxArg
-      sta HuTrack.channel.panState,x
+      bne .skip3      
     rts
 .skip3
         cmp #$0F        ; speed 2
@@ -870,8 +866,7 @@ HuTrackEngine.Channel.update.Volume
       bcc .out
         lda HuTrack.VolEnv.repeat,x
         cmp #$ff
-      bne .out
-        lda HuTrack.channel.directVolume,x
+      bne .out        
         lda #$80
         sta HuTrack.channel.lastEnvVolume,x
 
@@ -1381,7 +1376,6 @@ HuTrack.channel.FX.handler:
 
             lda _hk.EAX0.l
               pha
-
             lda HuTrack.channel.current.fxArg
             and #$0f
               sta _hk.EAX0.l
@@ -1761,8 +1755,6 @@ HuTrack.channel.FX.handler:
         jsr HuTrackEngine.reset.hardsync
 
 .platFX.hardsync.out
-
-
   rts
 
 ;...................................................

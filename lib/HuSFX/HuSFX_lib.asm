@@ -157,51 +157,32 @@ HuSFX.process
 
 ;..............
 .wf_update
-
-        ;// This is a slow, but for now it works.
-
+       
         lda #(HuSFX.DMA.TINop)
         sta HuSFX.DMA + 0
         lda #(HuSFX.DMA.RTSop)
         sta HuSFX.DMA + 7
-
         tma #$02
         pha
         tma #$03
         pha
 
-      jsr .fetch_byte
+      jsr .fetch_byte        
 
-          cly
-          asl a
-          say
-          rol a
-          say
-
-          asl a
-          say
-          rol a
-          say
-
-          asl a
-          say
-          rol a
-          say
-
-          asl a
-          say
-          rol a
-          say
-
-          asl a
-          say
-          rol a
-          say
-          sty HuSFX.DMA + 2
-
+        tay                   
+        asl a
+        asl a
+        asl a
+        asl a
+        asl a                
         clc
         adc HuSFX.wf.lo,x
         sta HuSFX.DMA + 1
+        tya                   
+        lsr a
+        lsr a                
+        sta HuSFX.DMA + 2
+
         lda HuSFX.wf.hi,x
         and #$1f
         ora #$40
@@ -301,8 +282,7 @@ HuSFX.process
       jmp .exit_parse
 ;..............
 .wait_1_frame
-        lda #$01
-        sta HuSFX.delay,x
+        stz HuSFX.delay,x
       jmp .exit_parse
 
 

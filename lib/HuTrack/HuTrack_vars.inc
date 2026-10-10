@@ -37,6 +37,7 @@ _hk.EAX0.u = _hk.EAX0+3
       .zp
 
 HuTrack.DDAprocess:                 .ds 1
+HuTrack.dda.inactive:               .ds (1* 6) ; $80 stopped, zero active; bank is a full byte
 HuTrack.dda.bank:                   .ds (1* 6)
 HuTrack.dda.addr.lo:                .ds (1* 6)
 HuTrack.dda.addr.hi:                .ds (1* 6)
@@ -107,6 +108,22 @@ HuTrack.pattern.table.bank:         .ds 1
 HuTrack.instr.table.bank:           .ds 1
 HuTrack.waveform.table.bank:        .ds 1
 HuTrack.samples.table.bank:         .ds 1
+; Bank mapped at $4000 for the song's original assembled pointer window.
+; A table may itself be in a later bank without changing this mapping base.
+HuTrack.song.windowBank:            .ds 1
+HuTrack.song.format:                .ds 1
+HuTrack.song.tables:                .ds 18
+HuTrack.channel.patternList.bank:   .ds 6
+HuTrack.channel.patternTable.lo:    .ds 6
+HuTrack.channel.patternTable.hi:    .ds 6
+HuTrack.channel.patternTable.bank:  .ds 6
+HuTrack.VolEnv.bank:                .ds 6
+HuTrack.ArpEnv.bank:                .ds 6
+HuTrack.WfEnv.bank:                 .ds 6
+HuTrack.F.bank:                     .ds 1
+HuTrack.F.record:                   .ds 3
+HuTrack.F.offset:                   .ds 2
+HuTrack.F.value:                    .ds 3
 
 HuTrack.channel.pattern.num:        .ds (1* 6)
 HuTrack.channel.pattern.idx:        .ds (1* 6)
@@ -165,6 +182,74 @@ HuTrack.channel.noteCutDelay:       .ds (1* 6)
 HuTrack.channel.pitch.period.lo:    .ds (1* 6)
 HuTrack.channel.pitch.period.hi:    .ds (1* 6)
 
+; Released Furnace legacy pitch/effect state (periods before fine tune).
+HuTrack.P.anchor:                  .ds 6
+HuTrack.P.oldNote:                 .ds 6
+HuTrack.P.baseLo:                  .ds 6
+HuTrack.P.baseHi:                  .ds 6
+HuTrack.P.basis:                   .ds 6
+HuTrack.P.unbentLo:                .ds 6
+HuTrack.P.unbentHi:                .ds 6
+HuTrack.M.octave:                  .ds 1
+HuTrack.M.note:                    .ds 1
+HuTrack.P.target:                  .ds 6
+HuTrack.P.speed:                   .ds 6
+HuTrack.P.mode:                    .ds 6
+HuTrack.P.inPorta:                 .ds 6
+HuTrack.P.lastPorta:               .ds 6
+HuTrack.P.lastVib:                 .ds 6
+HuTrack.P.vibDepth:                .ds 6
+HuTrack.P.vibFine:                 .ds 6
+HuTrack.P.arp:                     .ds 6
+HuTrack.P.arpStage:                .ds 6
+HuTrack.P.arpTicks:                .ds 6
+HuTrack.P.arpOffset:               .ds 6
+HuTrack.P.volumeFrac:              .ds 6
+HuTrack.P.legacyVolume:             .ds 1
+HuTrack.P.driverVolume:             .ds 6
+HuTrack.P.outputVolume:             .ds 6
+HuTrack.P.volumeTail:               .ds 6
+HuTrack.P.arpYield:                 .ds 6
+HuTrack.P.arpSpeed:                .ds 1
+HuTrack.P.lastSlide:               .ds 1
+HuTrack.P.trigger:                 .ds 1
+HuTrack.P.shortRow:                .ds 1
+HuTrack.P.globalPitch:             .ds 4
+HuTrack.P.divisor:                 .ds 4
+HuTrack.M.a:                       .ds 4
+HuTrack.M.b:                       .ds 4
+HuTrack.M.p:                       .ds 4
+HuTrack.M.r:                       .ds 4
+HuTrack.M.pitch:                   .ds 2
+HuTrack.M.index:                   .ds 1
+HuTrack.M.block:                   .ds 1
+HuTrack.M.count:                   .ds 1
+HuTrack.M.bits:                    .ds 1
+HuTrack.M.packed:                  .ds 1
+HuTrack.M.delta:                   .ds 1
+HuTrack.M.sign:                    .ds 1
+HuTrack.P.tremDepth:               .ds 6
+HuTrack.P.tremRate:                .ds 6
+HuTrack.P.tremPhase:               .ds 6
+HuTrack.P.tremAttenuation:         .ds 6
+HuTrack.P.retrigSpeed:             .ds 6
+HuTrack.P.retrigTick:              .ds 6
+HuTrack.P.sampleBank:              .ds 1
+HuTrack.P.lfoMode:                 .ds 1
+HuTrack.P.lfoSpeed:                .ds 1
+HuTrack.externalValue:             .ds 1
+HuTrack.externalPending:           .ds 1
+HuTrack.P.rowDelay:                .ds 6
+HuTrack.P.pendingChange:           .ds 6
+HuTrack.P.pendingExt:              .ds 6
+HuTrack.P.cutTick:                 .ds 6
+HuTrack.P.rowTicks:                .ds 1
+HuTrack.P.legato:                  .ds 6
+HuTrack.P.legatoTick:              .ds 6
+HuTrack.P.legatoDelta:             .ds 6
+HuTrack.P.random:                  .ds 1
+HuTrack.P.dirty:                   .ds 6
+
 HuTrack.channel.volSlideDown:       .ds (1* 6)
 HuTrack.channel.volSlideUp:         .ds (1* 6)
 HuTrack.channel.delay:              .ds (1* 6)
@@ -194,6 +279,8 @@ HuTrack.channel.patternOffset.lo:   .ds (1* 6)
 HuTrack.channel.patternOffset.hi:   .ds (1* 6)
 
 HuTrack.channel.patternBreak:       .ds 1
+HuTrack.breakRow:                   .ds 1
+HuTrack.channel.seekRemaining:      .ds 6
 
 
 HuTrack.channel.waveform.num:       .ds (1* 6)
@@ -239,6 +326,7 @@ HuTrack.ArpEnvPtr.hi:               .ds (1* 6)
 ; envelope indexes, len, repeat position
 HuTrack.VolEnv.idx:                 .ds (1* 6)
 HuTrack.WfEnv.idx:                  .ds (1* 6)
+HuTrack.ArpEnv.finished:            .ds 6
 HuTrack.ArpEnv.idx:                 .ds (1* 6)
 
 HuTrack.ArpEnv.len:                 .ds (1* 6)
@@ -260,6 +348,10 @@ HuTrack.channel.proccessState:      .ds (1* 6)
 HuTrack.channel.panState:           .ds (1* 6)
 
 HuTrack.SFX.inProgress:             .ds (1* 6)
+; Released channels stay silent until the next actual music note.
+HuTrack.channel.waitNote:           .ds (1* 6)
+; Hardware cache is separate from the desired/held envelope waveform.
+HuTrack.channel.uploadedWaveform:   .ds (1* 6)
 HuTrack.channel.ddaState:           .ds (1* 6)
 
 
@@ -276,8 +368,6 @@ HuTrack.process.temp3:              .ds 1
     ; Keeps track of how many rows were processed.
 HuTrack.rowIncrement:               .ds 1
 
-HuTrack.waveform.buffer:            .ds 32
-
             ;-----------------------------------------------
 HuTrack.SFXstream.bnk:              .ds 6
 HuTrack.SFXstream.lo:               .ds 6
@@ -287,7 +377,7 @@ HuTrack.SFXwf.lo:                   .ds 6
 HuTrack.SFXwf.hi:                   .ds 6
 HuTrack.sfx.delay:                  .ds 6
 HuTrack.sfx.control:                .ds 6
-HuTrack.DMA:                        .ds (1+2+2+2+1)   ; this needs to be initialized to TIN and RTS.
+HuTrack.DMA:                        .ds (1+2+2+2+1)   ; RAM TIN source,$0806,32 / RTS; initialized by Reset.
 
 HuTrack.DMA.TINop = $D3
 HuTrack.DMA.RTSop = $60
@@ -316,5 +406,6 @@ HuTrack.FXptr0:                     .ds 2
 HuTrack.FXptr1:                     .ds 2
 HuTrack.FXptr2:                     .ds 2
 HuTrack.FXptr3:                     .ds 2
+HuTrack.F.ptr:                      .ds 2
 
       .bss

@@ -28,8 +28,9 @@ HuTrackEngine.7khz.IRQ:
           pha                               ;3 = 33
 
 .DDA.loop
-        lda <HuTrack.dda.bank,x             ;4
+        lda <HuTrack.dda.inactive,x         ;4
       bmi .next                             ;2
+        lda <HuTrack.dda.bank,x             ;4
         tam #$02                            ;5
 
         lda <HuTrack.dda.addr.lo,x          ;4
@@ -75,7 +76,9 @@ HuTrackEngine.7khz.IRQ:
         lda #$40
         sta <HuTrack.dda.addr.hi,x
         inc <HuTrack.dda.bank,x
-      bra .next
+      bne .next
+        lda #$80             ; Do not wrap the physical bank byte to ROM zero.
+      bra .stop
 
 .control_flag
         ora <HuTrack.dda.cntr0,x
@@ -90,6 +93,7 @@ HuTrackEngine.7khz.IRQ:
         stx _htk.WSG.ChannelSelect          ;5
         sta _htk.WSG.DDAport                ;5
         cli
+        lda <HuTrack.dda.loop.bank,x
         tam #$02
 
         lda <HuTrack.dda.addr.loop.hi,x
@@ -103,6 +107,7 @@ HuTrackEngine.7khz.IRQ:
       jmp .re_entry
 
 .stop
+        sta <HuTrack.dda.inactive,x
         sta <HuTrack.dda.bank,x
         bra .next
 

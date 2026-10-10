@@ -262,7 +262,7 @@ class HuTrackLib():
     def __indentInc(self):
         self.indentMod += 4
 
-    def __indentInc(self):
+    def __indentDec(self):
         self.indentMod -= (0,4)[self.indentMod > 0]
 
     def __indentReset(self):
@@ -276,7 +276,7 @@ class HuTrackLib():
         if _indent == '+':
             self.__indentInc()
         elif _indent == '-':
-            self.__indentInc()
+            self.__indentDec()
 
         indent = ('',' '*self.indentMod)[text != '']
         self.hutrackMod.append(indent + text + '\n')
@@ -285,7 +285,7 @@ class HuTrackLib():
         if _indent == '++':
             self.__indentInc()
         elif _indent == '--':
-            self.__indentInc()
+            self.__indentDec()
 
 
 
@@ -300,8 +300,22 @@ class HuTrackExportPCE():
     def process(self, hutrack=None, params=None):
         self.huTrack = (self.huTrack, hutrack)[hutrack is not None]
         self.params  = (self.params, params)[params is not None]
+        if self.params.get('bitpackPCM') or self.params.get('alignPCM256') or self.params.get('bitDepth','5bit')!='5bit':
+            raise ValueError('HuTrack exports unpacked 5-bit PCM; packing, alignment and other bit depths are not implemented')
         self.writeHutrackFiles()
         return True
+
+    def writeLocation(self, output, label):
+        # Rebase CPU addresses without changing the physical output position.
+        # Every independently addressed music object fits a two-bank window.
+        if self.banked:
+            output.write('  .page 2\n')
+        output.write(label + '\n')
+
+    def writePointer(self, output, label):
+        output.write(f'  .dw {label}\n')
+        if self.banked:
+            output.write(f'  .db bank({label})\n')
 
     def writeSongHeader(self):
 
@@ -310,25 +324,25 @@ class HuTrackExportPCE():
 
         with open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
             hu_out.write(f'\n\n\n')
-            hu_out.write(f'.song\n')
-            hu_out.write(f'  .dw .song.tables\n')
-            hu_out.write(f'  .dw .song.tables.bank\n')
+            self.writeLocation(hu_out, '.song')
+            if self.banked:
+                hu_out.write('  .dw 0 ; banked-format marker\n  .db 1 ; format revision\n')
+                self.writePointer(hu_out, '.song.tables')
+            else:
+                hu_out.write('  .dw .song.tables\n  .dw .song.tables.bank\n')
 
             songname = (self.huTrack.songName,'')[ self.params['no_songname'] ]
             authorname = (self.huTrack.authorName,'')[ self.params['no_author'] ]
-            hu_out.write(f'.songname\n')
-            hu_out.write(f'  .db "{songname}",0\n')
-            hu_out.write(f'.author\n')
-            hu_out.write(f'  .db "{authorname}",0\n')
+            for label, text in (('songname',songname),('author',authorname)):
+                hu_out.write(f'.{label}\n')
+                data = [ord(c) & 255 for c in text] + [0]
+                for start in range(0,len(data),32):
+                    hu_out.write('  .db ' + ','.join(str(value) for value in data[start:start+32]) + '\n')
 
             hu_out.write(f'\n\n')
-            hu_out.write(f'.song.tables\n')
-            hu_out.write(f'  .dw .attributes\n')
-            hu_out.write(f'  .dw .patternList.table\n')
-            hu_out.write(f'  .dw .instrument.table\n')
-            hu_out.write(f'  .dw .waveform.table\n')
-            hu_out.write(f'  .dw .pattern.table\n')
-            hu_out.write(f'  .dw .samples.table\n')
+            self.writeLocation(hu_out, '.song.tables')
+            for label in ('.attributes','.patternList.table','.instrument.table','.waveform.table','.pattern.table','.samples.table'):
+                self.writePointer(hu_out,label)
             hu_out.write(f'\n')
             hu_out.write(f'.song.tables.bank\n')
             hu_out.write(f'  .db bank(.attributes)\n')
@@ -341,7 +355,9 @@ class HuTrackExportPCE():
 
             hu_out.write(f'\n\n')
 
-            hu_out.write(f'.attributes\n\n')
+            self.writeLocation(hu_out, '.attributes')
+            hu_out.write('  ; Extended attributes: marker, initial arp ticks, legacy volume slides\n')
+            hu_out.write(f'  .db 0,{getattr(self.huTrack, "legacyArpSpeed", 1)},{int(getattr(self.huTrack, "dmfVersion", 24) <= 24)}\n')
 
             hu_out.write(f' ;NOTE: time base =  {self.huTrack.timeBase}\n')
             hu_out.write(f' ;NOTE: frame mode =  {self.huTrack.frameMode}\n')
@@ -353,7 +369,7 @@ class HuTrackExportPCE():
             hu_out.write(f'.attributes.tick2\n')
             hu_out.write(f'  .db {self.huTrack.tickTime2}\n')
             hu_out.write(f'.attributes.rowLength\n')
-            hu_out.write(f'  .db {self.huTrack.rowsPerPattern}\n')
+            hu_out.write(f'  .db {self.huTrack.rowsPerPattern & 255}\n')
             hu_out.write(f'.attributes.patternListLen\n')
             hu_out.write(f'  .db {self.huTrack.PatternMatrixLen}\n')
             hu_out.write(f'.attributes.instrumentLen\n')
@@ -375,9 +391,9 @@ class HuTrackExportPCE():
 
             hu_out.write(f'\n\n')
             hu_out.write(f';###########################################################################\n')
-            hu_out.write(f'.instrument.table\n')
+            self.writeLocation(hu_out, '.instrument.table')
             for instrument in range(self.huTrack.instrumentsLen):
-                hu_out.write(f'  .dw .instrument.{str(instrument)}\n')
+                self.writePointer(hu_out,f'.instrument.{instrument}')
             hu_out.write(f'\n')
 
         filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.instrData.inc').replace("\\","/")
@@ -388,19 +404,18 @@ class HuTrackExportPCE():
             for instrument in range(self.huTrack.instrumentsLen):
                 hu_out.write(f'\n\n')
                 hu_out.write(f';###########################################################################\n')
-                hu_out.write(f'.instrument.{str(instrument)}\n')
+                self.writeLocation(hu_out,f'.instrument.{instrument}')
                 hu_out.write(f'; name {self.huTrack.instrumentData[instrument].name}\n')
                 hu_out.write(f'; mode {self.huTrack.instrumentData[instrument].mode}\n')
                 hu_out.write(f'\n')
                 hu_out.write(f'.instrument.{str(instrument)}.table\n')
-                hu_out.write(f'  .dw .instrument.{str(instrument)}.volEnv\n')
-                hu_out.write(f'  .dw .instrument.{str(instrument)}.arpEnv\n')
-                hu_out.write(f'  .dw .instrument.{str(instrument)}.waveFormEnv\n')
+                for kind in ('volEnv','arpEnv','waveFormEnv'):
+                    self.writePointer(hu_out,f'.instrument.{instrument}.{kind}')
 
 
                 hu_out.write(f'\n')
                 hu_out.write(f';........................\n')
-                hu_out.write(f'.instrument.{str(instrument)}.volEnv\n')
+                self.writeLocation(hu_out,f'.instrument.{instrument}.volEnv')
                 hu_out.write(f'\n')
                 hu_out.write(f'.instrument.{str(instrument)}.volEnv.size\n')
                 hu_out.write(f'  .db {str(self.huTrack.instrumentData[instrument].volumeEnvLength)}\n')
@@ -412,7 +427,7 @@ class HuTrackExportPCE():
 
                 hu_out.write(f'\n')
                 hu_out.write(f';........................\n')
-                hu_out.write(f'.instrument.{str(instrument)}.arpEnv\n')
+                self.writeLocation(hu_out,f'.instrument.{instrument}.arpEnv')
                 hu_out.write(f'\n')
                 hu_out.write(f'.instrument.{str(instrument)}.arpEnv.mode\n')
                 hu_out.write(f'  .db {str(self.huTrack.instrumentData[instrument].arpeggioEnvMode)}\n')
@@ -427,7 +442,7 @@ class HuTrackExportPCE():
 
                 hu_out.write(f'\n')
                 hu_out.write(f';........................\n')
-                hu_out.write(f'.instrument.{str(instrument)}.waveFormEnv\n')
+                self.writeLocation(hu_out,f'.instrument.{instrument}.waveFormEnv')
                 hu_out.write(f'\n')
                 hu_out.write(f'.instrument.{str(instrument)}.waveFormEnv.size\n')
                 hu_out.write(f'  .db {str(self.huTrack.instrumentData[instrument].wavetableEnvLength)}\n')
@@ -447,12 +462,12 @@ class HuTrackExportPCE():
 
             hu_out.write(f'\n\n')
             hu_out.write(f';###########################################################################\n')
-            hu_out.write(f'.patternList.table\n')
+            self.writeLocation(hu_out,'.patternList.table')
             for channel in range(HuTrackContainer.SYSTEM_TOTAL_CHANNELS):
-                hu_out.write(f'  .dw .patternList.chan{str(channel)}\n')
+                self.writePointer(hu_out,f'.patternList.chan{channel}')
             hu_out.write(f'\n')
             for channel in range(HuTrackContainer.SYSTEM_TOTAL_CHANNELS):
-                hu_out.write(f'.patternList.chan{str(channel)}\n')
+                self.writeLocation(hu_out,f'.patternList.chan{channel}')
                 for patternNum in range(self.huTrack.PatternMatrixLen):
                     hu_out.write(f'  .db {self.huTrack.PatternMatrixCompressed[channel][patternNum]}\n')
 
@@ -465,9 +480,9 @@ class HuTrackExportPCE():
             # Pattern tables
             hu_out.write(f'\n\n')
             hu_out.write(f';###########################################################################\n')
-            hu_out.write(f'.pattern.table\n')
+            self.writeLocation(hu_out,'.pattern.table')
             for channel in range(HuTrackContainer.SYSTEM_TOTAL_CHANNELS):
-                hu_out.write(f'  .dw .pattern.table.chan{channel}\n')
+                self.writePointer(hu_out,f'.pattern.table.chan{channel}')
             hu_out.write(f'\n\n')
 
             for channel in range(HuTrackContainer.SYSTEM_TOTAL_CHANNELS):
@@ -476,9 +491,9 @@ class HuTrackExportPCE():
 
             for channel in range(HuTrackContainer.SYSTEM_TOTAL_CHANNELS):
                 hu_out.write(f';.....................................................\n')
-                hu_out.write(f'.pattern.table.chan{channel}\n')
-                for pattern in set(self.huTrack.PatternMatrixCompressed[channel]):
-                    hu_out.write(f'  .dw .pattern.table.chan{channel}.pattern{pattern}\n')
+                self.writeLocation(hu_out,f'.pattern.table.chan{channel}')
+                for pattern in sorted(set(self.huTrack.PatternMatrixCompressed[channel])):
+                    self.writePointer(hu_out,f'.pattern.table.chan{channel}.pattern{pattern}')
                 hu_out.write(f'\n\n')
                 hu_out.write(f';###########################################################################\n')
                 hu_out.write(f'\n\n')
@@ -490,9 +505,9 @@ class HuTrackExportPCE():
                 hu_out.write(f';........................................................................\n')
                 hu_out.write(f'\n')
                 chanSongdataBinsize = 0
-                for pattern in set(self.huTrack.PatternMatrixCompressed[channel]):
+                for pattern in sorted(set(self.huTrack.PatternMatrixCompressed[channel])):
                     hu_out.write(f';......................................\n')
-                    hu_out.write(f'.pattern.table.chan{channel}.pattern{pattern}\n')
+                    self.writeLocation(hu_out,f'.pattern.table.chan{channel}.pattern{pattern}')
                     hu_out.write(f'\n')
                     for row in self.huTrack.patternData[channel][pattern].patternData:
                         byteNum = 0
@@ -519,10 +534,10 @@ class HuTrackExportPCE():
             # waveform table
             hu_out.write(f'\n\n')
             hu_out.write(f';###########################################################################\n')
-            hu_out.write(f'.waveform.table\n')
+            self.writeLocation(hu_out,'.waveform.table')
             hu_out.write(f'\n')
             for wavetableNum in range(self.huTrack.wavetableLen):
-                hu_out.write(f'  .dw .waveform.{str(wavetableNum)}\n')
+                self.writePointer(hu_out,f'.waveform.{wavetableNum}')
             hu_out.write(f'\n\n')
 
         filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.wfData.inc').replace("\\","/")
@@ -533,7 +548,7 @@ class HuTrackExportPCE():
             hu_out.write(f';###########################################################################\n')
             for wavetableNum in range(self.huTrack.wavetableLen):
                 hu_out.write(f';.....................................................\n')
-                hu_out.write(f'.waveform.{str(wavetableNum)}\n')
+                self.writeLocation(hu_out,f'.waveform.{wavetableNum}')
                 self.writeArrayAs_DB_fourInRow(hu_out, self.huTrack.wavetableData[wavetableNum])
                 hu_out.write(f'\n')
             hu_out.write(f'\n\n')
@@ -548,7 +563,7 @@ class HuTrackExportPCE():
             hu_out.write(f'\n\n')
             hu_out.write(f';###########################################################################\n')
             hu_out.write(f'\n')
-            hu_out.write(f'.samples.table\n\n')
+            self.writeLocation(hu_out,'.samples.table')
             hu_out.write(f'  ; offset to sample bank table.\n')
             hu_out.write(f'  .dw ${hex(self.huTrack.samplesLen*2).split("0x")[1]}\n')
             hu_out.write(f'\n')
@@ -570,11 +585,12 @@ class HuTrackExportPCE():
             hu_out.write(f';###########################################################################\n')
             hu_out.write(f'\n')
             for sample in range(self.huTrack.samplesLen):
-                if sample > 0:
+                if sample > 0 and not self.banked:
                     hu_out.write(f'  .bank (bank(.sample{sample-1}.end))\n')
                     hu_out.write(f'  .org $4000 + (* & $1fff)\n')
-                hu_out.write(f'.sample{sample}\n')
-                hu_out.write(f'  ; name = {self.huTrack.samples[sample].sampleName}\n')
+                self.writeLocation(hu_out,f'.sample{sample}')
+                safeName=self.huTrack.samples[sample].sampleName.replace('\r',' ').replace('\n',' ')
+                hu_out.write(f'  ; name = {safeName}\n')
                 hu_out.write(f'  ; size = {self.huTrack.samples[sample].sampleSize}\n')
                 hu_out.write(f'  ; rate = {RATE_TABLE[self.huTrack.samples[sample].sampleRate]}\n')
                 hu_out.write(f'  ; pitch = {self.huTrack.samples[sample].samplePitch}\n')
@@ -591,6 +607,7 @@ class HuTrackExportPCE():
 
     def writeHutrackFiles(self):
 
+        self.banked = not self.params.get('legacy_format',False)
         os.makedirs(os.path.join(self.params['destinationPath'],f'{self.params["subFolder"]}'), exist_ok=True)
 
         self.writeSongHeader()
@@ -615,7 +632,7 @@ class HuTrackExportPCE():
 
         # Write the raw data out.. for debug purposes
         if self.params['debug']:
-            dmf = self.dmf.getDMF()
+            dmf = getattr(self.huTrack, 'rawDMF', [])
             with open(os.path.join(self.params['destinationPath'],f'{self.params["subFolder"]}',f'{self.params["songName"]}.debug.txt'), 'w') as fileout:
                 column = 0
                 for i in range(len(dmf)):
@@ -638,12 +655,21 @@ class HuTrackExportPCE():
             with open(os.path.join(self.params['destinationPath'],filename),'wb') as fout:
                 fout.write(bytearray(sampleObj.samplePCE))
 
-        hu_out.write(f'  ; size\n')
-        hu_out.write(f'  .dw {len(sampleObj.samplePCE)}\n')
+        # The driver skips this historical word and reads until the control
+        # marker. Keep its low 16 bits for old readers; streams may exceed 64KB.
+        hu_out.write(f'  ; size {len(sampleObj.samplePCE)} (informational low 16 bits)\n')
+        hu_out.write(f'  .dw {len(sampleObj.samplePCE) & 65535}\n')
         hu_out.write(f'\n')
         hu_out.write(f'  ; data\n')
 
-        self.writeArrayAs_DB_fourInRow(hu_out, sampleObj.samplePCE, base=base)
+        if self.banked:
+            # A single PCM stream may span many banks. Rebase each small chunk
+            # so PCEAS never wraps its CPU address from $ffff to $0000.
+            for start in range(0,len(sampleObj.samplePCE),4096):
+                hu_out.write('  .page 2\n')
+                self.writeArrayAs_DB_fourInRow(hu_out,sampleObj.samplePCE[start:start+4096],base=base)
+        else:
+            self.writeArrayAs_DB_fourInRow(hu_out, sampleObj.samplePCE, base=base)
 
 
     def writeArrayAs_DB_fourInRow(self, hu_out, array, base=10):

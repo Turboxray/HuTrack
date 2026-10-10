@@ -21,7 +21,7 @@ ISR.setVecMask   .macro
 ;................................................
 ISR.resetVecMask   .macro
 
-    lda #(\1 ^ 0xff)
+    lda #\1
     trb <vector_mask
 
   .endm

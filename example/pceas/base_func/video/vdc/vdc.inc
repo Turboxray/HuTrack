@@ -193,10 +193,12 @@ VREG_Select .macro
 sVDC_REG     .macro
 
     .if    (\?2=1)
+    pha
     lda #\1
     sta <vdc_reg
     st0 #\1
-    sta $0002
+    pla
+    st\2 $0002
     stz $0003
     .endif
 

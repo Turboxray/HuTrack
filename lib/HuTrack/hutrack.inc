@@ -36,119 +36,58 @@ HuTrack.setVDCreturnVector  .macro
 ;................................................................
 
 
-PatternEntry    .macro
-
-    ; \1 = NOTE + octave
-    ; \2 = instrument
-    ; \3 = volume (direct/relative)
-    ; \4 = fx 1
-    ; \5 = fx 1 data
-    ; \6 = fx 2
-    ; \7 = fx 2 data
-    ; \8 = fx 3
-    ; \9 = fx 3 data
-    if (\?1 = 6)
-        if (\1 = _)
-            ;.fail it worked!
-        endif
-    endif
-    if (\?2 = 6)
-        if (\1 = _)
-            ;.fail it worked!
-        endif
-    endif
-    if (\?3 = 6)
-        if (\1 = _)
-            ;.fail it worked!
-        endif
-    endif
-
-
-    ; skip current entry
-    if (\?1 = 0 & \?2 = 0 & \?3 = 0 & \?4 = 0 & \?5 = 0 & \?6 = 0 & \?7 = 0)
-    .db #$80
-    endif
-
-    ; just note
-    if (\?1 != 0 & \?2 = 0 & \?3 = 0 & \?4 = 0 & \?5 = 0 & \?6 = 0 & \?7 = 0)
-    .db #$01, #\1
-    endif
-
-    ; note and instrument
-    if (\?1 != 0 & \?2 != 0 & \?3 = 0 & \?4 = 0 & \?5 = 0 & \?6 = 0 & \?7 = 0)
-    .db #$03, #\1, #\2
-    endif
-
-    ; just instrument
-    if (\?1 = 0 & \?2 != 0 & \?3 = 0 & \?4 = 0 & \?5 = 0 & \?6 = 0 & \?7 = 0)
-    .db #$02, #\2
-    endif
-
-   ; note, and direct volume
-    if (\?1 != 0 & \?2 != 0 & \?3 != 0 & \?4 = 0 & \?5 = 0 & \?6 = 0 & \?7 = 0)
-    .db #$05, #\1, #\3
-    endif
-
-    ; note, instrument, and direct volume
-    if (\?1 != 0 & \?2 != 0 & \?3 != 0 & \?4 = 0 & \?5 = 0 & \?6 = 0 & \?7 = 0)
-    .db #$07, #\1, #\2 , #\3
-    endif
-
-    ; Just direct volume
-    if (\?1 = 0 & \?2 = 0 & \?3 != 0 & \?4 = 0 & \?5 = 0 & \?6 = 0 & \?7 = 0)
-    .db #$04, #\3
-    endif
-
-    ; note, istr, vol, fx1, fx1 data
-    if (\?1 != 0 & \?2 != 0 & \?3 != 0 & \?4 != 0 & \?5 != 0 & \?6 = 0 & \?7 = 0)
-    .db #$0F, #\1, #\2 , #\3, #\4, #\5
-    endif
-
-    ; note, istr, vol, fx1, fx1 data, fx2, fx2 data
-    if (\?1 != 0 & \?2 != 0 & \?3 != 0 & \?4 != 0 & \?5 != 0 & \?6 != 0 & \?7 != 0)
-    .db #$1F, #\1, #\2 , #\3, #\4, #\5, #\6, #\7
-    endif
-
-
-
-
+PatternEntry .macro
+    ; note, instrument, volume, FX1, arg1, FX2, arg2, FX3, arg3.
+    ; Empty arguments omit the corresponding independently encoded field.
+    .db ((\?1!=0)*1)+((\?2!=0)*4)+((\?3!=0)*8)+((\?4!=0)*16)+((\?5!=0)*32)+(((\?6!=0)|(\?7!=0)|(\?8!=0)|(\?9!=0))*64)
+    .if (\?1!=0)
+      .db \1
+    .endif
+    .if (\?2!=0)
+      .db \2
+    .endif
+    .if (\?3!=0)
+      .db \3
+    .endif
+    .if (\?4!=0)
+      .db \4
+    .endif
+    .if (\?5!=0)
+      .db \5
+    .endif
+    .if ((\?6!=0)|(\?7!=0)|(\?8!=0)|(\?9!=0))
+      .db ((\?6!=0)*1)+((\?7!=0)*2)+((\?8!=0)*4)+((\?9!=0)*8)
+      .if (\?6!=0)
+        .db \6
+      .endif
+      .if (\?7!=0)
+        .db \7
+      .endif
+      .if (\?8!=0)
+        .db \8
+      .endif
+      .if (\?9!=0)
+        .db \9
+      .endif
+    .endif
     .endm
 
-PatternEntry.skip    .macro
-
-    if (\# = 0)
-        .db #$80
-    .endif
-
-    if (\1 > 0 & \1 < 64)
-        .db #($80 | \1)
-    .endif
-
-    if (\1 > 31)
-        .fail Can only skip up to 63 lines
-    .endif
-
-    .endm
-
-
-PatternEntry.end    .macro
-
-    if (\# = 0)
-        .db #$40
+PatternEntry.skip .macro
+    .if (\#=0)
+      .db $e1
     .else
-        .fail Macro takes no arguments.
+      .if (\1<1 | \1>30)
+        .fail PatternEntry.skip accepts 1 through 30 rows.
+      .endif
+      .db 224+\1
     .endif
-
     .endm
 
+; End the current pattern using D00 (there is no stream terminator byte).
+PatternEntry.end .macro
+    .db $10,$0d
+    .endm
 
-;................................................................
-;................................................................
-; General/interface macros                                      .
-;                                                               .
-;................................................................
-
-;................................................
 HuTrack.CallFar    .macro
                 tma #page(\1)
                 pha
@@ -164,48 +103,43 @@ HuTrack.CallFar    .macro
 
 ;......................
 ;HuTrack.CallFarRemap  label, page#
-HuTrack.CallFarRemap    .macro
-
+HuTrack.CallFarRemap .macro
+.htk.remap\@:
+    ; The callee must be assembled for this page, or be position independent.
+    .if (\2=page(.htk.remap\@))
+      .fail CallFarRemap cannot replace the page containing its return code.
+    .endif
+    tma #\2
+    pha
     lda #bank(\1)
-    sta _HuTrack_Arg_Pass_EAX0_l
-    lda #low((\1 & $1fff | \2*$2000) - 1)
-    sta _HuTrack_Arg_Pass_EAX0_m
-    lda #high((\1 & $1fff | \2*$2000) - 1)
-    sta _HuTrack_Arg_Pass_EAX0_h
-
-    jsr htk.CallFarRemap
-
-
+    tam #\2
+    jsr ((\1 & $1fff) | (\2*$2000))
+    pla
+    tam #\2
     .endm
 
-;......................
-;HuTrack.CallFarRemap  label
-; Maps a single bank/page
-HuTrack.CallFarSafe    .macro
-
-    lda #bank(\1)
-    sta _HuTrack_Arg_Pass_EAX0_l
-    lda #low(\1)
-    sta _HuTrack_Arg_Pass_EAX0_m
-    lda #high(\1)
-    sta _HuTrack_Arg_Pass_EAX0_h
-
-    jsr htk.CallFarRemap
-
-
+HuTrack.CallFarSafe .macro
+.htk.safe\@:
+    ; Keep expansion size independent of a forward target's bank/page.
+    .if (page(\1)=page(.htk.safe\@))
+      .if (bank(\1)!=bank(.htk.safe\@))
+        .fail CallFarSafe cannot replace the executing bank. Use a fixed-page trampoline.
+      .endif
+    .endif
+    HuTrack.CallFar \1
     .endm
 
 ;......................
 HutrackEngine.ManualCall   .macro
-        HuTrack.setVDCreturnVector  HutrackEngine.irq1.vsyncRTN, HuTrack.returnVec
+        HuTrack.setVDCreturnVector  HutrackEngine.irq1.vsyncRTN\@, HuTrack.returnVec
         jmp HuTrackEngine.EngineCall
-HutrackEngine.irq1.vsyncRTN:
+HutrackEngine.irq1.vsyncRTN\@:
     .endm
 
 _HuTrackEngine_ManualCall   .macro
-        HuTrack.setVDCreturnVector  HutrackEngine.irq1.vsyncRTN, HuTrack.returnVec
+        HuTrack.setVDCreturnVector  HutrackEngine.irq1.vsyncRTN\@, HuTrack.returnVec
         jmp HuTrackEngine.EngineCall
-HutrackEngine.irq1.vsyncRTN:
+HutrackEngine.irq1.vsyncRTN\@:
     .endm
 
 ;.................................................
@@ -219,7 +153,7 @@ HuTrack.AlignByte256    .macro
 HuTrack.BenchmarkColorZero   .macro
 
 .ifdef HUTRACK_BENCHMARK
-.if (HUTRACK_BENCHMARK == 1)
+.if (HUTRACK_BENCHMARK = 1)
         stz $402
         lda #$01
         sta $403
@@ -434,6 +368,17 @@ x_\@ = 1
         .endif
     .endif
 
+    .if (\?1=2 & \?2=4)
+x_\@ = 16
+        lda #low(\1)
+        sta \2
+        phy
+        ldy #1
+        lda #high(\1)
+        sta \2,y
+        ply
+    .endif
+
     ;source=#, dest = REG:PAIR AX
     .if (\?1 = 2 & \?2=5)
         .if (\2="AX")
@@ -489,7 +434,8 @@ x_\@ = 7
     .endif
 
     ;source=AX or AY or XY, dest = addr
-    .if ((\?2 = 3 | \?2 = 6) & \?1=6)
+    ; PCEAS versions classify named constants as either type 3 or type 6.
+    .if ((\?2 = 3 | \?2 = 6) & (\?1=3 | \?1=6))
         .if (\1=REG_AX)
 x_\@ = 8
             stx \2
@@ -509,6 +455,7 @@ x_\@ = 10
 
     ;source=ADDR, dest = addr
     .if (\?1=3 & \?2!=5)
+    .if (\1 != REG_AX & \1 != REG_AY & \1 != REG_XY)
         .if (\?2!=4)
 x_\@ = 11
             lda \1
@@ -517,19 +464,22 @@ x_\@ = 11
             sta \2 + 1
         .endif
     .endif
+    .endif
 
     ;source=ADDR, dest = indirect
     .if (\?1=3 & \?2!=5)
+    .if (\1 != REG_AX & \1 != REG_AY & \1 != REG_XY)
         .if (\?2=4)
 x_\@ = 12
             lda \1
             sta \2
             phy
             ldy #$01
-            lda \1
-            ply
+            lda \1 + 1
             sta \2,y
+            ply
         .endif
+    .endif
     .endif
 
     ;source=indirect, dest = addr
@@ -554,18 +504,26 @@ x_\@ = 14
         phy
         ldy #$01
         lda \1,y
-        ply
         sta \2,y
+        ply
     .endif
 
     ;source=label as direct address
     .if (\?1=6 & \?2!=5)
-    .if (\1 != REG_AX)
+    .if (\1 != REG_AX & \1 != REG_AY & \1 != REG_XY)
 x_\@ = 15
             lda \1
             sta \2
-            lda \1 + 1
-            sta \2 + 1
+        .if (\?2=4)
+            phy
+            ldy #1
+            lda \1+1
+            sta \2,y
+            ply
+        .else
+            lda \1+1
+            sta \2+1
+        .endif
     .endif
     .endif
 
@@ -612,6 +570,32 @@ _htk.MOVE.sw    .macro
             .endif
         .endif
 
+        .if (\2=REG_X & \3=REG_AX)
+            lda \1.hi,x
+            ldx \1.lo,x
+        .endif
+        .if (\2=REG_X & \3=REG_AY)
+            lda \1.hi,x
+            ldy \1.lo,x
+        .endif
+        .if (\2=REG_X & \3=REG_XY)
+            lda \1.hi,x
+            ldy \1.lo,x
+            tax
+        .endif
+        .if (\2=REG_Y & \3=REG_AX)
+            lda \1.hi,y
+            ldx \1.lo,y
+        .endif
+        .if (\2=REG_Y & \3=REG_AY)
+            lda \1.hi,y
+            ldy \1.lo,y
+        .endif
+        .if (\2=REG_Y & \3=REG_XY)
+            lda \1.hi,y
+            ldy \1.lo,y
+            tax
+        .endif
         .if (\?1=2)
 
         .endif
@@ -620,10 +604,24 @@ _htk.MOVE.sw    .macro
 
     ; Do split with no index
     .if (\#=2)
-        lda \1.lo
-        sta \2
-        lda \1.hi
-        sta \2+1
+        .if (\2!=REG_AX & \2!=REG_AY & \2!=REG_XY)
+            lda \1.lo
+            sta \2
+            lda \1.hi
+            sta \2+1
+        .endif
+        .if (\2=REG_AX)
+            ldx \1.lo
+            lda \1.hi
+        .endif
+        .if (\2=REG_AY)
+            ldy \1.lo
+            lda \1.hi
+        .endif
+        .if (\2=REG_XY)
+            ldy \1.lo
+            ldx \1.hi
+        .endif
     .endif
 
     .if (\?1=1)
@@ -900,7 +898,7 @@ _htk.PUSHBANK.1        .macro
     .fail Macro requires one argument
     .endif
 
-        tma #(high(\1)>>5)
+        tma #(\1)
         pha
     .endm
 

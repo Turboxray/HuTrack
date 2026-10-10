@@ -17,7 +17,7 @@
 
 typedef enum
 {
-    HU_SFX_ERROR   = 0,
+    HU_SFX_STATE_ERROR = 0,
     HU_SFX_PLAYING = 1,
     HU_SFX_STOPPED = 2,
 } HU_SFX_STREAMNIG_t;

@@ -12,8 +12,8 @@
 HUTRACK_HUC_HUCC_RETURN .macro
 
   .ifndef HUCC
-      sax
       sxy
+      sax
   .endif
 
   .endm
@@ -122,6 +122,7 @@ _HuTrackEngine_PlayOnce.1:
 ;...............................................
 ;
 ; #pragma fastcall HuTrackEngine_Pause();
+_HuTrackEngine_Stop:
 _HuTrackEngine_Pause:
         tma #$06
         pha
@@ -130,48 +131,32 @@ _HuTrackEngine_Pause:
         jsr HuTrackEngine.pause
         pla
         tam #$06
-
-        ldx #05
-        lda #$DF
-.loop
-        stx $800
-        sta $804
-        stz $807
-        stz $808
-        stz $809
-      dex
-        bpl .loop
-  rts
-
-;...............................................
-;
-; #pragma fastcall HuTrackEngine_Stop();
-_HuTrackEngine_Stop:
-        tma #$06
-        pha
-        lda #bank(HuTrackEngine.pause)
-        tam #$06
-        jsr HuTrackEngine.pause
-        pla
-        tam #$06
-
-        ldx #05
-.loop
           php
           sei
-          nop
+        ldx #5
+.loop
+        bit HuTrack.SFX.inProgress,x
+      bmi .next
         stx $800
         stz $804
         stz $807
+        lda #$80
+        sta <HuTrack.dda.inactive,x
+        sta <HuTrack.dda.bank,x
+        sta HuTrack.channel.waitNote,x
+.next
+        dex
+      bpl .loop
+        lda HuTrack.SFX.inProgress
+        ora HuTrack.SFX.inProgress+1
+      bne .out
         stz $809
+.out
           plp
-      dex
-        bpl .loop
-  rts
+        rts
 
-;...............................................
-;
-;#pragma fastcall HuTrackEngine_SetGlobal(byte acc);
+; Global stereo attenuation, either packed nibbles or two 8-bit levels.
+
 _HuTrackEngine_SetGlobal.1:
         sta HuTrack.Global.SetVolume
         lda #$80
@@ -181,17 +166,14 @@ _HuTrackEngine_SetGlobal.1:
 ;#pragma fastcall HuTrackEngine_SetGlobal(byte __al, byte __ah);
 _HuTrackEngine_SetGlobal.2:
         lda <__al
-        lsr a
-        lsr a
-        lsr a
-        lsr a
+        and #$f0
         sta HuTrack.Global.SetVolume
         lda <__ah
         lsr a
         lsr a
         lsr a
         lsr a
-        and HuTrack.Global.SetVolume
+        ora HuTrack.Global.SetVolume
         sta HuTrack.Global.SetVolume
         lda #$80
         sta HuTrack.Global.VolUpdate
@@ -286,32 +268,22 @@ _HuTrackEngine_chanReserve.1:
       bcs .out
         lda #$80
         sta HuTrack.SFX.inProgress, x
+        sta HuTrack.channel.waitNote, x
+        sta <HuTrack.dda.inactive,x
         sta <HuTrack.dda.bank, x
 
-        lda #$df
           php
           sei
-            stx $800
-            sta $804
-          plp
-
-          php
-          sei
-            stx $800
-            stz $807
-          plp
-
-          php
-          sei
-            stx $800
-            stz $809
-          plp
-
+        stx $800
+        stz $804
+        stz $807
+        ; The PSG LFO couples channels 0/1 only.
+        cpx #2
+      bcs .pan
+        stz $809
+.pan
         lda #$ff
-          php
-          sei
-            stx $800
-            sta $805
+        sta $805
           plp
 
 .out
@@ -322,13 +294,30 @@ _HuTrackEngine_chanRelease.1:
         ldx <__al
         cpx #06
       bcs .out
-        stz HuTrack.SFX.inProgress, x
-
-        lda HuTrack.channel.panState,x
+        ; Repeated release must not silence a channel that music owns.
+        bit HuTrack.SFX.inProgress,x
+      bpl .out
           php
           sei
-            stx $800
-            sta $805
+        lda #$80
+        sta <HuTrack.dda.inactive,x
+        sta <HuTrack.dda.bank,x
+        sta HuTrack.channel.waitNote,x
+        .ifdef HuSFX.stream.bnk
+        lda #$ff
+        sta HuSFX.stream.bnk,x
+        stz HuSFX.delay,x
+        .endif
+        stx $800
+        stz $804
+        stz $807
+        stz HuTrack.SFX.inProgress,x
+        cpx #2
+      bcs .lfo.done
+        stz $809
+.lfo.done
+        lda #$ff
+        sta HuTrack.channel.uploadedWaveform,x
           plp
 
 .out
@@ -343,7 +332,7 @@ _HuTrackEngine_PCMStatus.1:
       bcs .error
         bit HuTrack.SFX.inProgress,x
       bpl .error
-        lda <HuTrack.dda.bank,x
+        lda <HuTrack.dda.inactive,x
         cmp #$80 
       beq .nosfx      
         lda #1
@@ -370,19 +359,22 @@ _HuTrackEngine_stopPcm.1:
       bpl .error
 
         lda #$80
+        sta <HuTrack.dda.inactive,x
         sta <HuTrack.dda.bank,x
 
         ; No error
         lda #$01
-        clx
+        cly
         clc
-.out    
+.out
+  HUTRACK_HUC_HUCC_RETURN
   rts
 
 .error
-        clx
+        cly
         cla
         sec
+  HUTRACK_HUC_HUCC_RETURN
   rts
 
 ; int __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, unsigned char bank<__fbank>, unsigned int addr<__fptr>);
@@ -403,6 +395,7 @@ _HuTrackEngine_PcmRequest.5:
       bpl .error
 
         lda #$80
+        sta <HuTrack.dda.inactive,x
         sta <HuTrack.dda.bank,x
 
         lda <__ch
@@ -418,28 +411,46 @@ _HuTrackEngine_PcmRequest.5:
         sta <HuTrack.dda.addr.lo,x
         sta <HuTrack.dda.addr.loop.lo,x
         lda <__fptr+1
+        and #$1f
         adc #$00
+        tay
         and #$1f
         ora #$40
         sta <HuTrack.dda.addr.hi,x
         sta <HuTrack.dda.addr.loop.hi,x
+        tya
+        cmp #$20
         lda <__fbank
         adc #$00
-        sta <HuTrack.dda.bank,x
         sta <HuTrack.dda.loop.bank,x
+          php
+          sei
+        stx $800
+        stz $807
+        lda #$df
+        sta $804
+        lda #$10
+        sta $806
+        lda <HuTrack.dda.loop.bank,x
+        sta <HuTrack.dda.inactive,x
+        sta <HuTrack.dda.bank,x
+        stz <HuTrack.dda.inactive,x
         rmb7 <HuTrack.DDAprocess
+          plp
 
         ; No error
         lda #$01
-        clx
+        cly
         clc
-.out    
+.out
+  HUTRACK_HUC_HUCC_RETURN
   rts
 
 .error
-        clx
+        cly
         cla
         sec
+  HUTRACK_HUC_HUCC_RETURN
   rts
 
 _getFarBank.1
@@ -457,7 +468,7 @@ _HuTrackEnginePauseDDA:
 
         lda HuTrack.DDAprocess
         sta HuTrack.DDAprocessBackup
-        and #$7f
+        ora #$80
         sta HuTrack.DDAprocess
   rts
 
@@ -484,38 +495,47 @@ _HuTrackEngineSFXrest.1:
           sei
 
         stx $800
-        lda #$d0
-        sta $804
+        stz $804
+        lda #$80
+        sta <HuTrack.dda.inactive,x
+        sta <HuTrack.dda.bank,x
 
           plp
 
         lda #$01
-        tax
+        cly
         clc
-.out    
+.out
+  HUTRACK_HUC_HUCC_RETURN
   rts
 
 .error
-        clx
+        cly
         cla
         sec
+  HUTRACK_HUC_HUCC_RETURN
   rts
 
 ;//.........................................................
 ; int __fastcall HuTrackEngine_SFXmode();
 _HuTrackEngine_SFXmode:
-
+        ; Return bits 0..5, one per reserved channel, in the compiler ABI.
         clx
+        cly
 .loop
         lda HuTrack.SFX.inProgress,x
         cmp #$80
-        say
-        ror 
-        say
-
+        tya
+        ror a
+        tay
         inx
         cpx #$06
-      bcc .loop 
+      bcc .loop
+        tya
+        lsr a
+        lsr a
+        cly
+        HUTRACK_HUC_HUCC_RETURN
   rts
 
 ;//.........................................................
@@ -529,15 +549,17 @@ _HuTrackEngine_SFXmode.1:
       bpl .error
 
         lda #$01
-        clx
+        cly
         clc
-.out    
+.out
+  HUTRACK_HUC_HUCC_RETURN
   rts
 
 .error
-        clx
+        cly
         cla
         sec
+  HUTRACK_HUC_HUCC_RETURN
   rts
 
 ;//.........................................................
@@ -547,6 +569,30 @@ _HuTrackEngine_SFXmode.1:
 
     .include "HuTrack/engine/HuTrack_parser.asm"
     .include "HuTrack/HuTrack_lib.asm"
+HuTrack.CodeEnd:
+  .if (bank(HuTrack.CodeEnd-1)!=SOUND_BANK)
+    .fail HuTrack music code exceeds SOUND_BANK.
+  .endif
+
+    ; Ordinary compiler data, outside both fixed libraries and music code.
+  .ifdef HUCC
+  .if RESERVE_BANKS < 1
+    .fail HuTrack requires one reserved bank for its ROM tables.
+  .endif
+  .bank RESERVED_BANK, "HuTrack Tables"
+  .org $8000
+  .else
+  .data
+  .bank CONST_BANK
+  .align $2000
+  .page 4
+  .endif
+    .include "HuTrack/engine/HuTrack_pitch_tables.inc"
+  .ifndef HUCC
+    ; HuC permanently maps its following string constants through MPR2.
+  .page 2
+  .endif
+  .code
 
   .ifdef HUCC
   .bank CORE_BANK

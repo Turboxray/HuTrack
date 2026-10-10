@@ -1,87 +1,70 @@
+HuSFX byte-stream control codes
+==============================
 
+Each channel has an independent stream. The decoder reads commands until a
+wait or End of Stream. Lengths below INCLUDE the opcode. Operand bytes are
+data even when their values equal FB, FC, FD, FE or FF.
 
-0x00 to 0x1f
--===========-
-                volume                  no operand
-                   |
-                   |-> Write this directly to $804
+Opcode     Bytes  Meaning
+------     -----  -------
+00..1F       1    Write the byte to $804 (channel off, volume 0..31).
+20..3F       1    DDA control: expand to C0..DF and write to $804.
+40..5F       1    Write the byte to $804 (DDA selected, channel off).
+80..9F       1    Write the byte to $804 (waveform playback, volume 0..31).
+A0..A9       2    Write the following byte to PSG register $800+(opcode&15).
+AA           2    Pattern index metadata: consume the following byte only.
+AB           2    Pattern number metadata: consume the following byte only.
+B0           2    Upload waveform <next byte> from the shared 32-byte pool.
+C0..CF       2    Period: write the next byte to $802 (low), opcode&15 to
+                  $803 (high). This is a 12-bit period.
+FB           1    End of Stream for this channel. Stop parsing immediately,
+                  mark the stream inactive and silence control/noise. Also
+                  disable LFO when ending channel 0 or 1. No operand.
+FC           3    Fixed-sample command: consume TWO operand bytes. Playback
+                  is still a placeholder; parsing continues after both bytes.
+FD           1    Stop-sample placeholder. No operand; parsing continues.
+FE           2    Wait N updates, where N is the next unsigned byte (1..255).
+                  Zero retains the historical minimum of one update.
+FF           1    Wait one update. No operand.
 
-0x20 to 0x3f
--===========-
-                volume (DDA)            no operand
-                   |
-                   |-> Write this directly to $804
+One update is one call to HuSFXprocess (normally once per video frame).
+FE 01 and FF both resume parsing on the next call. FE 80 waits 128 calls,
+not zero or an indefinite pause. HuSFX.delay is an unsigned countdown.
 
-0x40 to 0x5f
--===========-
-                volume                  no operand
-                   |
-                   |-> Write this directly to $804 with OR $80
+An A4 operand is a RAW $804 value, not a compact volume opcode. For example,
+20 writes C0 to $804, while A4 20 writes 20. Volume/pan attenuation applies
+after decoding. AA/AB metadata never writes to hardware.
 
-0x80 to 0x9f
--===========-
-                volume (DDA)            no operand
-                   |
-                   |-> Write this directly to $804 with OR $C0
+FB stops this stream only; it does not consume another byte, process trailing
+commands, or release HuTrack channel ownership. Applications still perform
+HuTrack reserve -> HuSFX play/process -> HuTrack release.
 
-0xA0 to 0xA9
--===========-
-                register destination    one byte operand
-                   |                         |
-                   |                         |->  Write this directly to the "resolved register number"
-                   |
-                   |-> (0xA0 to 0xAF) & 0x0f + $800 to create "resolved register number"
+Examples
+--------
+C1 FB FF FB       Set period $1FB, wait one update, then end the stream.
+FC 00 01 C1 FB    Skip the two PCM operands, then set period $1FB. The FB here
+FF FB            is period data; only the final FB is End of Stream.
+FE FB FB         Wait 251 updates, then end. The first FB is wait data.
+3F FF FB         DDA at volume 31 for one update, then end.
 
-0xAA 
--===========-
-                (dummy) destination    one byte operand
-                   |                         |
-                   |                         |->  Pattern Index #
-                   |
+C macros (lib/HuSFX/HuC_interface/HuVGM_defs.h)
+------------------------------------------------
+HuEndOfStream emits FB; HuWait1frame emits FF. HuWait_frames(n) emits FE,n.
+HuDDAvol(v) emits 20|v; HuWFvol(v) emits 80|v. Volume must be 0..31.
+HuChanDDA emits 30, preserving its old raw D0 setting (DDA, volume 16).
+HuPan(left,right) takes two 0..15 levels. HuPeriod(high,low) takes a 0..15
+high nibble and a 0..255 low byte. Waveform indices and wait counts are bytes.
+Arguments must fit their fields; the macros do not validate or mask them.
 
-0xAB
--===========-
-                (dummy) destination    one byte operand
-                   |                         |
-                   |                         |->  Pattern #
-                   |
+Compatibility notes
+-------------------
+The older copy of this document incorrectly described the compact volume
+ranges and reversed the period high/low registers. The definitions above
+match the converter's existing stream encoding. Other opcode ranges are
+undefined and must not be emitted (the decoder retains some legacy aliases,
+including the former HuChanDDA raw D0 encoding).
 
-0xB0
--===-
-                waveform update         one byte operand.   NOTE: This is a pseudo instruction, not a register write.
-                   |
-                   |-> Waveform block number. Used as an index into table of 32byte entries. Write all 32bytes to $806
-
-
-0xC0 to 0xCF
--===========-
-                period values           one byte operand
-                   |                         |
-                   |                         |->  Write this directly to $803
-                   |
-                   |-> (0xC0 to 0xCF) & 0x0f to $802
-
-0xfb
--===-
-                Stop all streaming for current channel: EOF.   no operand.         NOTE: This is a pseudo instruction, not a register write.
-
-0xfc
--===-
-                play fixed sample       two byte operand
-                   |
-                   |-> TODO for sample playback
-
-0xfd
--===-
-                stop sample             no operand
-                   |
-                   |-> TODO for sample playback
-
-0xfe
--===-
-                wait <n> frames         one byte operand.   NOTE: This is a pseudo instruction, not a register write.
-
-0xff
--===-
-                wait one frame          no operand.         NOTE: This is a pseudo instruction, not a register write.
-
+The converter internally uses FFFF as a frame marker and stores the two FC
+operands in one packed Python integer. Those are internal tokens, not stream
+bytes. Both the binary and assembler exports must serialize FF and both FC
+operands, followed by one final FB.

@@ -27,6 +27,12 @@ Workflow Overview
 	Between vsyncs begin playing a song with HuTrackEngine_PlaySong(index value of song to play);
 
 Furnace Song Creation and Exporting Data
+	Compatibility target for current development: official Furnace 0.6.8.3 legacy-DMF playback.
+	This preserves period-based pitch slides with linear vibrato and fine tuning.
+	Later official development builds removed that mixed pitch mode and can change how old DMFs sound.
+	Use the pinned release for playback comparisons. The mixed pitch model and feasible legacy effects are implemented; documented exceptions and hardware-validation limits remain.
+	See ../compatibility.md for the reference version, deliberate noise correction, and format limits.
+
 	Furnace is the tracker style music creation software that HuTrack requires be used to export the data for use in HuC.
 	Furnace download link: https://github.com/tildearrow/furnace
 	When using furnace it is important to note that it can be used to create music and sound effects for a 	variety of systems, 

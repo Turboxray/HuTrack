@@ -42,7 +42,9 @@ def decodeWaveformList(waveformlist):
 
     wf_block = [wf_set[:] for wf_set in wf_block if wf_set != []]
 
-    wf_block_check = [len(wf_set) for wf_set in wf_block if len(wf_set) != 32]
+    if len(wf_block)>256 or any(len(w)!=32 or any(v<0 or v>31 for v in w) for w in wf_block):
+        raise ValueError('Invalid shared pool: expected at most 256 complete five-bit waveforms')
+    wf_block_check = []
 
     if wf_block_check:
         print(f"Error: failed to decode full waveform sets. Found {len(wf_block_check)} sets with incorrect size.")
@@ -116,6 +118,8 @@ class GuiGui():
     def openVGM(self):
         filenames = fd.askopenfilenames(defaultextension='.png', filetypes = (("VGM files","*.vgm"),("all files","*")))
 
+        if not filenames:
+            return
         filename = filenames[0]
         if filename == '' or filename == None:
             print('Cancel open..')
@@ -131,6 +135,8 @@ class GuiGui():
     def openWaveform(self):
         filenames = fd.askopenfilenames(defaultextension='.wf.inc', filetypes = ((" files","*.wf.inc"),("all files","*")))
 
+        if not filenames:
+            return
         filename = filenames[0]
         if filename == '' or filename == None:
             print('Cancel open..')
@@ -157,7 +163,7 @@ class GuiGui():
             messagebox.showerror(title='On VGM', message='No VGM file is loaded.')
             return
 
-        configMsg = f'VGM: {self.args.filein}\n\nFolder: {self.buildPath}\n\nFilename: {self.sfxFileName.get()}\n\nInclude path: {self.includePath.get()}'
+        configMsg = f'VGM: {self.args.filein}\n\nFolder: {self.args.destfolder}\n\nFilename: {self.sfxFileName.get()}\n\nInclude path: {self.includePath.get()}'
 
         if not  messagebox.askyesno(title='Confirmation', message=configMsg):
             return
@@ -175,7 +181,7 @@ class GuiGui():
 
             print(f' log: {self.outputLog.get()}, {self.args.debugLog }. bin: {self.outputBin.get()},{self.args.debugBin}')
 
-            self.wf_block = decodeWaveformList(args.waveformlist)
+            self.wf_block = decodeWaveformList(self.args.waveformlist)
 
             action = ('append','new')[self.args.waveformlist=='']
             wf_list_file = (self.args.waveformlist,self.args.destfolder+".wf.inc")[self.args.waveformlist=='']
@@ -202,9 +208,9 @@ class ConvertVGM():
         self.wf_block = []
 
         if self.args.destfolder == '':
-            self.args.destfolder = self.args.filein
+            self.args.destfolder = str(Path(self.args.filein).with_suffix(''))
 
-        self.includPathName = os.path.join(self.args.dir,Path(self.args.destfolder).name)
+        self.includPathName = os.path.join(self.args.dir,self.args.sfxname).replace('\\','/')
 
         self.reg_list = { 0 : [],
                           1 : [],
@@ -246,10 +252,13 @@ class ConvertVGM():
                     }
 
 
-    def process(self, wf_block=[]):
-
-        if wf_block != []:
-            self.wf_block = [[val for val in wf_set] for wf_set in wf_block]
+    def process(self, wf_block=None):
+        self.wf_block = [list(wave) for wave in (wf_block or [])]
+        if len(self.wf_block)>256 or any(len(w)!=32 or any(v<0 or v>31 for v in w) for w in self.wf_block):
+            raise ValueError('Expected at most 256 waveforms of 32 five-bit samples')
+        self.reg_list = {ch:[] for ch in range(6)}
+        self.reg_list['num_frames'] = 0
+        self.debugLog = []
         self.debugPrint(f'Opening [{self.args.filein}] ....')
         content = None
         try:
@@ -258,26 +267,26 @@ class ConvertVGM():
                 content = [int(val) for val in content]
         except:
             error = (f'Error: could not read file {self.args.filein}.')
-            if self.args.guiMode:
-                raise(error)
+            if self.guiMode:
+                raise ValueError(error)
             return False
 
         if not content:
             error = (f'Error: file {self.args.filein} is empty.')
-            if self.args.guiMode:
-                raise(error)
+            if self.guiMode:
+                raise ValueError(error)
             return False
 
-        if not len(content) > 0x100:
+        if len(content) < 0x40:
             error = (f'Error: file {self.args.filein} is too small.')
-            if self.args.guiMode:
-                raise(error)
+            if self.guiMode:
+                raise ValueError(error)
             return False
 
-        if self.get_string(0,3,content) != "Vgm":
+        if self.get_string(0,4,content) != "Vgm ":
             error = (f'Error: file {self.args.filein} is not identified as "Vgm".')
-            if self.args.guiMode:
-                raise(error)
+            if self.guiMode:
+                raise ValueError(error)
             return False
 
         self.debugPrint(f'[{self.get_int(0x08, content)}]')
@@ -304,12 +313,14 @@ class ConvertVGM():
     def get_PCM(self, dataOffset, operand, content):
         self.debugPrint(f' pcm operand {operand}')
         pcmLen = self.get_int(2,operand)
+        if dataOffset+pcmLen>len(content):raise ValueError('Truncated VGM PCM block')
         data = content[dataOffset : dataOffset + pcmLen]
         self.debugPrint(f'^^^^^^^^^^^^^^^ get PCM {hex(pcmLen)}, {hex(dataOffset)}')
         return data, dataOffset+pcmLen
 
     def get_PatternInfo(self, dataOffset, operand, content):
         dataLen = self.get_int(2,operand)
+        if dataLen<9 or dataOffset+dataLen>len(content):raise ValueError('Invalid VGM pattern block')
         data = content[dataOffset : dataOffset + dataLen]
         self.debugPrint(f' block operand {operand}')
         self.debugPrint(f'^^^^^^^^^^^^^^^ get pattern {hex(dataLen)}, data {hexPrintList(data)}, offset {hex(dataOffset)}')
@@ -317,7 +328,11 @@ class ConvertVGM():
 
     def decode_vgm(self, content):
 
-        dataOffset = self.get_int(0x34,content) + 0x34
+        relative = self.get_int(0x34,content)
+        dataOffset = relative + 0x34 if relative else 0x40
+        if not 0x40 <= dataOffset < len(content):
+            raise ValueError('VGM data offset is outside the file')
+        ended = False
 
         channelCount = []
         chan_data = { 0:[], 1:[], 2:[], 3:[], 4:[], 5:[] }
@@ -339,16 +354,16 @@ class ConvertVGM():
                     self.debugPrint(f'set channel: [{current_channel}]')
             else:
                 error = (f'Error: op [{hex(op)}] is not recognised at offset [{hex(old_offset)}]')
-                if self.args.guiMode:
-                    raise(error)
+                if self.guiMode:
+                    raise ValueError(error)
                 print(error)
                 return False
 
             if current_channel > 5:
                 #print(f'op: [{hex(op)}], operand: {[hex(val) for val in operand]}, data offset: [{hex(dataOffset)}], chan offset {hex(self.op_chan[op])}')
                 error = (f'Error: found channel entry [{hex(operand[self.op_chan[op]])}] at offset {hex(old_offset)}. Channels must be between 0 to 5.')
-                if self.args.guiMode:
-                    raise(error)
+                if self.guiMode:
+                    raise ValueError(error)
                 print(error)
                 return False
 
@@ -392,10 +407,15 @@ class ConvertVGM():
 
             if op in [0x93]:
                 error = (f'Error: op {hex(op)} is not supported. Found at offset {hex(dataOffset)}, operand data {operand}.')
-                if self.args.guiMode:
-                    raise(error)
+                if self.guiMode:
+                    raise ValueError(error)
                 print(error)
                 return False
+
+            if op in (0x94,0x95) and operand[0]>5:
+                raise ValueError('PCM stream ID must be a HuSFX channel 0..5')
+            if op==0xb9 and operand[0]>9:
+                raise ValueError('Unsupported PCE register or second chip')
 
             if op in [0x94]:
                 self.debugPrint(f'&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& found op {hex(op)} at offset {hex(dataOffset)}, {operand}, chan {current_channel}')
@@ -426,6 +446,7 @@ class ConvertVGM():
                 self.debugPrint(f'###  Frame end!  #####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
 
                 if op == 0x66:
+                    ended = True
                     break
                 else:
                     continue
@@ -441,7 +462,10 @@ class ConvertVGM():
 
         self.debugPrint(f"\n\n\n{self.reg_list}\n\n\n")
 
-        waveforms, bin_channels =  self.consilidateWFupdates()
+        if not ended:
+            raise ValueError('Truncated VGM: missing end command')
+        waveforms, bin_channels = self.consilidateWFupdates()
+        Path(self.args.destfolder).mkdir(parents=True, exist_ok=True)
 
         #...........................................................................................................................
         #...........................................................................................................................
@@ -486,7 +510,7 @@ class ConvertVGM():
         with open(wf_list_file, 'w') as f:
             for idx,waveform in enumerate(waveforms):
                 waveform = list(waveform)
-                f.write(f'\n.wf.block{idx}\n')
+                f.write(f'\n  .page 2\n.wf.block{idx}\n')
                 waveform_labels.append(f'.wf.block{idx}')
                 output_str = self.asciiWaveform(waveform) + " "
                 for idx, val in enumerate(waveform):
@@ -510,7 +534,7 @@ class ConvertVGM():
         #
         # channel data
 
-        bin_pattern_channels = self.decodePatterns(bin_channels)
+        # The output is an SFX stream; optional Furnace pattern markers are retained.
 
         totalSongdataBinsize = 0
         data_labels = []
@@ -522,15 +546,14 @@ class ConvertVGM():
             if self.args.debugBin:
                 with open(f"{self.args.destfolder}/{self.args.sfxname}.chan{num}.bin",'wb') as f:
                     self.debugPrint(f' saving {num}: {chan_block}')
-                    prep_block = [val&0xff for val in chan_block]
+                    prep_block = self.encodeChannel(chan_block)
                     f.write(bytearray(prep_block))
-                    f.write(bytearray([0xFB]))
-                print(f' - Chan {num} bin size: {len(chan_block)+1}.')
-                totalSongdataBinsize += len(chan_block)+1
+                print(f' - Chan {num} bin size: {len(prep_block)}.')
+                totalSongdataBinsize += len(prep_block)
 
             wait_frame = 0
             with open(f"{self.args.destfolder}/{self.args.sfxname}.chan{num}.inc",'w') as f:
-                output_str = f"\n.data.chan{num}\n"
+                output_str = f"\n  .page 2\n.data.chan{num}\n"
                 data_labels.append(f".data.chan{num}")
                 output_str += f"\n\n;..........................\n; frame 0\n"
 
@@ -542,72 +565,72 @@ class ConvertVGM():
                         continue
 
                     if val == 0xffff:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        build_str   = f'\n  .page 2\n  .db ${hex(val&0xff)[2:]}'
                         output_str += build_str
                         output_str += self.commentDecode(val, 0 , len(build_str))
                         wait_frame += 1
                         output_str += f"\n\n;..........................\n; frame {wait_frame}\n"
                         if skip_byte > 0:
                             error = (f'Error converting channel block {num}, offset {idx}.')
-                            if self.args.guiMode:
-                                raise(error)
+                            if self.guiMode:
+                                raise ValueError(error)
                             print(error)
                             return False
                         skip_byte = 0
                         continue
 
                     elif val >= 0x00 and val <= 0x1f:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        build_str   = f'\n  .page 2\n  .db ${hex(val&0xff)[2:]}'
                         output_str += build_str
                         output_str += self.commentDecode(val, 0, len(build_str))
                         skip_byte = 0
                     elif val >= 0x20 and val <= 0x3f:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        build_str   = f'\n  .page 2\n  .db ${hex(val&0xff)[2:]}'
                         output_str += build_str
                         output_str += self.commentDecode(val, 0, len(build_str))
                         skip_byte = 0
                     elif val >= 0x40 and val <= 0x5f:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        build_str   = f'\n  .page 2\n  .db ${hex(val&0xff)[2:]}'
                         output_str += build_str
                         output_str += self.commentDecode(val, 0, len(build_str))
                         skip_byte = 0
                     elif val >= 0x80 and val <= 0x9f:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        build_str   = f'\n  .page 2\n  .db ${hex(val&0xff)[2:]}'
                         output_str += build_str
                         output_str += self.commentDecode(val, 0, len(build_str))
                         skip_byte = 0
                     elif val >= 0xA0 and val <= 0xAB:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        build_str   = f'\n  .page 2\n  .db ${hex(val&0xff)[2:]}'
                         build_str  += f', ${hex(chan_block[idx+1]&0xff)[2:]}'
                         output_str += build_str
                         output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
                         skip_byte = 1
                     elif val >= 0xC0 and val <= 0xCf:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        build_str   = f'\n  .page 2\n  .db ${hex(val&0xff)[2:]}'
                         build_str  += f', ${hex(chan_block[idx+1]&0xff)[2:]}'
                         output_str += build_str
                         output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
                         skip_byte = 1
                     elif val == 0xB0:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        build_str   = f'\n  .page 2\n  .db ${hex(val&0xff)[2:]}'
                         build_str  += f', ${hex(chan_block[idx+1]&0xff)[2:]}'
                         output_str += build_str
                         output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
                         skip_byte = 1
                     elif val == 0xFC:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        build_str   = f'\n  .page 2\n  .db ${hex(val&0xff)[2:]}'
                         build_str  += f', ${hex((chan_block[idx+1]>>8)&0xff)[2:]}'
                         build_str  += f', ${hex((chan_block[idx+1]>>24)&0xff)[2:]}'
                         output_str += build_str
                         output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
                         skip_byte = 1
                     elif val == 0xFD:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        build_str   = f'\n  .page 2\n  .db ${hex(val&0xff)[2:]}'
                         output_str += build_str
-                        output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
+                        output_str += self.commentDecode(val, 0, len(build_str))
                         skip_byte = 0
                     elif val == 0xFE:
-                        build_str   = f'\n  .db ${hex(val&0xff)[2:]}'
+                        build_str   = f'\n  .page 2\n  .db ${hex(val&0xff)[2:]}'
                         build_str  += f', ${hex(chan_block[idx+1]&0xff)[2:]}'
                         output_str += build_str
                         output_str += self.commentDecode(val, chan_block[idx+1], len(build_str))
@@ -615,7 +638,7 @@ class ConvertVGM():
                     else:
                         error = (f'Error: cannot identify token command: chan {num}, offset {hex(idx)}, val {hex(val)}.')
                         # if self.args.gui:
-                        #     raise(error)
+                        #     raise ValueError(error)
                         print(error)
                         return False
 
@@ -637,7 +660,7 @@ class ConvertVGM():
         # Write waveform table file.
         with open(f"{self.args.destfolder}/{self.args.sfxname}.wfTable.inc", 'w') as f:
             f.write(f'\n;'+("#"*75)+'\n')
-            f.write(f'\n.waveform.table\n')
+            f.write(f'\n  .page 2\n.waveform.table\n')
             f.write(f'\n  .dw ${hex(len(waveform_labels)*2)[2:]}       ; offset to bank table\n\n')
             for idx, wf_label in enumerate(waveform_labels):
                 f.write(f"  .dw {wf_label}\n")
@@ -648,7 +671,7 @@ class ConvertVGM():
         # Write data table file.
         with open(f"{self.args.destfolder}/{self.args.sfxname}.dataTable.inc", 'w') as f:
             f.write(f'\n;'+("#"*75)+'\n')
-            f.write(f'\n.data.table\n')
+            f.write(f'\n  .page 2\n.data.table\n')
             f.write(f'\n  .dw ${hex(len(data_labels)*2)[2:]}       ; offset to bank table\n\n')
             for idx, wf_label in enumerate(data_labels):
                 f.write(f"  .dw {wf_label}\n")
@@ -660,7 +683,7 @@ class ConvertVGM():
         # Separate waveform inc
         with open(f"{self.args.destfolder}/{self.args.sfxname}.sfx_wf.inc","w") as f:
             f.write(f' .include "{self.includPathName+".wfTable.inc"}"\n')
-            f.write(f' .include "{self.includPathName+".wf.inc"}"\n')
+            f.write(f' .include "{(self.args.waveformlist.replace("\\","/") if self.args.waveformlist else self.includPathName+".wf.inc")}"\n')
 
         # Separate data inc
         with open(f"{self.args.destfolder}/{self.args.sfxname}.sfx_data.inc","w") as f:
@@ -679,6 +702,34 @@ class ConvertVGM():
 
         self.debugPrint(f'Done')
         return True
+
+    @staticmethod
+    def encodeChannel(chan_block):
+        """Serialize internal tokens, whose packed FC operand is not one byte."""
+        output = []
+        index = 0
+        while index < len(chan_block):
+            op = chan_block[index]
+            index += 1
+            if op == 0xffff:
+                output.append(0xff)
+                continue
+            output.append(op)
+            if op == 0xfc:
+                if index == len(chan_block):
+                    raise ValueError('Missing packed FC operand')
+                packed = chan_block[index]
+                output.extend(((packed >> 8) & 0xff, (packed >> 24) & 0xff))
+                index += 1
+            elif 0xa0 <= op <= 0xab or op == 0xb0 or 0xc0 <= op <= 0xcf or op == 0xfe:
+                if index == len(chan_block):
+                    raise ValueError(f'Missing operand for {op:#x}')
+                output.append(chan_block[index] & 0xff)
+                index += 1
+            elif not (0 <= op <= 0x5f or 0x80 <= op <= 0x9f or op == 0xfd):
+                raise ValueError(f'Unknown HuSFX token {op:#x}')
+        output.append(0xfb)
+        return output
 
     def decodePatterns(self, bin_channels):
 
@@ -840,7 +891,7 @@ class ConvertVGM():
         elif val == 0xAB:
             output_str += f" ; Pattern # {opr}"
         elif val >= 0xC0 and val <= 0xCf:
-            output_str += f" ; 802 -> ${hex(val)[2:][-1]}, 803 -> ${hex(opr)[2:]}"
+            output_str += f" ; 802 -> ${hex(opr)[2:]}, 803 -> ${hex(val & 15)[2:]}"
         elif val == 0xB0:
             output_str += f" ; Waveform update #${hex(opr)[2:]}"
         elif val == 0xFB:
@@ -853,8 +904,8 @@ class ConvertVGM():
             output_str += f" ; Wait vblank {opr} frames."
         else:
             error = (f'Error: cannot identify token command {val} .')
-            if self.args.guiMode:
-                raise(error)
+            if self.guiMode:
+                raise ValueError(error)
             print(error)
             return False
 
@@ -870,48 +921,30 @@ class ConvertVGM():
                                 5 : {},
                                 'num_frames' : 0 }
 
-        # First thing is to consolidate 806 waveform buffer writes
-        for chan,data_set in self.reg_list.items():
-
-            if chan == 'num_frames':
-                self.prep_reg_list['num_frames'] = data_set
-                continue
-
-            _806_run = []
-
-            for frame, data_frame in enumerate(data_set):
-                if data_frame == []:
-                    if frame not in list(self.prep_reg_list[chan].keys()):
-                        self.prep_reg_list[chan][frame] = []
-                    continue
-
-                for data_pair in data_frame:
-
-                    reg_data = data_pair
-
-                    try:
-                        reg = reg_data[0]
-                        data = reg_data[1]
-                    except:
-                        error = f'failed pair: {reg_data}'
-                        print(error)
-                        if self.Guimode:
-                            raise Exception(error)
-                        sys.exit(1)
-                    self.debugPrint(f'reg    [{reg}], channel [{chan}]')
-                    if reg == 0x06:
-                        _806_run.append(data)
-                    elif reg != 0x06 and _806_run != []:
-                        if frame not in list(self.prep_reg_list[chan].keys()):
-                            self.prep_reg_list[chan][frame] = []
-                        self.prep_reg_list[chan][frame].append({'reg':0x06, 'data': _806_run})
-                        self.prep_reg_list[chan][frame].append({'reg':reg, 'data': [data]})
-                        _806_run = []
+        for chan in range(6):
+            control = 0
+            for frame, entries in enumerate(self.reg_list[chan]):
+                output = []
+                pending = []
+                def flush():
+                    if len(pending)==32 and not control&0x40:
+                        output.append({'reg':6, 'data':pending[:]})
                     else:
-                        if frame not in list(self.prep_reg_list[chan].keys()):
-                            self.prep_reg_list[chan][frame] = []
-                        self.prep_reg_list[chan][frame].append({'reg':reg, 'data': [data]})
-
+                        output.extend({'reg':6, 'data':[value]} for value in pending)
+                    pending.clear()
+                for reg, value in entries:
+                    if reg in (10,11):
+                        continue # Furnace pattern metadata is not a PSG write.
+                    if reg==6:
+                        pending.append(value&31)
+                        if len(pending)==32:flush()
+                    else:
+                        flush()
+                        output.append({'reg':reg,'data':[value]})
+                        if reg==4:control=value
+                flush()
+                self.prep_reg_list[chan][frame]=output
+        self.prep_reg_list['num_frames']=self.reg_list['num_frames']
 
         self.debugPrint(f"############################################### waveform prep\n\n ")
 
@@ -939,6 +972,11 @@ class ConvertVGM():
                             temp_list.append(waveform[:])
                             waveform_list.append(waveform[:])
 
+
+        # B0 has one byte for its waveform index. The ASM writer masks values
+        # to a byte, so an overflowing shared pool would silently select wave 0.
+        if len(waveform_list) > 256:
+            raise ValueError(f'HuSFX supports at most 256 shared waveforms; found {len(waveform_list)}')
 
         self.debugPrint(f'temp_list: ' )
         for a_list in temp_list:
@@ -972,65 +1010,22 @@ class ConvertVGM():
 
 
 
-        # combine period updates
-        for chan,data_set in self.prep_reg_list.items():
-            if chan == 'num_frames':
-                continue
-
-            for frame, data_frame in data_set.items():
-                if data_frame == []:
-                    continue
-
-                found_02 = False
-                period_02 = 0
-                for idx,data_pair in enumerate(data_frame):
-                    reg = data_pair['reg']
-                    data = data_pair['data']
-                    if reg == 0x02:
-                        found_02 = True
-                        period_02 = data[0]
-                        prev_idx = idx
-                        continue
-                    if reg == 0x03 and found_02:
-                        self.prep_reg_list[chan][frame][idx] = { 'reg' : 0x02, 'data' : [period_02, data[0]] }
-                        self.prep_reg_list[chan][frame].pop(prev_idx)
-
-                    found_02 = False
-
-        # remove duplicate reg writes
-        for chan,data_set in self.prep_reg_list.items():
-            if chan == 'num_frames':
-                continue
-
-            for frame, data_frame in data_set.items():
-                if data_frame == []:
-                    continue
-
-                rle_reg = []
-                rle_idx = []
-                for idx,data_pair in enumerate(data_frame):
-                    reg = data_pair['reg']
-                    data = data_pair['data']
-                    pair_set = set([(idx+1)<<8|val for idx, val in enumerate(data+[reg])])
-
-                    if rle_reg == []:
-                        rle_reg.append(pair_set)
-                        rle_idx = [idx]
-                        continue
-
-                    if pair_set in rle_reg:
-                        rle_idx.append(idx)
-                        continue
-
-                    for remove_idx in rle_idx[1:]:
-                        self.prep_reg_list[chan][frame].pop(remove_idx)
-                        rle_reg.append(pair_set)
-                        rle_reg = []
-                        rle_idx = []
-
-                    rle_reg = [pair_set]
-                    rle_idx = [idx]
-
+        # Only adjacent low/high period writes may be combined. Isolated low
+        # writes remain raw register commands; duplicate control/DDA writes can
+        # have hardware side effects and must not be discarded.
+        for chan in range(6):
+            for frame, entries in self.prep_reg_list[chan].items():
+                output=[]
+                index=0
+                while index<len(entries):
+                    entry=entries[index]
+                    if entry['reg']==2 and index+1<len(entries) and entries[index+1]['reg']==3:
+                        output.append({'reg':2,'data':[entry['data'][0],entries[index+1]['data'][0]&15]})
+                        index+=2
+                    else:
+                        output.append(entry)
+                        index+=1
+                self.prep_reg_list[chan][frame]=output
 
         bin_output = { 0:[], 1:[], 2:[], 3:[], 4:[], 5:[]}
         bin_test = []
@@ -1058,9 +1053,9 @@ class ConvertVGM():
                         reg = data[0]
                         if reg >=0 and reg <= 0x1f:
                             pass
-                        elif reg >=40 and reg <= 0x5f:
+                        elif reg >=0x40 and reg <= 0x5f:
                             pass
-                        elif reg >=80 and reg <= 0x9f:
+                        elif reg >=0x80 and reg <= 0x9f:
                             pass
                         elif reg >=0xC0 and reg <= 0xDf:
                             reg = reg - 0xc0 + 0x20
@@ -1088,7 +1083,7 @@ class ConvertVGM():
                         bin_output[chan].append(data)
                         bin_test.append(reg)
                         bin_test.append(data)
-                    elif reg == 0x02:
+                    elif reg == 0x02 and len(data)==2:
                         reg = data[1] + 0xC0
                         data = data[0]
                         bin_output[chan].append(reg)
@@ -1163,6 +1158,8 @@ class ConvertVGM():
         return new_wf
 
     def get_decodeData(self, offset, content):
+        if not 0<=offset<len(content):
+            raise ValueError('Truncated VGM command')
         op = content[offset]
 
 
@@ -1170,10 +1167,10 @@ class ConvertVGM():
             error  = f'failed on decodedata: op [{hex(op)}], offset [{hex(offset)}]'
             error += f'Error: opcode [{content[offset]}] at address {offset} is not recognised.'
             print(error)
-            if self.Guimode:
-                raise Exception(error)
-            sys.exit(1)
+            raise ValueError(error)
 
+        if offset+1+self.op_len[op]>len(content):
+            raise ValueError(f'Truncated VGM operand at {offset:#x}')
         operand = content[offset + 1 : offset + 1 + self.op_len[op]]
         offset += len(operand)+1
 
@@ -1186,12 +1183,10 @@ class ConvertVGM():
         return content[offset+1]<<8 | content[offset+0]
 
     def get_string(self, offset, length, content):
-        if length+offset > len(content) - 1:
+        if length+offset > len(content):
             error = f'Error: internal error - string offset and length exceeds file length.'
             print(error)
-            if self.Guimode:
-                raise Exception(error)
-            sys.exit(1)
+            raise ValueError(error)
 
         return ''.join([ f'{chr(val)}' for val in content[offset:offset+length]])
 

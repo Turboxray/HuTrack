@@ -13,6 +13,7 @@
 #asm
     ; HuCC expands these C macros before including its final BSS definitions.
     .include "HuSFX/HuSFX_mix.inc"
+    .include "HuSFX/HuSFX_pcm.inc"
 HuSFX_RETURN .macro
 
   .ifdef HUCC
@@ -22,6 +23,18 @@ HuSFX_RETURN .macro
 
   .endm
 
+#endasm
+
+#asm
+_HuSFX_QueuePCM.1 .macro
+        HuSFX.PCM.Queue <__fbank, <__fptr, <__fptr+1
+        HuSFX_RETURN
+    .endm
+_HuSFX_ClearPCM .macro
+        .ifdef HUTRACK_SFX_VOLUME
+        stz HuSFX.pcm.count
+        .endif
+    .endm
 #endasm
 
 //..........................................................................
@@ -36,12 +49,12 @@ _HuSFXstop_intf.1   .macro
         cpx #$06
       bcs .error\@
 
+        HuSFX.PCM.Stop
         lda #$ff
         sta HuSFX.stream.bnk,x
 
             php
         sei
-        lda #$d0
         stx $800
         stz $804
             plp
@@ -51,6 +64,10 @@ _HuSFXstop_intf.1   .macro
         nop
         stx $800
         stz $807
+        cpx #2
+      bcs .lfo.stopped\@
+        stz $809
+.lfo.stopped\@
             plp
                         ; HU_SFX_OK
         ldx #$01
@@ -74,9 +91,12 @@ _HuSFXstop_intf.1   .macro
 void __fastcall __macro HuSFX_Init_intf( unsigned char bank1<__fbank>, unsigned int addr1<__fptr> );
 #asm
 _HuSFX_Init_intf.2    .macro
+        .ifdef HUTRACK_SFX_VOLUME
+        stz HuSFX.pcm.count
+        .endif
         clx
-        lda #$ff
 .loop\@
+        HuSFX.PCM.Stop
         lda #$ff
         sta HuSFX.stream.bnk,x
         sta HuSFX.vol.pan,x
@@ -101,10 +121,6 @@ _HuSFX_Init_intf.2    .macro
         ora #$40
         sta HuSFX.wf.hi
 
-        lda #$1f
-        sta HuSFX.vol.chan
-        lda #$ff
-        sta HuSFX.vol.pan
 .endm
 
 #endasm   
@@ -121,6 +137,7 @@ _HuSFXplay_intf.3 .macro
         cpx #$06
       bcs .error\@
 
+        HuSFX.PCM.Stop
         lda #$ff
         sta HuSFX.stream.bnk,x
         stz HuSFX.delay,x
@@ -140,6 +157,11 @@ _HuSFXplay_intf.3 .macro
         stx $800
         stz $804
         stz $807
+        ; A new stream starts with raw pan $ff. Restore its persistent mix
+        ; and the matching cache after music/reservation changed hardware.
+        lda HuSFX.vol.pan,x
+        sta HuSFX.pan,x
+        sta $805
             plp
 
         cpx #2
@@ -254,6 +276,7 @@ _HuSFXprocess_intf  .macro
         cmp #$ff
       beq .skip_entry\@
 
+        HuSFX.PCM.CheckEnd
         jsr .refresh.gain\@
         lda HuSFX.delay,x
       beq .do_entry\@
@@ -367,6 +390,7 @@ _HuSFXprocess_intf  .macro
 
 ;..............
 .804\@
+        HuSFX.PCM.Control
         sta HuSFX.rawControl,x
         HuSFX.MixVolume
         sta HuSFX.control,x
@@ -379,6 +403,7 @@ _HuSFXprocess_intf  .macro
 
 ;..............
 .wf_update\@
+        HuSFX.PCM.Stop
 
         ;// This is a slow, but for now it works.
 
@@ -516,6 +541,7 @@ _HuSFXprocess_intf  .macro
 
 ;..............
 .eof\@
+        HuSFX.PCM.Stop
         lda #$ff
         sta HuSFX.stream.bnk,x
 
@@ -546,13 +572,19 @@ _HuSFXprocess_intf  .macro
 ;..............
 .play_pcm\@
       jsr .fetch_byte\@
+        pha
       jsr .fetch_byte\@
-        ; Skip PCM operands for now
+        tay
+        pla
+        HuSFX.PCM.Start
+      bcc .pcm.started\@
+      jmp .eof\@
+.pcm.started\@
       jmp .decode_byte\@
 
 ;..............
 .stop_pcm\@
-        ; TODO
+        HuSFX.PCM.Stop
       jmp .decode_byte\@
 
 ;..............

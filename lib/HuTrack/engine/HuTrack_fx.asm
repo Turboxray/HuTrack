@@ -292,7 +292,7 @@ HuTrack.FX.arpeggio:
         lda HuTrack.channel.current.fxArg
         sta HuTrack.P.arp,x
       bne .out
-        stz HuTrack.P.arpOffset,x
+
         lda #1
         sta HuTrack.P.dirty,x
         lda HuTrack.P.anchor,x
@@ -344,7 +344,7 @@ HuTrack.Pitch.arpeggio:
 .low
         and #15
 .base
-        sta HuTrack.P.arpOffset,x
+
         clc
         adc HuTrack.P.anchor,x
       bcc .period

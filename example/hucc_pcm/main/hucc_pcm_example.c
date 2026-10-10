@@ -60,7 +60,8 @@ void playSoundIdx(unsigned char idx);
 // ---------------------------------------------------------------------------
 void stopAll(void)
 {
-    HuTrackEngine_stopPcm(CH_DDA);
+    // Silence the output while keeping this PCM-only channel reserved.
+    HuTrackEngineSFXrest(CH_DDA);
     isPlaying = 0;
 }
 
@@ -134,7 +135,7 @@ void main(void)
 
         // The end marker stops the timer stream; reflect that in the menu.
         if (isPlaying && HuTrackEngine_PCMStatus(CH_DDA) != 1) {
-            isPlaying = 0;
+            stopAll();
             drawMenu();
         }
 

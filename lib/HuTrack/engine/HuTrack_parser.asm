@@ -15,7 +15,7 @@ HuTrackEngine.Parser:
 
           ; NOTE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
           ; turning interrupts on..
-          ; TODO protection against double call (will probably never happen)
+          ; Call the engine once per VBlank; do not re-enter it from another ISR.
           cli
 
         ;........................
@@ -39,7 +39,6 @@ HuTrackEngine.Parser:
         stz HuTrack.rowIncrement
 
         ldx HuTrack.current.channel
-        stz HuTrack.P.retrigSpeed,x
         lda HuTrack.channel.rowSkip,x
       beq .fetch.row.entry
         dec HuTrack.channel.rowSkip,x
@@ -48,6 +47,7 @@ HuTrackEngine.Parser:
         dec HuTrack.channel.seekRemaining,x
         jmp .readTracks
 .skip.row.ready
+        stz HuTrack.P.retrigSpeed,x
         jmp .row.position.tracking
 
 .fetch.row.entry
@@ -115,17 +115,10 @@ HuTrackEngine.Parser:
 .pattern.ready
         ; DEBUG this needs to change. It's a default for now
         ; NOTE need a function that clears these variables on new pattern entry
-        stz HuTrack.channel.noteDelay,x
+
 
 
         ;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        ; TODO disable old SFX handler
-;         bit HuTrack.SFX.inProgress,x
-;       bvc .real.parse
-;         jsr HuTrackEngine.ParseEntry.disabled
-;         sty HuTrack.rowIncrement
-;       bra .check.patternBreak
-; .real.parse
         jsr HuTrackEngine.ParseEntry
         sty HuTrack.rowIncrement
         lda HuTrack.channel.seekRemaining,x
@@ -181,7 +174,7 @@ HuTrackEngine.Parser:
       bcc .transition
         lda force_no_repeat
       beq .wrap.order
-        smb6 <HuTrack.Status
+        inc HuTrack.endPending
 .wrap.order
         cla
       bra .transition
@@ -437,6 +430,9 @@ HuTrackEngine.parse.extFX
 ;////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ;
 HuTrackEngine.Channel.update:
+        ; ED postpones the whole row, including clearing the previous 0C.
+        ; Compressed empty rows clear it separately when their row begins.
+        stz HuTrack.P.retrigSpeed,x
         stz HuTrack.P.lastSlide
         stz HuTrack.P.trigger
         stz HuTrack.P.shortRow
@@ -450,14 +446,14 @@ HuTrackEngine.Channel.update:
 .note
         lda HuTrack.channel.change,x
         bit #$01
-      beq .octave
+      beq .instrument
         lda HuTrack.P.arp,x
         sta HuTrack.P.arpYield,x
         lda #1
         sta HuTrack.P.trigger
         lda HuTrack.channel.temp.note,x
         cmp #84
-      bcs .octave
+      bcs .instrument
         lda HuTrack.P.anchor,x
         sta HuTrack.P.oldNote,x
         lda HuTrack.channel.temp.note,x
@@ -465,11 +461,6 @@ HuTrackEngine.Channel.update:
         adc #60
         sta HuTrack.P.anchor,x
 
-.octave
-        lda HuTrack.channel.change,x
-        bit #$02
-      beq .instrument
-        jsr HuTrackEngine.Channel.update.Octave
 
 
 .instrument
@@ -537,7 +528,7 @@ HuTrackEngine.Channel.update.Note
       bra .out
 
 .note.cut
-        stz HuTrack.channel.noteDelay,x
+
         stz HuTrack.Enabled,x
         lda #0
         jsr HuTrackEngine._htk.WSG.control
@@ -574,7 +565,7 @@ HuTrackEngine.Channel.update.Note
 .note.owned
         pla
         sta HuTrack.channel.note,x
-        sta HuTrack.channel.appliedNote,x
+
         bit HuTrack.channel.ddaState,x
       bpl .decode.note
 
@@ -590,10 +581,10 @@ HuTrackEngine.Channel.update.Note
 .decode.note
         jsr HuTrack.Pitch.decodeNote
         sta HuTrack.channel.note,x
-        sta HuTrack.channel.appliedNote,x
+
         tya
         sta HuTrack.channel.octave,x
-        sta HuTrack.channel.appliedOctave,x
+
 
 .out
             stz HuTrack.WfEnv.idx,x
@@ -604,13 +595,6 @@ HuTrackEngine.Channel.update.Note
             ora #$01
             sta HuTrack.channel.output,x
 .return
-  rts
-
-
-;...........................................................
-HuTrackEngine.Channel.update.Octave
-
-        ; TODO : This isn't supposed in Deflemask. Basically an octave request change without a note.
   rts
 
 
@@ -636,11 +620,11 @@ HuTrackEngine.Channel.update.FX:
         sta HuTrack.channel.change,x
 
         lda HuTrack.channel.temp.fxArg1,x
-        sta HuTrack.channel.fxArg1,x
+
         sta HuTrack.channel.current.fxArg
 
         lda HuTrack.channel.temp.fx1,x
-        sta HuTrack.channel.fx1,x
+
 
         jsr HuTrack.channel.FX.handler
 .out
@@ -658,11 +642,11 @@ HuTrackEngine.Channel.update.FX234
         bit #$01
       beq .fx3
         lda HuTrack.channel.temp.fxArg2,x
-        sta HuTrack.channel.fxArg2,x
+
         sta HuTrack.channel.current.fxArg
 
         lda HuTrack.channel.temp.fx2,x
-        sta HuTrack.channel.fx2,x
+
 
         jsr HuTrack.channel.FX.handler
 
@@ -672,11 +656,11 @@ HuTrackEngine.Channel.update.FX234
         bit #$04
       beq .fx4
         lda HuTrack.channel.temp.fxArg3,x
-        sta HuTrack.channel.fxArg3,x
+
         sta HuTrack.channel.current.fxArg
 
         lda HuTrack.channel.temp.fx3,x
-        sta HuTrack.channel.fx3,x
+
 
         jsr HuTrack.channel.FX.handler
 
@@ -686,11 +670,11 @@ HuTrackEngine.Channel.update.FX234
         bit #$10
       beq .out
         lda HuTrack.channel.temp.fxArg4,x
-        sta HuTrack.channel.fxArg4,x
+
         sta HuTrack.channel.current.fxArg
 
         lda HuTrack.channel.temp.fx4,x
-        sta HuTrack.channel.fx4,x
+
 
         jsr HuTrack.channel.FX.handler
 
@@ -1154,7 +1138,7 @@ HuTrack.channel.FX.handler:
         ldy HuTrack.channel.note,x
         lda NoiseTable,y
         jsr HuTrackEngine._htk.WSG.noise
-        sta HuTrack.channel.noisePeriod,x
+
         sta HuTrack.channel.appliedNoise,x
         lda #$80
         sta HuTrack.channel.noiseMode,x
@@ -1163,9 +1147,8 @@ HuTrack.channel.FX.handler:
         ora #$80
         jsr HuTrackEngine._htk.WSG.control
         stz HuTrack.channel.ddaState,x
-        cpx #$05
-      bne .platFX.Noise.out
-        ; TODO this needs a separate function so it's not dependent on only channel 5
+        ; Both noise channels can also stream PCM. Stop that stream when
+        ; switching to noise, so the timer cannot keep writing to its PSG port.
         lda #$80
         jsr HuTrackEngine._htk.WSG.DDAstop
 
@@ -1175,7 +1158,7 @@ HuTrack.channel.FX.handler:
         lda #$00
         jsr HuTrackEngine._htk.WSG.noise
         stz HuTrack.channel.noiseMode,x
-        ; TODO this needs to come out. The envelopes should be turning the channel back on. But needs more state logic.
+        ; Restore the selected waveform/DDA mode when noise is disabled.
 
         ; This check is needed because a previous FX might have turned on DDA playback
         lda HuTrack.channel.ddaState,x
@@ -1219,7 +1202,7 @@ HuTrack.channel.FX.handler:
         sta HuTrack.channel.ddaState,x
         lda #$80
         jsr HuTrackEngine._htk.WSG.DDAstop
-        ;stz HuTrack.channel.noteDelay,x
+
         stz HuTrack.Enabled,x
         jmp .platFX.SamplePCM.out
 .dda.mode
@@ -1405,11 +1388,6 @@ HuTrackEngine.Channel.setSample
 .sample.valid
         _htk.PUSHBANK.2 _htk.PAGE_4000
 
-        ; TODO disable old SFX handler
-    ;     bit HuTrack.SFX.inProgress,x
-    ;   bvc .channel
-    ; rts
-
 .channel
         _htk.MAP_BANK.2 HuTrack.samples.table.bank, _htk.PAGE_4000
         _htk.MOVE.w HuTrack.samples.table, <HuTrack.A0     ; Note: I think this should probably be an LEA
@@ -1450,7 +1428,7 @@ HuTrackEngine.Channel.setSample
 .skip
     sta .temp.addr.hi
 
-    rmb7 <HuTrack.DDAprocess
+    jsr HuTrackEngine.EnableDDA
 
     bit HuTrack.SFX.inProgress,x
   bmi .skip.pcm
@@ -1598,11 +1576,21 @@ HuTrackEngine.Channel.waveformEnv
         bit HuTrack.SFX.inProgress,x
       bmi .out
 
+        ; Upload control writes must obey the music fade too: restoring the
+        ; raw level would briefly unmute a silent song on every wave change.
         lda HuTrack.channel.proccessState,x
         and #$1f
+        sec
+        sbc HuTrack.musicAttenuation
+      bcs .upload.volume
+        cla
+.upload.volume
+        sta HuTrack.M.delta
         ora #$40
         tay
         lda HuTrack.channel.proccessState,x
+        and #$e0
+        ora HuTrack.M.delta
         ; Protect channel selection, upload and control restoration together:
         ; the timer IRQ can select another PSG channel. Restore the caller's
         ; interrupt state rather than unconditionally enabling interrupts.
@@ -1668,7 +1656,7 @@ HuTrackEngine.Channel.volumeEnv
       bcc .scale
         lda #31
 .scale
-        sta HuTrack.channel.lastEnvVolume,x
+
         jsr HuTrack.Math.volume
       bra .store
 .direct
@@ -1734,7 +1722,7 @@ HuTrackEngine.Channel.arpEnv
         jsr HuTrack.Bank.mapPair
 .arp.read
         lda [HuTrack.A0],y
-        sta HuTrack.channel.lastEnvApr,x
+
         pha
         lda HuTrack.ArpEnv.mode,x
       beq .relative
@@ -1787,9 +1775,6 @@ HuTrackEngine.Process.envelopes
 
         clx
 .channel.loop
-        ; TODO disable old SFX handler
-    ;     bit HuTrack.SFX.inProgress,x
-    ;   bvs .skip
         jsr HuTrack.FX.delayedRow
         lda HuTrack.Enabled,x
       beq .skip
@@ -1845,12 +1830,26 @@ HuTrackEngine._htk.WSG.control:
         bit HuTrack.channel.waitNote,x
       bmi .out
 .cont
+        sta HuTrack.channel.write.volume,x ; cache the unattenuated control
+        ldy HuTrack.musicAttenuation
+      beq .write
+        pha
+        and #31
+        sec
+        sbc HuTrack.musicAttenuation
+      bcs .attenuated
+        cla
+.attenuated
+        sta HuTrack.M.delta
+        pla
+        and #$e0
+        ora HuTrack.M.delta
+.write
           php
           sei
         stx $800
         sta $804
           plp
-        sta HuTrack.channel.write.volume,x
 .out
 
   rts
@@ -1965,17 +1964,7 @@ HuTrackEngine._htk.WSG.noise:
 
 ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-; This routine returns just the integer value of a decimal part multiplied by an integer part
-; 8:0 x 0:8 -> 8:0
-;
-; Input:
-;        A = HuTrack.process.temp0
-;        B = HuTrack.process.temp1
-;
-; Output:
-;       Acc
-;
-SampleNumDecode:
+; Legacy noise pitch by semitone.
 NoiseTable:
     ;   C, C#,  D, D#,  E,  F, F#,  G, G#,  A, A#,  B
   .db    $84,$8D,$8F,$92,$95,$97,$99,$9B,$9D,$9F,$80,$82
@@ -1983,8 +1972,6 @@ NoiseTable:
 ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-; No alignment requirement for the compressed pitch tables.
-      ;.ds    256 - (* & 255)
 
 
     .include "HuTrack/engine/HuTrack_pitch.asm"

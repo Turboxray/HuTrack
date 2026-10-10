@@ -39,6 +39,9 @@
   .note { background: var(--panel); border-left: 3px solid var(--accent); padding: .8rem 1.1rem; margin: 1.2rem 0; }
   .note p { margin: .3rem 0; }
   .table-wrap { overflow-x: auto; }
+  details { margin: 1rem 0; padding: .8rem 1rem; border: 1px solid var(--line); border-radius: 6px; }
+  summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+  summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
   table { width: 100%; border-collapse: collapse; font-size: .94rem; }
   th, td { text-align: left; vertical-align: top; padding: .8rem; border: 1px solid var(--line); }
   th { background: var(--panel); }
@@ -92,9 +95,13 @@
     <li><a href="#memory-layout">Code, data and RAM</a></li>
     <li><a href="#huc_use">HuC setup</a></li>
     <li><a href="#hucc_use">HuCC setup</a></li>
-    <li><a href="#huc_functions">Music API</a></li>
-    <li><a href="#pcm">WAV / PCM effects</a></li>
-    <li><a href="#husfx">HuSFX streams</a></li>
+    <li><a href="#api-reference">Complete API reference</a></li>
+    <li><a href="#huc_functions">Music examples and timing</a></li>
+    <li><a href="#music-events">Sync game logic to music</a></li>
+    <li><a href="#pcm">Convert WAVs and play PCM</a></li>
+    <li><a href="#pcm-gain-staging">Get better 5-bit sample quality</a></li>
+    <li><a href="#husfx">HuSFX effects</a></li>
+    <li><a href="#assembly-api">Assembly interface</a></li>
     <li><a href="#banking">Large songs and banking</a></li>
     <li><a href="#troubleshooting">Troubleshooting</a></li>
     <li><a href="#references">Examples and references</a></li>
@@ -107,13 +114,13 @@
   <ul>
     <li>A recent <a href="https://github.com/pce-devel/huc/releases">4.x toolchain distribution</a>, including the matching compiler, PCEAS and headers. Choose <code>huc.exe</code> with <code>include/huc</code>, or <code>hucc.exe</code> with <code>include/hucc</code>.</li>
     <li>This HuTrack checkout. Its <code>lib</code> directory belongs on the include path.</li>
-    <li>Python 3 with <code>numpy</code>, <code>resampy</code> and Tkinter for conversion. The converters import Tkinter even in command-line mode.</li>
-    <li>Furnace to edit/export songs, and an emulator or console to check the resulting ROM.</li>
+    <li>Python 3.12 or newer with <code>numpy</code>, <code>resampy</code> and Tkinter for conversion. The converters import Tkinter even in command-line mode.</li>
+    <li>An emulator or console to check the resulting ROM. Furnace is needed only for editing/exporting songs; standalone WAV effects do not need Furnace or a DMF file.</li>
   </ul>
   <p>The commands below are Windows <strong>Command Prompt / <code>.bat</code></strong> syntax. Set these paths to your installations in the same command prompt:</p>
   <pre><code id="environment">set "HUC_HOME=C:\huc"
 set "HUTRACK_HOME=C:\Projects\PCE_DEV\HuTrack"
-python -m pip install numpy resampy
+python -m pip install -r "%HUTRACK_HOME%\requirements.txt"
 python -c "import numpy, resampy, tkinter"</code></pre>
   <p>Keep the compiler, assembler and include directory from the same toolchain build. These instructions cover current HuCard integration; CD overlays need their own memory and interrupt integration.</p>
 </section>
@@ -162,15 +169,15 @@ python -c "import numpy, resampy, tkinter"</code></pre>
   <h3 id="furnace-legacy-export">Export legacy DMF: illustrated steps</h3>
   <p>These screenshots show the <strong>official Furnace 0.6.8.3 release</strong> with a PC Engine song loaded. The legacy choice is in the Export dialog, before the file picker.</p>
   <figure>
-    <a href="furnace_legacy_export_menu.png"><img src="furnace_legacy_export_menu.png" width="1283" height="831" alt="Furnace 0.6.8.3 with the File menu open, showing export below save as."></a>
+    <a href="furnace_legacy_export_menu.jpg"><img src="furnace_legacy_export_menu.jpg" width="1283" height="831" alt="Furnace 0.6.8.3 with the File menu open, showing export below save as."></a>
     <figcaption><strong>1. Open File → export….</strong> Keep a .fur working copy separately if you use Furnace features that DMF cannot store.</figcaption>
   </figure>
   <figure>
-    <a href="furnace_legacy_dmf_format.png"><img src="furnace_legacy_dmf_format.png" width="1283" height="831" alt="Furnace Export dialog on the DMF tab, with 1.0/legacy (0.12) selected and the Export button below it."></a>
+    <a href="furnace_legacy_dmf_format.jpg"><img src="furnace_legacy_dmf_format.jpg" width="1283" height="831" alt="Furnace Export dialog on the DMF tab, with 1.0/legacy (0.12) selected and the Export button below it."></a>
     <figcaption><strong>2. Select DMF → 1.0/legacy (0.12), then Export.</strong> Confirm that the radio button beside the legacy option is selected; the other option is 1.1.3 and higher.</figcaption>
   </figure>
   <figure>
-    <a href="furnace_legacy_dmf_save.png"><img src="furnace_legacy_dmf_save.png" width="841" height="221" alt="Save As dialog with my_song.dmf as the filename and DefleMask 1.0/legacy module as the file type."></a>
+    <a href="furnace_legacy_dmf_save.jpg"><img src="furnace_legacy_dmf_save.jpg" width="841" height="221" alt="Save As dialog with my_song.dmf as the filename and DefleMask 1.0/legacy module as the file type."></a>
     <figcaption><strong>3. Choose your game/music folder, enter my_song.dmf, and Save.</strong> The file type should read <strong>DefleMask 1.0/legacy module</strong>. The screenshot uses the repository's sample-song folder; choose your own destination. Reopen the exported DMF in Furnace for comparison, then convert it using the next section.</figcaption>
   </figure>
   <div class="note"><p>Newer Furnace playback is not automatically the same reference: later development changed the mixed legacy pitch model. Use <a href="https://github.com/tildearrow/furnace/releases/tag/v0.6.8.3">release 0.6.8.3</a> for parity comparisons. A native <code>.fur</code> file, VGM or audio export is not input to the DMF converter.</p></div>
@@ -197,11 +204,12 @@ python -c "import numpy, resampy, tkinter"</code></pre>
     </tbody>
   </table></div>
   <h3>Using the converter GUI</h3>
-  <p>Run <code>python "%HUTRACK_HOME%\utils\HuTrackConverter.py"</code> and choose <strong>Open DMF</strong>. After loading, set <strong>Include Path</strong> to <code>../assets/song</code>, <strong>Song name</strong> and <strong>subFolder</strong> to <code>demo</code>, and <strong>dest path</strong> to <code>../assets/song</code>. Then use <strong>Save DMF</strong>.</p>
-  <p>The current button names are misleading: <strong>Save DMF writes the assembly <code>.inc</code> bundle</strong>; <strong>Export Hutrack</strong> writes a separate textual <code>.hutrack</code> file. Use the assembly bundle for the C builds below.</p>
+  <p>Assembly exports are saved as a complete set. If conversion or an ordinary file-write error prevents saving, the converter preserves the previous files rather than leaving a mixture of old and new assets. Close files locked by another application and retry. This also applies to the standalone WAV and VGM converters, including their debug files and shared waveform collection.</p>
+  <p>Run <code>python "%HUTRACK_HOME%\utils\HuTrackConverter.py"</code> and choose <strong>Open DMF</strong>. After loading, set <strong>Include Path</strong> to <code>../assets/song</code>, <strong>Song name</strong> and <strong>subFolder</strong> to <code>demo</code>, and <strong>dest path</strong> to <code>../assets/song</code>. Then use <strong>Export assembly</strong>.</p>
+  <p><strong>Export assembly</strong> writes the <code>.inc</code> bundle used by the builds below. <strong>Export text dump</strong> writes a separate <code>.hutrack</code> file for inspection. PCM output is fixed at unpacked 5-bit; its bit-depth and packing controls are disabled. Filter, playback rate and debug selections are applied when exporting, including changes made after opening the DMF.</p>
   <figure>
-    <a href="dmf_converter_settings.png"><img src="dmf_converter_settings.png" width="923" height="444" alt="DMF converter with Include Path and dest path set to ../assets/song, Song name and subFolder set to demo, five-bit PCM at 6960 Hz and the Save DMF button visible."></a>
-    <figcaption>The current converter with the settings used in this guide. After opening a DMF, enter these paths and names, then select Save DMF to write the .inc bundle.</figcaption>
+    <a href="dmf_converter_settings.jpg"><img src="dmf_converter_settings.jpg" width="967" height="444" alt="DMF converter with Include Path and dest path set to ../assets/song, Song name and subFolder set to demo, five-bit PCM at 6960 Hz and the Export assembly button visible."></a>
+    <figcaption>The current converter with the settings used in this guide. After opening a DMF, enter these paths and names, then select Export assembly to write the .inc bundle.</figcaption>
   </figure>
   <p>Song PCM defaults to unpacked five-bit data at 6960 Hz, matching the supplied timer path. Changing a converter's sample-rate setting alone does not change the runtime timer rate.</p>
 </section>
@@ -297,7 +305,7 @@ set "PATH=%HUC_HOME%\bin;%PATH%"
 set "PCE_INCLUDE=%CD%;%HUTRACK_HOME%\lib;%HUC_HOME%\include\huc"
 set "PCE_BINPATH=%HUC_HOME%\bin"
 set "PCE_PCEAS=%HUC_HOME%\bin\pceas.exe"
-huc.exe -v -v -msmall -fno-recursive main.c -T
+"%HUC_HOME%\bin\huc.exe" -v -v -msmall -fno-recursive main.c -T
 exit /b %ERRORLEVEL%</code></pre>
   <p>Run <code>build.bat</code> and load <code>main.pce</code>. The VBlank callback advances music automatically; the loop does not call the parser itself.</p>
 </section>
@@ -361,50 +369,317 @@ set "PATH=%HUC_HOME%\bin;%PATH%"
 set "PCE_INCLUDE=%CD%;%HUTRACK_HOME%\lib;%HUC_HOME%\include\hucc"
 set "PCE_BINPATH=%HUC_HOME%\bin"
 set "PCE_PCEAS=%HUC_HOME%\bin\pceas.exe"
-hucc.exe -v -v -gL -msmall -fno-recursive main.c
+"%HUC_HOME%\bin\hucc.exe" -v -v -gL -msmall -fno-recursive main.c
 exit /b %ERRORLEVEL%</code></pre>
   <p>Run <code>build.bat</code> and load <code>main.pce</code>. <code>HuTrack_Init()</code> connects the music callback to HuCC's <code>sound_hook</code>.</p>
 </section>
 
-<section id="huc_functions">
-  <h2>Music API</h2>
-  <div class="note"><p>In <code>#incasmlabel(demo, "...", 2)</code>, <strong><code>2</code> is the CPU page (<code>$4000</code>)</strong>, not physical ROM bank 2 or a two-bank size limit. The generated asset label carries its bank/address information to the interface.</p></div>
+<section id="api-reference">
+  <h2>Complete C API reference</h2>
+  <p>Use these functions from your C game after following the HuC or HuCC setup above. Start with <code>HuTrack_Init()</code>, register each converted song with <code>HuTrackEngine_QueueSong()</code>, then play it using the returned song ID. The standard setup updates music automatically while your game runs.</p>
+  <p><strong>Music</strong> means the song HuTrack is playing. <strong>SFX</strong> means sound effects requested by your game, such as an explosion or menu click. <strong>PCM</strong> means a recorded sound converted from a WAV file. The optional HuSFX library plays synthesized effects. Both kinds of effect can continue while you pause or fade the music.</p>
+  <p>The console has six sound <strong>channels</strong>, numbered 0 through 5. Think of each as one voice that can play music or an effect. Your game temporarily reserves a channel for an effect and releases it afterward so music can use it again.</p>
+  <p>The tables list every supported call form in <a href="../../lib/HuTrack/Huc_interface/HuTrack.c">HuTrack.c</a> and the optional <a href="#husfx-api">HuSFX interface</a>. Include the supplied interface files rather than copying these signatures as declarations. A call marked <strong>No return value</strong> performs an action; do not use it as an <code>if</code> condition. For calls returning <code>int</code> or a named status type, the description explains each result.</p>
+  <ul>
+    <li><a href="#api-music">Start, stop, pause and inspect music</a></li>
+    <li><a href="#api-volume">Control volume and fade music</a></li>
+    <li><a href="#api-pcm">Borrow channels and play WAV sound effects</a></li>
+    <li><a href="#husfx-api">Play and control HuSFX effects</a></li>
+    <li><a href="#api-helper">Advanced compiler helper</a></li>
+    <li><a href="#assembly-api">Assembly interface and low-level details</a></li>
+  </ul>
+  <p>Keep numeric arguments within the documented ranges. Most are stored as single bytes (0–255), so a number outside that range can wrap before the function checks it; for example, 256 becomes 0. Make ordinary game-side calls from your main game code. Custom interrupt handlers and music schedulers need the additional coordination described in the <a href="#c-integration-details">advanced integration notes</a>.</p>
+  <h3 id="api-music">Music, status and events</h3>
+  <p><a href="#huc_functions">Usage and integration details</a></p>
   <div class="table-wrap"><table>
-    <thead><tr><th scope="col">Call</th><th scope="col">Behavior</th></tr></thead>
+    <thead><tr><th scope="col">Call</th><th scope="col">Result</th><th scope="col">What it does and how to use it</th></tr></thead>
     <tbody>
-      <tr><td><code>HuTrack_Init()</code></td><td>Initialize the engine and interrupt integration once before use. Reinitialization resets engine state, so coordinate it with active SFX.</td></tr>
-      <tr><td><code>HuTrackEngine_QueueSong(song)</code></td><td>Register an included song. First registration is index 0, then 1, etc., up to 64 songs. This is a catalog, not an automatic playback queue. Further registrations are ignored once full.</td></tr>
-      <tr><td><code>HuTrackEngine_PlaySong(index)</code></td><td>Start/restart a registered song and allow its looping behavior.</td></tr>
-      <tr><td><code>HuTrackEngine_PlayOnce(index)</code></td><td>Start a registered song without repeating it.</td></tr>
-      <tr><td><code>HuTrackEngine_Stop()</code><br><code>HuTrackEngine_Pause()</code></td><td>Aliases that halt and silence music while preserving reserved SFX channels. There is no public C resume-position function; <code>PlaySong</code> restarts.</td></tr>
-      <tr><td><code>HuTrackEngine_SetGlobal(0xFF)</code></td><td>Set packed global stereo volume: high nibble left, low nibble right; 0 is silent, F full. Applied by the music update.</td></tr>
-      <tr><td><code>HuTrackEngine_SetGlobal(left, right)</code></td><td>Accept 0–255 per side; each upper nibble becomes the hardware level. <code>(255, 255)</code> is full volume.</td></tr>
-      <tr><td><code>HuTrackEngine_getCurrSongTitle(buffer)</code><br><code>HuTrackEngine_getCurrSongAuthor(buffer)</code></td><td>Copy current loaded metadata into a writable RAM buffer of at least 48 bytes, including the terminating zero. Call after starting a song. Text omitted during conversion is empty.</td></tr>
+      <tr><td><code data-api="HuTrack_Init" data-argc="0">HuTrack_Init()</code></td><td>No return value</td><td>Prepare HuTrack for use. Call this once during game startup, before registering songs or playing sound effects. It clears the song list and all sound-effect reservations, and starts music, sound effects and master volume at their maximum settings. It also connects the timer and HuCC music-update support used by the setups above. Do not call it each frame or when changing songs.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_QueueSong" data-argc="1">HuTrackEngine_QueueSong(song)</code></td><td>int</td><td>Add a converted song to the list your game can play. Pass the song label from <code>#incasmlabel</code>, such as <code>demo</code>. Returns the assigned song ID, from <code>0</code> to <code>63</code>; save this ID for <code>PlaySong</code> or <code>PlayOnce</code>. Returns <code>-1</code> if all 64 slots are used. Despite the name, this only registers the song: it does not start playback or arrange for songs to play one after another.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_PlaySong" data-argc="1">HuTrackEngine_PlaySong(index)</code></td><td>No return value</td><td>Start the song identified by <code>index</code>, the ID returned by <code>QueueSong</code>. Calling it again restarts that song from the beginning. Music may loop as arranged in the song. An ID that has not been registered leaves playback unchanged. Starting a song restores music volume to <code>31</code> (its original maximum) and cancels any music fade. Sound effects already playing continue.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_PlayOnce" data-argc="1">HuTrackEngine_PlayOnce(index)</code></td><td>No return value</td><td>Start a registered song from the beginning and stop after its final row has played for its full duration. Use this for a title jingle or other piece that should finish by itself, then check <code>HuTrackEngine_Status()</code> for <code>HUTRACK_ENDED</code>. A jump written into the song can still create a loop, so remove those jumps for a reliably one-time jingle. Song IDs, volume reset and ongoing sound effects behave as with <code>PlaySong</code>.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_Stop" data-argc="0">HuTrackEngine_Stop()</code></td><td>No return value</td><td>Stop and silence the music. Sound effects keep playing. This discards the resumable music position: use <code>PlaySong</code> or <code>PlayOnce</code> to start again from the beginning. Use <code>Pause</code> instead if you want to continue from the same position later.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_Pause" data-argc="0">HuTrackEngine_Pause()</code></td><td>No return value</td><td>Silence the music and remember where it was playing, including any recorded samples used in the song. Use this when opening a pause menu while keeping menu sound effects audible. Call <code>Resume</code> to continue from that position. Pausing also freezes a music fade in progress. Calling Pause again while already paused has no effect.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_Resume" data-argc="0">HuTrackEngine_Resume()</code></td><td>No return value</td><td>Continue a paused song from its saved position, at the current music volume. It has no effect if music is already playing, stopped or finished. If you paused with <code>FadeToPause</code>, the volume is still silent; use <code>FadeIn</code> to resume with a gradual return to full volume. A channel returned by a sound effect still waits for its next new music note.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_Status" data-argc="0">HuTrackEngine_Status()</code></td><td>int</td><td>Find out what the music player is doing. Returns <code>HUTRACK_STOPPED</code> (0: no song playing), <code>HUTRACK_PLAYING</code> (1: song advancing, even if its volume is silent), <code>HUTRACK_PAUSED</code> (2: position saved for Resume), or <code>HUTRACK_ENDED</code> (3: PlayOnce reached the end). Compare against these named constants, for example to leave a jingle screen when playback ends.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_PollEvent" data-argc="0">HuTrackEngine_PollEvent()</code></td><td>int</td><td>Receive a cue placed in the music, such as a signal to spawn enemies on a beat. Returns the latest unread <code>EExx</code> value, from <code>0</code> to <code>255</code>, or <code>-1</code> if no cue is waiting. Reading a cue removes it. Zero is a valid cue, so check for <code>-1</code> rather than using a true/false test. A newer cue replaces an unread one; starting a song clears it. See the <a href="#music-events">event example</a>.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_ManualCall" data-argc="0">HuTrackEngine_ManualCall()</code></td><td>No return value</td><td><strong>For a custom update loop only.</strong> Advance music by one update. The standard HuC and HuCC setups already update music automatically every video frame; do not add this call to those game loops, because that would make the music run twice as fast. See <a href="#music-update-timing">music-update timing</a> before replacing the automatic setup.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_getCurrSongTitle" data-argc="1">HuTrackEngine_getCurrSongTitle(buffer)</code></td><td>No return value</td><td>Copy the current song title into a C string your game can display. Call after starting a song and pass a writable array of at least 48 bytes, such as <code>char title[48]</code>. The result contains at most 47 text bytes followed by the terminating zero. If no title was exported, the string is empty. See the <a href="#metadata-strings">string example and limits</a>.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_getCurrSongAuthor" data-argc="1">HuTrackEngine_getCurrSongAuthor(buffer)</code></td><td>No return value</td><td>Copy the current song author into a C string, for example for a music-selection screen or credits. Call after starting a song and provide at least <code>char author[48]</code>. As with the title, the result is limited to 47 text bytes plus the terminating zero, and is empty if no author was exported. The function cannot detect an undersized destination array.</td></tr>
     </tbody>
   </table></div>
-  <p>For more songs, include each complete bundle under a unique label, call <code>QueueSong</code> once per label after initialization, and select the corresponding registration index. Queueing does not start playback.</p>
-  <h3>Tick ownership</h3>
-  <p>The default setups call the engine once per VBlank. Use ordinary <code>vsync()</code> in your game loop. Do not also call <code>HuTrackEngine_ManualCall()</code>: that would advance music twice. The <code>HuTrackEngine_Vsync</code> declarations in the interface have no implementation; use the installed hook.</p>
-  <p>A custom scheduler may use <code>HuTrackEngine_ManualCall()</code> only after removing the automatic callback: set <code>HUTRACK_VBLANK_CALLBACK = 0</code> for HuC, or replace/disconnect the HuCC <code>sound_hook</code> installed by initialization. Coordinate register, bank and interrupt handling in that integration. This is also where a project must handle nonstandard song tick rates.</p>
-  <p>The library's fade/save-position and low-level assembly-stop placeholders are not completed C features. For supported tracker FX, use the <a href="../compatibility.md">effect matrix</a>.</p>
+  <h3 id="api-volume">Music fades, sound-effect volume and master volume</h3>
+  <p>Use the music controls to lower a song while explosions, speech or menu clicks remain audible. Use the SFX control for a separate sound-effects slider. Use the master control when you want to change <em>everything</em> heard from a speaker.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">What you want</th><th scope="col">Control to use</th><th scope="col">Volume range</th></tr></thead>
+    <tbody>
+      <tr><td>Adjust music only</td><td><code>SetMusicVolume</code> or a music fade</td><td><strong>0 = silent; 31 = original maximum.</strong> Sound effects keep their own volume.</td></tr>
+      <tr><td>Adjust sound effects only</td><td><code>SetSFXVolume</code></td><td><strong>0 = silent; 31 = original maximum.</strong> Music keeps its own volume.</td></tr>
+      <tr><td>Adjust all sound, separately for each speaker</td><td><code>HuTrackEngine_SetGlobal(left, right)</code></td><td><strong>0 = silent; 255 = maximum</strong> on each side.</td></tr>
+    </tbody>
+  </table></div>
+  <p>“Original maximum” means the library leaves the volumes already written into the song or effect unchanged. A quiet note stays quiet; setting 31 does not make every note equally loud. These are volume steps, not percentages: 16 does not promise half the perceived loudness.</p>
+  <p id="fade-timing"><strong>How fast is a fade?</strong> <code>interval</code> is the wait between one-step changes, measured in music updates. It is neither seconds nor the whole fade’s duration. The default setup runs about 60 music updates per second: going from 31 to 0 with interval 1 takes 31 updates (about half a second), interval 2 takes 62 (about one second), and interval 4 takes 124 (about two seconds). A shorter volume change finishes sooner. Zero means immediate. Custom update rates change these times.</p>
+  <p>Fade calls return immediately so your game keeps running. Music must keep updating for a fade to progress; pausing freezes it. A new fade replaces the previous one. A newly started song resets music to 31 and cancels its fade, while sound-effect and master-volume settings stay as you set them. See the <a href="#music-volume-examples">gameplay examples</a>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Call</th><th scope="col">Result</th><th scope="col">What it does and how to use it</th></tr></thead>
+    <tbody>
+      <tr><td><code data-api="HuTrackEngine_SetGlobal" data-argc="1">HuTrackEngine_SetGlobal(packed)</code></td><td>No return value</td><td>Set the master volume for <strong>all music and sound effects</strong> using one hexadecimal value. In <code>0xLR</code>, the first digit controls the left speaker and the second controls the right: <code>0</code> is silent and <code>F</code> is maximum. For example, <code>0xFF</code> enables full volume on both sides, <code>0x00</code> mutes everything, <code>0xF0</code> mutes the right side and <code>0x0F</code> mutes the left. Applied at the next automatic music update, including while music is paused or stopped; kept across song changes.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_SetGlobal" data-argc="2">HuTrackEngine_SetGlobal(left, right)</code></td><td>No return value</td><td>Set the same master volume with separate left and right values. Each accepts <code>0</code> (silent) through <code>255</code> (maximum). Use <code>HuTrackEngine_SetGlobal(255, 255)</code> for full volume or <code>HuTrackEngine_SetGlobal(0, 0)</code> to mute all sound. The hardware has 16 steps per side: 0–15 select silence, 16–31 select the next step, and so on up to 240–255 selecting maximum. This affects both music and sound effects, takes effect at the next music update, and stays in effect across song changes.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_SetMusicVolume" data-argc="1">HuTrackEngine_SetMusicVolume(level)</code></td><td>No return value</td><td>Make only the music quieter or restore its original volume. <code>level</code> is <code>0</code> for silence or <code>31</code> for the maximum setting, which preserves the volumes written into the song. Values between them reduce the volume; they are steps, not percentages. The song keeps advancing even at zero. Cancels any music fade and takes effect on the next music update or Resume. Values 32–255 are treated as 31. Sound effects are unaffected.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_MusicVolume" data-argc="0">HuTrackEngine_MusicVolume()</code></td><td>int</td><td>Read the current music-volume setting: <code>0</code> means silent and <code>31</code> means the original maximum. During a fade this returns the current step, not the requested final volume. Use it to display a music-volume setting or follow fade progress. It does not measure how loud the current notes are. Each newly started song begins at 31.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_SetSFXVolume" data-argc="1">HuTrackEngine_SetSFXVolume(level)</code></td><td>No return value</td><td>Set the volume of sound effects without changing the music. <code>0</code> silences them and <code>31</code> preserves their original maximum volume; intermediate values make them quieter. Values 32–255 are treated as 31. Updates currently playing HuTrack WAV effects and integrated HuSFX effects on reserved channels immediately. New effects inherit this setting, and changing songs keeps it. Sound effects written with your own direct sound-chip code must apply their own volume control.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_SFXVolume" data-argc="0">HuTrackEngine_SFXVolume()</code></td><td>int</td><td>Read the current volume setting for the sound-effects group: <code>0</code> is silent and <code>31</code> is the original maximum. This reports the group setting, not whether an effect is playing or how loud a particular effect is. Use it for an options-menu sound-effects slider.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_FadeTo" data-argc="2">HuTrackEngine_FadeTo(level, interval)</code></td><td>No return value</td><td>Gradually change the music to <code>level</code>: <code>0</code> is silent and <code>31</code> preserves the song’s original maximum volume. Values 32–255 are treated as 31. <code>interval</code> is the number of music updates between each one-step volume change, from 1 to 255; larger values make a slower fade, and <code>0</code> changes the setting immediately. The call returns straight away while future updates perform the fade. Replaces any earlier fade and leaves the song advancing at the target volume, even at zero. Sound effects are unaffected. See <a href="#fade-timing">timing examples</a>.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_FadeOut" data-argc="1">HuTrackEngine_FadeOut(interval)</code></td><td>No return value</td><td>Gradually lower the music to silence, then stop the song. Sound effects continue at their own volume. <code>interval</code> is 1–255 music updates per volume step; larger means slower, while <code>0</code> stops immediately. For example, <code>HuTrackEngine_FadeOut(2)</code> takes about one second from full volume at 60 updates per second. Returns without waiting for the fade to finish. Afterward, start the song again with PlaySong; it cannot be resumed.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_FadeToPause" data-argc="1">HuTrackEngine_FadeToPause(interval)</code></td><td>No return value</td><td>Gradually lower music to silence, then save its position and pause it. Sound effects continue. <code>interval</code> is 1–255 music updates per volume step; larger means slower, and <code>0</code> silences and pauses immediately. The call returns without waiting. Use <code>FadeIn</code> later to continue from that position and bring the volume back up. Plain Resume keeps the zero-volume setting.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_FadeIn" data-argc="1">HuTrackEngine_FadeIn(interval)</code></td><td>No return value</td><td>Begin at silent music volume and gradually rise to <code>31</code>, the song’s original maximum. Also resumes a paused song, making this the companion to FadeToPause. <code>interval</code> is 1–255 music updates per volume step; larger means slower, and <code>0</code> restores maximum volume immediately. Returns without waiting; sound effects are unaffected. It does not start a stopped or finished song: call PlaySong or PlayOnce first, then FadeIn.</td></tr>
+    </tbody>
+  </table></div>
+  <h3 id="api-pcm">Borrow channels and play recorded sound effects</h3>
+  <p>For a normal WAV effect, the sequence is <strong>reserve → play → check for completion → release</strong>. Reserving a channel interrupts its music voice while the rest of the song continues. Your game is responsible for releasing it even when the sound finishes naturally. The <a href="#pcm">WAV example</a> shows this complete sequence.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Call</th><th scope="col">Result</th><th scope="col">What it does and how to use it</th></tr></thead>
+    <tbody>
+      <tr><td><code data-api="HuTrackEngine_TryReserve" data-argc="1">HuTrackEngine_TryReserve(channel)</code></td><td>int</td><td>Temporarily borrow one of the six sound channels for an effect. <code>channel</code> is a number from <code>0</code> to <code>5</code>. Returns <code>1</code> if borrowed successfully, silencing music on that channel until you release it. Returns <code>0</code> if another effect already reserved it or the number is invalid. A channel playing music can still be borrowed; “busy” here means reserved for another effect. Prefer this call when different game events may request sounds at the same time.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_chanReserve" data-argc="1">HuTrackEngine_chanReserve(channel)</code></td><td>No return value</td><td><strong>For games that manage channel sharing themselves.</strong> Give channel <code>0–5</code> to sound effects unconditionally, silencing its current sound and stopping its PCM playback. It does not check whether another effect already owns the channel or cancel another HuSFX/custom player that could write to it again. Stop those players yourself before taking over. An invalid channel does nothing. Use TryReserve for ordinary effect playback.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_chanRelease" data-argc="1">HuTrackEngine_chanRelease(channel)</code></td><td>No return value</td><td>Finish borrowing channel <code>0–5</code> and return it to music. Stops its HuTrack PCM or integrated HuSFX effect and silences it. The song keeps its place, but this channel waits for a new music note before sounding again; it does not restart a note halfway through. Call once when your effect finishes, or to cancel it early. An invalid or already released channel does nothing.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_SFXmode" data-argc="0">HuTrackEngine_SFXmode()</code></td><td>int</td><td>Check all sound-effect reservations at once. Returns <code>0</code> if no channels are reserved; otherwise each set bit marks a reserved channel (bit 0 for channel 0 through bit 5 for channel 5). For example, <code>32</code> means only channel 5 is reserved. For a simpler check of just one channel, use the one-argument form below.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_SFXmode" data-argc="1">HuTrackEngine_SFXmode(channel)</code></td><td>int</td><td>Check whether channel <code>0–5</code> is reserved for a sound effect. Returns <code>1</code> if reserved, or <code>0</code> if available or invalid. This checks the reservation, not whether a sound is still playing. Use TryReserve when you want to check and acquire the channel in one call.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_PcmRequest" data-argc="2">HuTrackEngine_PcmRequest(channel, asset)</code></td><td>int</td><td>Play a converted WAV effect on a channel you have already reserved. Pass <code>channel</code> (0–5) and the included asset label, such as <code>explosion</code>. A normal WAV conversion plays once; another accepted request on the same channel restarts or replaces it. Returns <code>1</code> if accepted, or <code>0</code> for an invalid/unreserved channel, a header whose sample start is past the last ROM bank, or an empty repeating sample. A rejected request leaves existing playback intact. Use PCMStatus to detect completion, then release the channel. See the <a href="#pcm">complete example</a>.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_PcmRequest" data-argc="3">HuTrackEngine_PcmRequest(channel, bank, address)</code></td><td>int</td><td><strong>Advanced asset lookup.</strong> Play the same effect, but supply its ROM <code>bank</code> (0–255) and <code>address</code> (16-bit) separately instead of an asset label. They must point to the converted asset header, not the raw samples. Returns <code>1</code> if accepted or <code>0</code> under the same rejection conditions as the two-argument form. Ordinary C callers should use the simpler <code>(channel, asset)</code> form.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_PcmRequest" data-argc="4">HuTrackEngine_PcmRequest(channel, asset, mask1, mask2)</code></td><td>int</td><td>Play a converted effect with an explicit repeat setting. Pass a reserved channel 0–5 and the included asset label. To force repeat playback, use <code>mask1 = 0x01</code> and <code>mask2 = 0x81</code>; to force one-time playback, use <code>0x00</code> and <code>0x80</code>. These two values control what happens at the end of the sound; they are not volume settings. Returns <code>1</code> if accepted or <code>0</code> for an invalid/unreserved channel, header bank overflow, or an empty sample whose masks would make it repeat. A rejection preserves existing playback. See <a href="#pcm-loop-policy">looping examples and asset requirements</a>.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_PcmRequest" data-argc="5">HuTrackEngine_PcmRequest(channel, bank, address, mask1, mask2)</code></td><td>int</td><td><strong>Advanced asset lookup with repeat control.</strong> Combines the separate ROM bank/address form with the two repeat-setting values described above. Use <code>0x01, 0x81</code> to repeat or <code>0x00, 0x80</code> to play once. Returns <code>1</code> if accepted or <code>0</code> under the same rejection conditions as the four-argument form. The bank/address must identify a valid converted asset header.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_PCMStatus" data-argc="1">HuTrackEngine_PCMStatus(channel)</code></td><td>int</td><td>Check whether a WAV effect has finished on channel <code>0–5</code>. Returns <code>1</code> while the sample is active, <code>0</code> after it has stopped, or <code>2</code> if the channel is invalid or not reserved. A sample temporarily suspended by PauseDDA still counts as active. Finishing the sample does not return the channel to music: your game must call chanRelease. Compare the result explicitly with 1; a true/false test would also accept the error value 2.</td></tr>
+      <tr><td><code data-api="HuTrackEngine_stopPcm" data-argc="1">HuTrackEngine_stopPcm(channel)</code></td><td>int</td><td><strong>Stop sample playback while keeping the channel reserved.</strong> Returns <code>1</code> for a valid reserved channel 0–5, including one already stopped, or <code>0</code> otherwise. This stops feeding sample data but leaves the sound output at its last setting; it is not a guaranteed mute. To cancel an effect and give the channel back to music, use chanRelease instead. To silence PCM while keeping the reservation, use HuTrackEngineSFXrest.</td></tr>
+      <tr><td><code data-api="HuTrackEngineSFXrest" data-argc="1">HuTrackEngineSFXrest(channel)</code></td><td>int</td><td>Stop PCM playback and silence a reserved channel while keeping it available for your next effect. <code>channel</code> is 0–5. Returns <code>1</code> for a valid reserved channel or <code>0</code> otherwise. This does not stop a HuSFX effect or custom sound player from writing to the channel again; stop that player separately if used. To return the channel to music as well, use chanRelease.</td></tr>
+      <tr><td><code data-api="HuTrackEnginePauseDDA" data-argc="0">HuTrackEnginePauseDDA()</code></td><td>int</td><td><strong>Advanced: suspend all recorded-sample playback.</strong> DDA is the hardware mode used for PCM samples. This freezes sample positions for both music and sound effects, without muting the current sound output. Ordinary synthesized notes and the song’s position keep advancing. New PCM requests wait until ResumeDDA. Returns <code>1</code> when suspension begins or <code>0</code> if already suspended. For a normal game pause that silences only music, use HuTrackEngine_Pause instead.</td></tr>
+      <tr><td><code data-api="HuTrackEngineResumeDDA" data-argc="0">HuTrackEngineResumeDDA()</code></td><td>int</td><td>Continue all PCM samples suspended by PauseDDA from their saved sample positions, including both music samples and sound effects. Returns <code>1</code> when leaving suspension or <code>0</code> if sample playback was already enabled. Does not start a new sample by itself. This is the companion to PauseDDA, not the normal music Resume call.</td></tr>
+    </tbody>
+  </table></div>
+  <h3 id="api-helper">Advanced compiler helper</h3>
+  <p>Ordinary C music and PCM playback does not need this helper.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Call</th><th scope="col">Result</th><th scope="col">What it does and how to use it</th></tr></thead>
+    <tbody>
+      <tr><td><code data-api="getDataPtr" data-argc="1">getDataPtr(label)</code></td><td>No return value</td><td><strong>For inline assembly only.</strong> Prepare an included asset label’s bank and address for assembly code immediately following the call. It does not return a C pointer and is not needed for normal HuTrack music or PCM calls: pass the included label directly to those functions. See the <a href="#compiler-helper-details">assembly helper details</a> for the registers it sets.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Pause/Resume remembers the position of the current song while the game is running. There is no API for saving a playback position to a file or restoring it after a restart.</p>
+</section>
+
+<section id="huc_functions">
+  <h2>Music usage and timing</h2>
+  <p>Register each included song once after initialization and keep its returned ID. Use that ID whenever you want to start or restart it. Registering multiple songs does not automatically play them in sequence. See the setup examples for <a href="#huc_use">HuC</a> and <a href="#hucc_use">HuCC</a>.</p>
+  <p>Choose <code>PlaySong</code> for looping background music or <code>PlayOnce</code> for a piece that should stop at its end. Pause remembers the current position; Stop means the next play call starts over. Neither interrupts sound effects.</p>
+  <h3 id="metadata-strings">Title and author string limits</h3>
+  <p>After starting a song, copy its title and author into your own arrays before drawing them with your game’s text routines:</p>
+  <pre><code id="metadata-code">char song_title[48];
+char song_author[48];
+
+void read_song_credits(void)
+{
+    HuTrackEngine_getCurrSongTitle(song_title);
+    HuTrackEngine_getCurrSongAuthor(song_author);
+}</code></pre>
+  <p>Each array must hold at least <strong>48 bytes</strong>: up to 47 text bytes and the final zero that ends a C string. The functions are not given the array size, so they cannot protect a smaller array. An omitted title or author becomes an empty string. The limit counts bytes, not Unicode characters; your game’s font and character mapping determine how the text is displayed.</p>
+  <p>The converter shortens titles and author names longer than 47 bytes and prints a warning when doing so. It always adds the final zero. If you exclude a title or author during conversion, that string will be empty.</p>
+  <details>
+    <summary>Advanced: compatibility with older metadata</summary>
+    <p>An embedded zero (NUL) ends a field; the converter discards the remaining bytes of that field so a title suffix cannot be mistaken for the author. For older exports, the loader consumes up to the legacy DMF limit of 255 text bytes plus NUL per field, retaining only the first 47 bytes in RAM. It handles metadata crossing an 8 KB ROM bank boundary. If a field has no NUL within those 256 bytes, loading stops with empty title/author strings and playback state <code>HUTRACK_STOPPED</code>; it does not keep scanning ROM for a terminator.</p>
+  </details>
+  <h3 id="music-update-timing">When music updates happen</h3>
+  <p>The standard setups update music automatically once per video frame, during the display’s vertical blanking period (VBlank). Keep the usual <code>vsync()</code> in your game loop. You do not need to call a music-processing function there. Adding <code>HuTrackEngine_ManualCall()</code> would make the song advance twice per frame.</p>
+  <p>A “music update” in the fade descriptions means one of these regular player updates, not a whole tracker row or musical beat. Normal game-side calls can change songs, pause playback or request fades while this automatic update continues.</p>
+  <details>
+    <summary>Advanced: replacing the automatic music update</summary>
+    <p>A custom scheduler may use <code>HuTrackEngine_ManualCall()</code> only after removing the automatic callback: set <code>HUTRACK_VBLANK_CALLBACK = 0</code> for HuC, or replace/disconnect the HuCC <code>sound_hook</code> installed by initialization. Coordinate register, bank and interrupt handling and prevent overlapping updates. This is also where a project must handle nonstandard song update rates.</p>
+  </details>
+  <h3 id="music-events">Sync game logic to the music with EExx</h3>
+  <p><code>EExx</code> is a music-to-game cue. Put effect <code>EE</code> with a hexadecimal value <code>00–FF</code> on a tracker row to signal your game when HuTrack processes that row. Your game assigns the values: for example, <code>EE01</code> could start an enemy wave and <code>EE02</code> could trigger an animation, palette flash or other visual effect on a beat.</p>
+  <p>Call <code>HuTrackEngine_PollEvent()</code> once per game frame, normally after <code>vsync()</code> with the default VBlank music hook, and dispatch the returned value. In a custom scheduler, poll after the music update. The event follows the music-update timing; your game performs the action when it polls. Replace the example case bodies with your own game logic:</p>
+  <pre><code id="music-events-code">void update_music_events(void)
+{
+    int event;
+
+    event = HuTrackEngine_PollEvent();
+    switch (event) {
+    case 0x01:  /* EE01: start the next enemy wave. */
+        break;
+    case 0x02:  /* EE02: trigger a visual beat pulse. */
+        break;
+    default:    /* -1 = no event, or an unused event ID. */
+        break;
+    }
+}</code></pre>
+  <p>Polling consumes the event: the next poll returns <code>-1</code> unless another cue has arrived. <code>EE00</code> is a valid value, so do not use a simple true/false test for an event. There is <strong>one pending value, not an event queue</strong>: later cues overwrite earlier unread cues, including multiple cues processed before the same poll. Poll every frame and avoid placing multiple cues at the same musical position if each must be handled. Loading a song clears any unread event.</p>
+  <h3 id="music-volume-examples">Lower music for dialogue, fade out, or pause</h3>
+  <p>Use <code>FadeTo</code> to make room for dialogue while the song continues in the background. Use <code>FadeOut</code> when leaving a scene and the song should stop. Use <code>FadeToPause</code> followed later by <code>FadeIn</code> when you want to return to the same musical position. All of these leave sound-effect volume alone.</p>
+  <pre><code id="music-controls">void pause_or_resume_music(void)
+{
+    if (HuTrackEngine_Status() == HUTRACK_PAUSED)
+        HuTrackEngine_Resume();
+    else if (HuTrackEngine_Status() == HUTRACK_PLAYING)
+        HuTrackEngine_Pause();
+}
+
+void lower_music_for_dialogue(void)
+{
+    /* Lower music over 16 updates (about a quarter second
+       when starting at 31). Sound effects keep their volume. */
+    HuTrackEngine_FadeTo(23, 2);
+}
+
+void restore_music_after_dialogue(void)
+{
+    /* Return music to its original maximum volume. */
+    HuTrackEngine_FadeTo(31, 2);
+}
+
+void fade_music_keep_sfx(void)
+{
+    /* Fade music to silence, then stop it. From volume 31
+       this takes about one second at the default update rate. */
+    HuTrackEngine_FadeOut(2);
+}
+
+void fade_music_for_pause_menu(void)
+{
+    /* Fade to silence, then remember the music position. */
+    HuTrackEngine_FadeToPause(2);
+}
+
+void fade_music_back_from_pause_menu(void)
+{
+    /* Resume the paused song and fade up from silence. */
+    HuTrackEngine_FadeIn(2);
+}</code></pre>
+  <p>Call these functions when the game action happens, not on every frame. Reissuing a fade every frame keeps resetting its wait and can prevent it from progressing. The ordinary game loop and automatic music updates continue while a fade runs. To start a different song with a fade-in, call PlaySong with its ID and then FadeIn.</p>
+  <p><code>HuTrackEngine_SetMusicVolume(0)</code> and <code>HuTrackEngine_FadeTo(0, interval)</code> make music silent while it keeps playing. FadeOut stops it after reaching silence; FadeToPause freezes its position there. For an options menu, use SetMusicVolume and SetSFXVolume for separate sliders. Remember to reapply your chosen music-volume setting after starting a new song, because a new song begins at 31.</p>
+  <details>
+    <summary>Advanced: how the volume steps are applied</summary>
+    <p>HuTrack subtracts <code>31 - level</code> from each final 5-bit channel volume and clamps at zero. For example, level 27 subtracts 4: a channel at volume 20 becomes 16, and one at volume 3 becomes 0. These are the PSG’s logarithmic volume steps. HuSFX applies its per-channel volume reduction before the SFX group reduction; each stereo side similarly subtracts <code>15 - side_setting</code> from the effect’s original pan value. The hardware master volume is a further control over all output.</p>
+  </details>
+  <p>For register arguments and safe banked calls, see the <a href="#assembly-api">assembly interface reference</a>. For tracker FX, see the <a href="../compatibility.md">effect matrix</a>.</p>
 </section>
 
 <section id="pcm">
-  <h2>WAV / PCM sound effects</h2>
-  <p>HuTrack's timer-driven PCM API can borrow any PSG channel 0–5. It does not require HuSFX. Convert a WAV from <code>game/main</code>:</p>
+  <h2>Convert WAV files for standalone PCM playback</h2>
+  <p>This is a separate workflow from converting tracker music. Start with an ordinary WAV recording, convert it with <strong>Wav/RIFF to HuPCM Converter</strong>, then play the converted sound from your C game. You do not need Furnace, a DMF file, or a song playing. HuTrack supplies the timer-driven sample player; the separate HuSFX library is optional.</p>
+  <p><strong>Want to try a complete project first?</strong> The <a href="../../example/hucc_pcm/README.md">HuCC WAV/PCM example</a> already contains six converted sounds, a C menu, compiler setup and a build script. The <a href="../../example/huc_pcm_sample_ids/README.md">HuC sample-ID example</a> and <a href="../../example/hucc_pcm_sample_ids/README.md">HuCC sample-ID example</a> are also complete projects; those additionally demonstrate several samples in one HuSFX effect, PCM followed by a square-wave tone, and a PCM volume envelope. Their supplied assets are ready to build without running a converter.</p>
+  <h3 id="pcm-prepare-wav">1. Prepare your WAV</h3>
+  <p>Use a <strong>mono, uncompressed 8-bit or 16-bit PCM WAV</strong>. If your recording is stereo, 24-bit, floating-point WAV, MP3 or another format, export a supported mono WAV from your audio editor first. Keep the source at its existing sample rate; this converter can resample it for the player.</p>
+  <h3 id="pcm-gain-staging">Get better 5-bit quality: gain first, playback volume second</h3>
+  <p><strong>Prepare a strong sample, then use the sound chip’s volume control to place it in the mix.</strong> This is a useful default for five-bit PCM, even for an effect that should sound quiet in the game. <em>Pre-gain</em> means increasing the recording’s amplitude before conversion. It lets the converter describe more of the sound with its limited set of sample levels. Lowering the hardware playback volume afterward makes the result quieter without throwing away those stored levels.</p>
+  <p>Five bits provide just <strong>32 possible sample values</strong>. Quantization fits the recording onto those levels, losing the detail between them. A quiet recording may use only a few values near the middle: its smooth changes become large steps relative to the sound. You may hear the error as hiss, grain, buzz or roughness, especially in a fade. It is not always steady white noise. See <a href="https://www.analog.com/media/en/training-seminars/tutorials/MT-001.pdf">Analog Devices’ explanation of quantization error</a>.</p>
+  <figure>
+    <a href="pcm_gain_levels.svg"><img src="pcm_gain_levels.svg" width="1100" height="880" alt="A tone using 12 percent of full-scale amplitude occupies only four of the 32 sample codes. Eight times the amplitude uses all 32. Reducing playback amplitude by eight afterward gives a much finer staircase at the same intended listening level."></a>
+    <figcaption>Top: how much of the available sample range is used. Bottom: the results at the same intended playback level. The lower plots are enlarged vertically to show the difference. This idealized example has no clipping; it still stores only five bits per sample. Click any graph for its full size.</figcaption>
+  </figure>
+  <p>In this example, raising a tone from 12% to 96% of full scale lets it use all 32 values instead of four. Reducing its playback amplitude to one-eighth afterward also reduces the conversion error. <strong>The order matters:</strong> making the WAV quiet before conversion wastes available steps; making the chip’s output quiet afterward retains the fuller set of steps. The hardware has not gained extra bits, but you are using the bits it has more effectively.</p>
+
+  <h4 id="pcm-noise-masking">Why this matters most in quiet sounds and tails</h4>
+  <p><strong>The same noise is usually more noticeable against a quiet sound than against a loud one.</strong> Think of a hiss exposed between drum hits but partly hidden during each hit. This hiding effect is called <em>auditory masking</em>. It depends on the sounds’ frequencies and timing as well as their level; a loud sound does not hide every kind of noise. It is more accurate to describe reduced masking than to say our ears simply become more sensitive whenever a recording gets quiet. <a href="https://www.cl.cam.ac.uk/teaching/1112/DSP/slides-2up.pdf#page=93">Cambridge’s DSP notes illustrate loudness and masking</a>.</p>
+  <p>Five-bit conversion adds another problem: the spacing between available sample values stays fixed while a sound fades. Those steps become large compared with the remaining voice, ambience or reverberation. With less sound to mask the error, a tail can become rough before it disappears. Pre-gain gives the quiet detail more steps to work with. The lower hardware volume then brings both the sample and its conversion error down, leaving less error at the intended listening level.</p>
+  <figure>
+    <a href="pcm_gain_quiet_tail.svg"><img src="pcm_gain_quiet_tail.svg" width="1100" height="620" alt="A fading sound approaches the fixed quantization-error bound. Applying eight times pre-gain and one-eighth playback amplitude lowers that bound by about 18 decibels at the same intended sound level, helping quieter parts before they too run out of resolution."></a>
+    <figcaption>The white line is the sound’s fading envelope. Each dashed line is a mathematical upper bound on rounding error, not a measured noise floor or a hearing threshold. Lower on this graph means quieter. The example illustrates why extra room between the sound and its conversion error helps; it does not predict precisely when a listener will hear noise.</figcaption>
+  </figure>
+  <p>Pre-gain does not remove noise already in the recording, and a sufficiently long fade will still run out of resolution. A fixed gain also leaves the relative loudness of unclipped loud and quiet passages unchanged. If one sharp peak prevents the rest of a sound from using enough range, controlling that peak can help.</p>
+
+  <h4 id="pcm-intentional-clipping">A little deliberate clipping can be a useful tradeoff</h4>
+  <p><em>Clipping</em> cuts off peaks that exceed the allowed amplitude. For five-bit effects, preserving every brief peak is not always the best-sounding choice: one tall spike may force most of the sound to occupy very few levels. Increasing gain until a few peaks clip can give the main body and tail more usable detail. That can be worthwhile for a punchy impact, explosion or noisy percussion sample.</p>
+  <p>Treat this as an auditioned compromise. Brief peak distortion may be less objectionable than coarse quantization throughout the sound. Sustained clipping flattens many cycles and can make voices or pitched tones harsh. A limiter, compressor or soft clipper in your audio editor gives more control over the compromise; each can also change the sound. <a href="https://www.izotope.com/community/blog/clipping-in-mixing">iZotope’s clipping guide</a> explains the difference between peak control and heavier saturation.</p>
+  <figure>
+    <a href="pcm_gain_clipping.svg"><img src="pcm_gain_clipping.svg" width="1100" height="920" alt="Three gain settings for a sound with a short tall transient and a quieter body: intact peak, a clipped brief peak with a larger body, and excessive gain flattening many cycles. Red bands mark the portions that clip."></a>
+    <figcaption>These plots isolate clipping before quantization. The middle choice sacrifices a short peak so the rest can occupy more of the five-bit range. The bottom choice changes much more of the waveform. The gain settings illustrate this particular signal; they are not universal presets or safe clipping limits.</figcaption>
+  </figure>
+  <p><strong>Compare the converted versions at matched listening volume.</strong> Turn the boosted version down at playback so louder does not automatically seem better. Listen for clearer tails and detail, then check whether the altered attack or extra harshness is acceptable. Lower hardware volume cannot restore clipped peaks; you are choosing which compromise sounds better.</p>
+
+  <h4 id="pcm-converter-gain">Account for this converter’s built-in boost</h4>
+  <div class="note"><p>The standalone WAV converter already applies <strong>1.5× amplitude gain (about +3.5 dB)</strong>, clips to the supported range, then resamples. It clamps again after resampling before reducing to five bits. Both the app and CLI do this. There is no gain slider or automatic normalization.</p></div>
+  <p>Count that boost as part of your preparation. A WAV whose peaks reach about two-thirds of full scale will approach full scale after the initial 1.5× boost; a WAV already normalized to maximum will clip some peaks. That clipping may suit an effect, but it should be a listening decision. Resampling can change peaks too, so check the converted result. In the graphs, “total gain” includes this built-in boost: an eightfold total boost would require about 5.33× additional amplitude gain in the editor, where the source has enough headroom.</p>
+  <ol>
+    <li><strong>Keep the original and prepare a working copy.</strong> Trim unwanted material and fix obvious background noise or an offset waveform in your editor. Prefer a supported 16-bit WAV for the final source so you do not discard useful precision early.</li>
+    <li><strong>Make a clean starting version.</strong> Adjust the source level with the converter’s 1.5× boost in mind. A peak around two-thirds of full scale is a starting point for avoiding its initial clipping, not a required target for every sound.</li>
+    <li><strong>Try more gain if the body or tail sounds grainy.</strong> For example, compare a version with another 1–3 dB of editor gain, allowing some peak clipping if it suits the sound. That range is a small experiment, not a guarantee of transparent results. Use peak control in the editor if it sounds better.</li>
+    <li><strong>Convert, then compensate at playback.</strong> Lower the sample’s hardware volume and compare versions at similar listening loudness in the game or a complete example. Check the quiet tail as well as the loudest moment.</li>
+    <li><strong>Keep the version that serves the effect.</strong> A little peak damage may be preferable to a rough tail. For a clean voice or sustained tone, a less aggressive setting may win.</li>
+  </ol>
+
+  <h4 id="pcm-playback-level">Which volume control should compensate?</h4>
+  <p>The following controls change the PSG’s playback volume; they do not scale and re-quantize the PCM bytes. <strong>31 means full available volume and 0 means silent.</strong> Intermediate values are logarithmic hardware steps: 15 does not mean half amplitude, and dividing a setting of 31 by eight does not implement the graph’s one-eighth amplitude. Adjust by listening at the intended mix level.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">What you are playing</th><th scope="col">Volume control</th><th scope="col">What else it affects</th></tr></thead>
+    <tbody>
+      <tr><td>Direct PCM through <code>HuTrackEngine_PcmRequest</code></td><td><code>HuTrackEngine_SetSFXVolume(level)</code></td><td>The SFX group, including other reserved PCM and HuSFX effects. Use this for a shared SFX level; it is not a separate setting for each sample.</td></tr>
+      <tr><td>A sample inside a HuSFX effect</td><td><code>HuDDAvol(level)</code> immediately before <code>HuPlayPCM(sampleID)</code> in the effect’s byte stream</td><td>That channel’s PCM playback level. Place another HuDDAvol before the next sample if it needs a different level. Per-channel and SFX-group reductions still apply.</td></tr>
+      <tr><td>An entire HuSFX effect on one channel</td><td><code>HuSFXchanVol(channel, level)</code></td><td>PCM and waveform parts of that channel’s effect. The setting persists for later effects on the same channel, so set it when preparing playback.</td></tr>
+    </tbody>
+  </table></div>
+  <pre><code>/* After initialization: an example shared SFX level, chosen by ear.
+ * 31 is full volume; 24 reduces it. Music keeps its own volume setting.
+ */
+HuTrackEngine_SetSFXVolume(24);</code></pre>
+  <p>The hardware master-volume API controls the whole output, including music. Use the SFX or channel controls above when compensating a sample without turning down the song. To hear volume commands changing one sample over time, try the <a href="#husfx-pcm-envelope">playable PCM envelope example</a> below.</p>
+  <details>
+    <summary>About the illustrations</summary>
+    <p>These are original explanatory plots generated by <a href="generate_pcm_figures.py">generate_pcm_figures.py</a>. They use a uniform 32-level quantizer, centred reconstruction levels and ideal playback attenuation. They do not simulate the converter’s resampling filter or measure the console’s analogue output, noise or hearing thresholds. Regeneration needs NumPy and Matplotlib; reading this guide and building the examples does not.</p>
+  </details>
+  <h3 id="pcm-open-converter">2. Open the WAV converter</h3>
+  <p>Install the Python dependencies once, then start the app. These are Windows <strong>Command Prompt</strong> commands; change the checkout path to yours. Python needs Tkinter as well as the packages in <code>requirements.txt</code>.</p>
+  <pre><code id="wav-gui-launch">set "HUTRACK_HOME=C:\Projects\PCE_DEV\HuTrack"
+python -m pip install -r "%HUTRACK_HOME%\requirements.txt"
+python "%HUTRACK_HOME%\utils\PCM_SFX\waveConvert.py"</code></pre>
+  <p>Click <strong>Open WAV</strong>, select your recording and dismiss its information message. The settings and Save button become available after a valid file loads. Opening a file does not write converted assets yet.</p>
+  <figure id="wav-app-screenshot">
+    <a href="wav_converter_settings.jpg"><img src="wav_converter_settings.jpg" width="809" height="444" alt="Current Wav/RIFF to HuPCM Converter app with kaiser_best, 6960 Hz playback, fixed five-bit output, Debug Off, Bit Pack PCM Off, Include Path ../assets/pcm and PCM name explosion. Open WAV and Save HuPCM are on the right."></a>
+    <figcaption>The WAV converter after opening a file and filling in the example settings. The left column controls conversion; the middle names and locates the generated asset; the buttons on the right load the WAV and save HuPCM. Click the screenshot for its full size.</figcaption>
+  </figure>
+  <h3 id="pcm-converter-settings">3. Choose the settings</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">App control</th><th scope="col">Use for this walkthrough</th><th scope="col">What it means</th></tr></thead>
+    <tbody>
+      <tr><td>Filter Type</td><td><code>kaiser_best</code></td><td>The filter used when changing sample rate. Keep this setting for the normal conversion path. <code>kaiser_fast</code> is an alternative when conversion speed matters.</td></tr>
+      <tr><td>Bit Depth</td><td><code>5bit</code> (fixed)</td><td>The console plays 32 possible sample levels. The converter produces these values for you; do not prepare a five-bit WAV yourself.</td></tr>
+      <tr><td>Playback Rate</td><td><code>6960</code></td><td>Convert to approximately 6,960 samples per second, matching the supplied player setup. Selecting a different rate does not change the runtime timer. Use <code>no resample</code> only when the source rate already matches your player.</td></tr>
+      <tr><td>Debug</td><td><code>Off</code></td><td>Normal builds need only the two assembly includes. On also writes raw binary PCM files for inspection; these are not ordinary WAV files or required game assets.</td></tr>
+      <tr><td>Bit Pack PCM</td><td><code>Off</code> (fixed)</td><td>Each five-bit sample occupies one byte. The supplied player does not accept packed output.</td></tr>
+      <tr><td>Include Path</td><td><code>../assets/pcm</code></td><td>The path the assembler will use to find the sample-data file, relative to the directory where your build runs. This field does <strong>not</strong> choose the folder where the app saves files.</td></tr>
+      <tr><td>PCM name</td><td><code>explosion</code></td><td>The base name of the two generated files. Use a simple name containing letters, digits and underscores, without a path or extension. Opening another WAV sets this field to that file’s base name again.</td></tr>
+    </tbody>
+  </table></div>
+  <h3 id="pcm-save-files">4. Save both generated files</h3>
+  <p>Click <strong>Save HuPCM</strong> and select the actual destination folder, such as <code>game/assets/pcm</code>. Wait for the export-complete message. With PCM name <code>explosion</code>, the folder contains:</p>
+  <pre><code>game/
+  assets/
+    pcm/
+      explosion.inc        Include this header in your C program.
+      explosion.data.inc   Sample bytes and the end marker; keep it with the header.
+  main/
+    main.c
+    build.bat              Runs the compiler/assembler from this directory.</code></pre>
+  <p>For this layout, the assembler starts in <code>game/main</code>, so <code>../assets/pcm</code> is the correct Include Path. The header contains an assembly include pointing to <code>explosion.data.inc</code>. Keep both files; moving them to another folder requires updating that path or exporting again. The original WAV is not needed to build the ROM after conversion.</p>
+  <p>The app performs conversion when you save, using the current settings. It does not offer an audio-preview button. To hear the result through the actual player, rebuild and run your example or game.</p>
+  <h3 id="pcm-command-line">Command-line conversion (optional)</h3>
+  <p>The GUI steps above are sufficient. For a repeatable build command, the following performs the same conversion from <code>game/main</code>:</p>
   <pre><code id="convert-wav">python "%HUTRACK_HOME%\utils\PCM_SFX\waveConvert.py" --noGui ^
   --filein "..\music\explosion.wav" ^
   --destinationPath "..\assets\pcm" ^
   --includePath "../assets/pcm" ^
   --playback 6960 --bitDepth 5bit --resampleFilter kaiser_best</code></pre>
-  <p>The CLI switch here is <code>--noGui</code>; the DMF converter uses <code>--no_gui</code>. Keep both <code>explosion.inc</code> and <code>explosion.data.inc</code>. Include the header asset beside your song include, and add these functions before <code>main</code>:</p>
+  <p>The CLI switch here is <code>--noGui</code>; the DMF converter uses <code>--no_gui</code>. The input base name supplies the output name, or add <code>--overridename explosion</code> to choose it explicitly. Both interfaces apply the same fixed gain and produce the same asset format.</p>
+  <h3 id="pcm-play-from-c">5. Play the converted sound from C</h3>
+  <p>Start from a complete example linked above, or install the library using the <a href="#huc_use">HuC setup</a> or <a href="#hucc_use">HuCC setup</a>. Keep that compiler’s asset placement and timer setup. Call <code>HuTrack_Init()</code> once at startup; you do not need to register or start a song.</p>
+  <p>For a single recorded effect, use <code>HuTrackEngine_PcmRequest()</code> directly. You do not need HuSFX initialization, a sample ID, or <code>HuSFXprocess()</code> for this path. Include the generated header in your project’s asset section, and add these functions before <code>main</code>:</p>
   <pre><code id="pcm-code">#incasmlabel(explosion, "../assets/pcm/explosion.inc", 2);
 
 char explosion_active;
 
 void play_explosion(void)
 {
-    HuTrackEngine_chanReserve(5);
+    if (explosion_active || !HuTrackEngine_TryReserve(5))
+        return;
     if (HuTrackEngine_PcmRequest(5, explosion)) {
         explosion_active = 1;
     } else {
@@ -421,40 +696,216 @@ void update_explosion(void)
     }
 }</code></pre>
   <p>Set <code>explosion_active = 0</code> during your game's initialization. Call <code>play_explosion()</code> on the event, then <code>update_explosion()</code> once per loop after <code>vsync()</code>. The flag prevents releasing a channel every frame after completion. Coordinate this channel with any other SFX owner.</p>
+  <p>The example borrows channel 5 only if another effect has not reserved it. A successful PcmRequest starts the sound; update_explosion gives the channel back when playback ends. The <a href="#api-pcm">PCM reference</a> explains each return value. For early cancellation, call <code>HuTrackEngine_chanRelease(5)</code> while <code>explosion_active</code> is set, then clear that flag.</p>
+  <p><strong>Using sample IDs in HuSFX instead?</strong> The same converted files work there. Register the header label with <code>HuSFX_QueuePCM(explosion)</code> after initializing both libraries, then use the returned ID in the effect stream. See the <a href="#husfx">HuSFX walkthrough and complete sample-ID projects</a> for registration order, timed sample sequences and PCM-to-waveform transitions.</p>
+  <h3 id="pcm-troubleshooting">6. Check the result</h3>
   <div class="table-wrap"><table>
-    <thead><tr><th scope="col">Call</th><th scope="col">Result / ownership</th></tr></thead>
+    <thead><tr><th scope="col">Problem</th><th scope="col">What to check</th></tr></thead>
     <tbody>
-      <tr><td><code>HuTrackEngine_chanReserve(channel)</code></td><td>Give the channel to SFX before starting a sound.</td></tr>
-      <tr><td><code>HuTrackEngine_PcmRequest(channel, asset)</code></td><td>1 on success, 0 on failure. The C API expects the asset's three-byte header, not its raw sample-data label.</td></tr>
-      <tr><td><code>HuTrackEngine_PCMStatus(channel)</code></td><td>1 playing, 0 stopped, 2 invalid/unreserved channel.</td></tr>
-      <tr><td><code>HuTrackEngine_stopPcm(channel)</code></td><td>Stop streaming; 1 on success, 0 for an invalid/unreserved channel. Does not release ownership.</td></tr>
-      <tr><td><code>HuTrackEngine_chanRelease(channel)</code></td><td>Silence and return the channel to music, waiting for its next fresh note.</td></tr>
-      <tr><td><code>HuTrackEngine_SFXmode()</code><br><code>HuTrackEngine_SFXmode(channel)</code></td><td>Return the reserved-channel bit mask, or 1/0 for a single channel's reservation.</td></tr>
+      <tr><td>The app will not open</td><td>Run the launch command in a terminal so you can read the error. Install the listed Python dependencies and ensure that Python includes Tkinter.</td></tr>
+      <tr><td>Open WAV reports an unsupported file</td><td>Export mono 8-bit or 16-bit integer PCM WAV from your audio editor. Renaming an MP3 or floating-point file to <code>.wav</code> does not convert its format.</td></tr>
+      <tr><td>The build cannot find the data include</td><td>Keep both generated files. Check Include Path against the build’s working directory, rather than the converter’s location or the WAV’s source folder.</td></tr>
+      <tr><td>The recording sounds harsh or distorted</td><td>Compare a version with less pre-gain at matched playback loudness. The fixed 1.5× boost can clip peaks; a little can be useful, while excessive clipping can change the sound too much. Five-bit conversion and the low sample rate also limit fidelity. See <a href="#pcm-intentional-clipping">the clipping tradeoff</a>.</td></tr>
+      <tr><td>Quiet parts or fading tails sound grainy</td><td>The recording may use too few of the 32 sample levels. Try more gain before conversion and compensate with lower hardware playback volume. Listen for the balance between clearer quiet detail and peak distortion; see <a href="#pcm-gain-staging">the gain and masking explanation</a>.</td></tr>
+      <tr><td>The voice is too fast, slow, high or low</td><td>The exported rate must match the timer player. Use 6960 for the supplied setup; choosing a different conversion rate alone changes how the sample sounds at playback.</td></tr>
+      <tr><td>No sound plays</td><td>Confirm initialization, a successful channel reservation and PcmRequest result, a valid header label, and nonzero SFX/master volume. Check your emulator or hardware sound output too.</td></tr>
     </tbody>
   </table></div>
-  <p>For early cancellation, call <code>HuTrackEngine_stopPcm(5)</code>, release channel 5, and clear the application flag. The <a href="../../example/hucc_pcm/README.md">complete HuCC PCM example</a> includes a menu, six WAVs and reproducible conversion/build scripts.</p>
-  <figure>
-    <a href="../../example/hucc_pcm/waveConvert_settings.jpg"><img src="../../example/hucc_pcm/waveConvert_settings.jpg" width="662" height="361" alt="WAV converter showing kaiser_best resampling, 5bit depth, 6960 playback rate, Debug Off and Bit Pack PCM Off."></a>
-    <figcaption>WAV converter settings from the PCM example: kaiser_best, 5bit, 6960, packing off. For this guide's folder layout, change the pictured Include Path to <code>../assets/pcm</code> and the PCM name to <code>explosion</code>. Open WAV loads the source; Save HuPCM writes the asset files.</figcaption>
-  </figure>
-  <div class="note"><p><strong>Release waits for a new music note.</strong> Music's logical state advances while SFX owns the channel. On release, it stays silent until a fresh note restarts the instrument and restores waveform, pan, noise and PCM mode. It does not resume a held note midway. Effect-only rows and retriggers do not end this wait.</p></div>
-  <p>Hardware LFO couples channels 0/1; borrowing either temporarily suspends that LFO until both are available to music. Channels 4/5 are the hardware noise channels. Numbering in these APIs starts at zero.</p>
+  <h3 id="pcm-loop-policy">Play once or repeat a sound</h3>
+  <p>A normal converted WAV plays once with <code>HuTrackEngine_PcmRequest(5, explosion)</code>. For a repeating sound, use the four-argument form below on a channel you have already reserved. The last two values control repeat behavior; you can use these pairs directly without knowing the sample format.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">What you want</th><th scope="col">Call</th><th scope="col">When it ends</th></tr></thead>
+    <tbody>
+      <tr><td>Normal converted WAV, played once</td><td><code>HuTrackEngine_PcmRequest(5, explosion)</code></td><td>When the sound reaches its end. Check PCMStatus, then release the channel.</td></tr>
+      <tr><td>Force one-time playback</td><td><code>HuTrackEngine_PcmRequest(5, explosion, 0x00, 0x80)</code></td><td>At the first end/repeat marker, even if the data requests a loop.</td></tr>
+      <tr><td>Repeat until your game cancels it</td><td><code>HuTrackEngine_PcmRequest(5, explosion, 0x01, 0x81)</code></td><td>Repeats from the beginning. Release the channel when the game no longer needs the sound.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Always pass the converted asset label, such as <code>explosion</code>, rather than a pointer to raw WAV bytes or the generated sample-data array. Use a nonempty converted sound for a forced loop: PcmRequest rejects an empty repeating stream so it cannot trap the timer interrupt. It also rejects a header whose sample start would wrap past bank <code>0xFF</code>. These checks do not validate every sample byte or locate a missing end marker; use the converter’s complete output. Finishing a sound or calling stopPcm leaves the channel reserved and its output at the last setting. Use chanRelease to silence it and return it to music, or HuTrackEngineSFXrest to silence PCM while keeping the reservation.</p>
+  <details>
+    <summary>Advanced: PCM headers and repeat masks</summary>
+    <p>All four C PcmRequest forms take the converted three-byte header address and start immediately after it. They do not infer loop settings from those header bytes. Samples are unpacked 5-bit values <code>0x00–0x1F</code>; bytes with bit 7 set are control markers. Every sample needs a valid terminating control marker.</p>
+    <p>At a marker, the decoder computes <code>(marker | mask1) &amp; (mask2 | 0x80)</code>. Result <code>0x80</code> stops playback; any other result loops to the first sample after the header. Both masks are bytes, and bit 7 of mask2 is forced on. Default masks are <code>0x00, 0x8F</code>: marker 0x80 stops and a marker with a nonzero low hexadecimal digit loops. The WAV converter emits marker 0x80, so default playback is one-shot. Masks <code>0x00, 0x80</code> force stopping; <code>0x01, 0x81</code> force looping.</p>
+    <p>HuTrackEnginePauseDDA and HuTrackEngineResumeDDA suspend/resume all PCM, including SFX, without discarding sample positions or muting the hardware. The music timeline and ordinary synthesized notes keep running. Use the normal music Pause function for a game pause that silences music while sound effects continue.</p>
+  </details>
+  <div class="note"><p><strong>Music returns on its next new note.</strong> The song keeps advancing while a sound effect borrows a channel. After release, that voice stays silent until the song starts a new note on it. This avoids jumping back into the middle of a long held note. A row that only changes an effect, or repeats the existing note through a retrigger effect, does not end this wait.</p></div>
+  <details>
+    <summary>Advanced: choosing a channel around special music sounds</summary>
+    <p>The hardware low-frequency oscillator (LFO) uses channels 0 and 1 together to modulate pitch. Borrowing either temporarily suspends this effect until both are available to music. Only channels 4 and 5 can generate hardware noise, often used for percussion. Consider what the song plays on each channel when deciding which voice a sound effect should interrupt.</p>
+  </details>
 </section>
 
 <section id="husfx">
-  <h2>HuSFX streams (optional)</h2>
-  <p>HuSFX is the separate PSG control-stream player in this repository. Its setup and per-frame processing are additional to HuTrack's music/PCM setup.</p>
+  <h2>HuSFX sound effects with PCM (optional)</h2>
+  <p>HuSFX is the separate player in this repository for sound effects that can combine synthesized sound and recorded PCM samples. Each effect is a sequence of sound instructions, called a <em>stream</em>. It describes how to change the sound over time. HuSFX needs its own initialization and one processing call per game frame in addition to HuTrack’s setup.</p>
   <ol>
     <li>Include <code>HuSFX/HuSFX_vars.inc</code> <strong>before</strong> <code>HuTrackEngine.asm</code> in your <code>libslot1.asm</code> or <code>hucc-final-extra.asm</code>. This also enables HuTrack's stream-cancellation support on release.</li>
     <li>In C, include <code>HuSFX/HuC_interface/HucSFX.c</code>. The capital C in <code>HuC_interface</code> is intentional; HuTrack's directory is spelled <code>Huc_interface</code>.</li>
     <li>Initialize with <code>HuSFX_Init(wave_bank, wave_address)</code> using the exported shared waveform pool. All concurrent streams must refer to that same pool.</li>
     <li>Reserve a channel, then call <code>HuSFXplay(channel, stream_bank, stream_address)</code>. It returns <code>HU_SFX_OK</code> (1) or <code>HU_SFX_ERROR</code> (0). Release your reservation if starting fails.</li>
-    <li>Call <code>HuSFXprocess()</code> once per SFX tick, typically after <code>vsync()</code>. The music hook does not call it.</li>
-    <li>When <code>HuSFXstate(channel) == HU_SFX_STOPPED</code>, release the channel once. Use an application ownership flag as in the PCM example.</li>
+    <li>Call <code>HuSFXprocess()</code> once per game frame, typically after <code>vsync()</code>. The music hook does not call it.</li>
+    <li>When <code>HuSFXstate(channel) == HU_SFX_STOPPED</code>, release the channel once. Use TryReserve and an application ownership flag as in the PCM example.</li>
   </ol>
-  <p><code>HuSFXplay()</code> does not reserve a channel, and stream EOF does not release it. <code>HuSFXstop(channel)</code> stops the stream; release afterward when music should regain ownership. Stop any external/custom PSG writer before returning its channel.</p>
+  <p>HuSFXplay does not reserve a channel, and reaching the end of an effect does not release it. Follow the same reserve → play → check → release sequence as for WAV effects. HuSFXstop stops the effect; release afterward when music should use the channel again. If you also run your own sound-chip code on that channel, stop it before returning the channel.</p>
   <p><strong>HuSFX status values differ from PCM:</strong> <code>HU_SFX_PLAYING = 1</code>, <code>HU_SFX_STOPPED = 2</code>, and <code>HU_SFX_STATE_ERROR = 0</code>. Test the named constants instead of reusing PCM status tests.</p>
-  <p>The supplied <a href="../../example/huc/main/huc_example.c">HuC</a> and <a href="../../example/hucc/main/hucc_example.c">HuCC</a> examples show asset bank/address helpers and waveform-pool initialization. See the <a href="../../utils/PSG_SFX/decode.txt">control-code format</a> when constructing streams. <code>FB</code> is EOF with no operand; <code>FC</code>/<code>FD</code> remain PCM placeholders, so use HuTrack's separate PCM API for WAV playback.</p>
+  <p><strong>Complete runnable projects:</strong> choose the <a href="../../example/huc_pcm_sample_ids/README.md">HuC PCM sample-ID example</a> or <a href="../../example/hucc_pcm_sample_ids/README.md">HuCC PCM sample-ID example</a>. Each includes its C program, samples, waveforms, compiler setup and build script; no project files need to be created or copied. The programs register three PCM labels at runtime and play their IDs within one HuSFX stream. A second effect switches from PCM to waveform playback. A third shapes one sample with a volume envelope.</p>
+  <h3 id="husfx-api">Complete HuSFX C reference</h3>
+  <p>Include <code>HuSFX/HuC_interface/HucSFX.c</code> to use these functions; their declarations are in <a href="../../lib/HuSFX/HuC_interface/HucSFX.h">HucSFX.h</a>. Channel numbers run from 0 to 5. Reserve a channel with HuTrack before using it for HuSFX: HuSFXplay does not acquire ownership for you. A PCM start command also checks that the channel is reserved.</p>
+  <p>The <code>bank</code> and <code>address</code> arguments identify an exported asset’s location in ROM. Use the asset helpers shown in the supplied <a href="../../example/huc/main/huc_example.c">HuC</a> or <a href="../../example/hucc/main/hucc_example.c">HuCC</a> example to obtain them. Per-channel HuSFX volume and stereo settings stay in effect when you stop an effect or start another on the same channel; initialization resets them to their original maximum settings.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Call</th><th scope="col">Result</th><th scope="col">What it does and how to use it</th></tr></thead>
+    <tbody>
+      <tr><td><code data-api="HuSFX_Init" data-argc="2">HuSFX_Init(bank, address)</code></td><td>No return value</td><td>Prepare the separate HuSFX player before using it. Supply the ROM bank and address of the shared waveform collection exported with your effects; all simultaneously playing effects use that same collection. Clears the runtime PCM list and initializes six effect slots, each at volume <code>31</code> (original maximum) and stereo setting <code>0xFF</code> (original left/right balance). Call once during startup, not to stop an effect. HuTrack_Init does not call this function for you.</td></tr>
+      <tr><td><code data-api="HuSFX_QueuePCM" data-argc="1">HuSFX_QueuePCM(asset)</code></td><td>int</td><td>Add a converted WAV to the PCM list at runtime, without playing it. Pass its included label, such as <code>explosion</code>. Stores its ROM bank and address and returns a sample ID: the first call returns <code>0</code>, the next <code>1</code>, and so on. Use that ID in HuPlayPCM or HuLoopPCM. Returns <code>-1</code> if the list is full, HuTrack PCM support is unavailable, or skipping the header would wrap past the last ROM bank. Call after HuTrack_Init and HuSFX_Init. Each call adds another entry, even for the same asset; sample data remains in ROM.</td></tr>
+      <tr><td><code data-api="HuSFX_ClearPCM" data-argc="0">HuSFX_ClearPCM()</code></td><td>No return value</td><td>Empty the runtime PCM list so the next registration returns ID <code>0</code> again. Does not stop a sample that already started, because its player keeps its own address. Future PCM commands use the new list, so normally stop old effects before clearing and registering sounds for another level. Song changes and individual effect stops do not clear the list.</td></tr>
+      <tr><td><code data-api="HuSFXprocess" data-argc="0">HuSFXprocess()</code></td><td>No return value</td><td>Advance all active HuSFX effects by one update, including their timing and any changed volume or stereo settings. Call once per game frame, normally after <code>vsync()</code>, and keep calling while music is paused so menu and other effects continue. HuTrack’s automatic music update does not call it for you.</td></tr>
+      <tr><td><code data-api="HuSFXplay" data-argc="3">HuSFXplay(channel, bank, address)</code></td><td><code>HU_SFX_STATUS_t</code></td><td>Start an effect on channel <code>0–5</code>, using the ROM bank and address of its converted HuSFX data. Reserve the channel with HuTrack first. The first sound instructions run on the next HuSFXprocess call; calling play again replaces or restarts the effect. Keeps that channel’s existing HuSFX volume and stereo settings. Returns <code>HU_SFX_OK</code> (1) for a valid channel or <code>HU_SFX_ERROR</code> (0) otherwise. It does not validate the effect data or check the reservation.</td></tr>
+      <tr><td><code data-api="HuSFXstop" data-argc="1">HuSFXstop(channel)</code></td><td><code>HU_SFX_STATUS_t</code></td><td>Stop and silence the HuSFX effect on channel <code>0–5</code>. Returns <code>HU_SFX_OK</code> (1) for a valid channel, even if already stopped, or <code>HU_SFX_ERROR</code> (0) otherwise. The channel stays reserved for sound effects; call HuTrackEngine_chanRelease afterward when music should use it again.</td></tr>
+      <tr><td><code data-api="HuSFXchanVol" data-argc="2">HuSFXchanVol(channel, vol)</code></td><td><code>HU_SFX_STATUS_t</code></td><td>Set the volume of just the HuSFX effect on channel <code>0–5</code>. <code>vol</code> is <code>0</code> for silence or <code>31</code> for the effect’s original maximum; intermediate values make it quieter. Applied on the next HuSFXprocess call and kept for later effects on this channel. The overall SFX volume can reduce it further. Returns <code>HU_SFX_OK</code> (1) for a valid channel or <code>HU_SFX_ERROR</code> (0) otherwise. Pass only 0–31: this older setter wraps larger byte values (32 becomes 0) instead of limiting them to 31.</td></tr>
+      <tr><td><code data-api="HuSFXpanVol" data-argc="2">HuSFXpanVol(channel, pan)</code></td><td><code>HU_SFX_STATUS_t</code></td><td>Adjust an effect’s left/right speaker volume on channel <code>0–5</code>. Write <code>pan</code> as <code>0xLR</code>: each digit runs from <code>0</code> (silent) to <code>F</code> (original maximum). <code>0xFF</code> keeps the effect’s original stereo balance; <code>0x00</code> mutes both sides, <code>0xF0</code> mutes the right, and <code>0x0F</code> mutes the left. This only reduces each side; it cannot move sound onto a side absent from the original effect. Applied next HuSFXprocess and kept across play/stop. Returns <code>HU_SFX_OK</code> (1) for a valid channel or <code>HU_SFX_ERROR</code> (0) otherwise.</td></tr>
+      <tr><td><code data-api="HuSFXstate" data-argc="1">HuSFXstate(channel)</code></td><td><code>HU_SFX_STREAMNIG_t</code></td><td>Find out whether a HuSFX effect is still playing on channel <code>0–5</code>. Returns <code>HU_SFX_PLAYING</code> (1), <code>HU_SFX_STOPPED</code> (2), or <code>HU_SFX_STATE_ERROR</code> (0, invalid channel). When an effect you own becomes STOPPED, release the channel once to return it to music. Use these named constants: the numbers differ from HuTrack PCMStatus. The public return-type name <code>HU_SFX_STREAMNIG_t</code> retains its original spelling.</td></tr>
+    </tbody>
+  </table></div>
+  <h3 id="husfx-pcm">Start with PCM, then continue with synthesized sound</h3>
+  <p>Convert a WAV and include the output under a label. Register that label at runtime with <code>HuSFX_QueuePCM</code>. Its returned number is the sample ID; registration order must match the IDs in your effect streams. Adding a sound does not automatically play it.</p>
+  <p>This helper assumes the HuTrack/HuSFX setup above and waveform 0 in the shared collection. Call <code>setup_combined_pcm()</code> after both libraries are initialized, <code>play_combined()</code> when the game event happens, and <code>update_combined()</code> once per frame. It borrows channel 5 for the whole effect.</p>
+  <pre><code id="husfx-pcm-code">#include "HuSFX/HuC_interface/HucSFX.c"
+#include "HuSFX/HuC_interface/HuVGM_defs.h"
+#include "HuCsupport/HuCsupport.h"
+#incasmlabel(impact_pcm, "../assets/pcm/explosion.inc", 2);
+
+const char combined_sfx[] = {
+    HuPlayPCM(0),          /* Registered sample 0; play once. */
+    HuWait_frames(8),      /* Eight game frames of PCM. */
+    HuStopPCM,             /* Stop before waveform playback. */
+    HuChanWFupdate(0),     /* Waveform 0 from the shared collection. */
+    HuPeriod(1, 64),       /* Synthesized tone at period 0x140. */
+    HuWFvol(31),           /* Full effect volume. */
+    HuWait_frames(8),
+    HuEndOfStream
+};
+int combined_ready;
+int combined_active;
+
+void setup_combined_pcm(void)
+{
+    combined_active = 0;
+    HuSFX_ClearPCM();
+    combined_ready = (HuSFX_QueuePCM(impact_pcm) == 0);
+}
+void play_combined(void)
+{
+    if (!combined_ready || combined_active) return;
+    if (!HuTrackEngine_TryReserve(5)) return;
+    if (HuSFXplay(5, getBank(combined_sfx), getAddress(combined_sfx)) == HU_SFX_OK)
+        combined_active = 1;
+    else
+        HuTrackEngine_chanRelease(5);
+}
+void update_combined(void)
+{
+    HuSFXprocess(); /* Call once globally, even with several effects active. */
+    if (combined_active &amp;&amp; HuSFXstate(5) == HU_SFX_STOPPED) {
+        HuTrackEngine_chanRelease(5);
+        combined_active = 0;
+    }
+}</code></pre>
+  <p><code>HuPlayPCM(id)</code> plays once; <code>HuLoopPCM(id)</code> repeats the entire nonempty sample until stopped. A wait schedules the next instruction in video frames; it does not wait for the recording to finish. If PCM finishes early, HuSFX silences it on its next update and continues the effect’s schedule. PCM starts at full stream volume unless an enabled DDA volume was already set; <code>HuDDAvol(0–31)</code> changes it during playback. Per-channel volume, stereo and overall SFX volume still apply.</p>
+  <p>Stopping or replacing the effect, ending its stream, or releasing its channel also stops its PCM. A waveform upload or control change out of PCM mode stops the timer writer before changing the channel. Invalid IDs, unsupported flags or empty looping samples end the effect safely. Keep the channel reserved until the complete effect finishes.</p>
+  <h3 id="husfx-pcm-envelope">Shape one PCM sample with a volume envelope</h3>
+  <p>A <em>volume envelope</em> is simply a schedule of loudness changes: start quietly, rise, hold, then fade. HuSFX can do this with ordinary volume and wait commands while the timer keeps playing the same sample. This makes the hardware volume useful for more than a fixed mix setting, and avoids baking an extra fade into the five-bit sample values.</p>
+  <p>Build either complete sample-ID project above. Use Left/Right to select <strong>PCM ID 2 + volume envelope</strong>, press I to play or restart, and II to stop. The program uses the included long Shubibinman recording so it will keep playing throughout the envelope. The full C programs are in <a href="../../example/huc_pcm_sample_ids/main/pcm_sample_ids.c">the HuC project</a> and <a href="../../example/hucc_pcm_sample_ids/main/pcm_sample_ids.c">the HuCC project</a>.</p>
+  <figure>
+    <a href="pcm_volume_envelope.svg"><img src="pcm_volume_envelope.svg" width="1100" height="530" alt="The playable PCM envelope rises through volume settings 12, 20 and 27, holds full volume 31, then steps down through 27, 23, 19, 15, 11, 7, 3 and 0. PCM starts once and advances throughout the 2.4-second envelope before being stopped."></a>
+    <figcaption>Volume settings, not amplitude percentages. The example uses one HuSFX update per frame at about 60 frames per second. All 144 updates act on one continuous PCM playback; the last six are silent before the stream stops it.</figcaption>
+  </figure>
+  <p>This is the effect’s complete command stream. Sample ID 2 must already be registered, as it is in the supplied projects; the surrounding program reserves the channel and calls HuSFXprocess once per frame.</p>
+  <pre><code id="husfx-envelope-code">const char pcm_envelope_sfx[] = {
+    HuDDAvol(12),      /* Quiet start: 31 is full volume, 0 is silent. */
+    HuPlayPCM(2),      /* Start once; do not repeat this for each volume. */
+    HuWait_frames(6),
+    HuDDAvol(20),
+    HuWait_frames(6),
+    HuDDAvol(27),
+    HuWait_frames(6),
+    HuDDAvol(31),      /* Hold at full volume for about 0.6 seconds. */
+    HuWait_frames(36),
+    HuDDAvol(27),      /* Fade in steps, each lasting about 0.2 seconds. */
+    HuWait_frames(12),
+    HuDDAvol(23),
+    HuWait_frames(12),
+    HuDDAvol(19),
+    HuWait_frames(12),
+    HuDDAvol(15),
+    HuWait_frames(12),
+    HuDDAvol(11),
+    HuWait_frames(12),
+    HuDDAvol(7),
+    HuWait_frames(12),
+    HuDDAvol(3),
+    HuWait_frames(12),
+    HuDDAvol(0),       /* Silent; the sample position still advances. */
+    HuWait_frames(6),
+    HuEndOfStream     /* Stop PCM. The program then releases the channel. */
+};</code></pre>
+  <p><strong>HuDDAvol changes volume without restarting PCM.</strong> “DDA” is the sound chip’s PCM playback mode; use this macro for samples. HuWFvol selects waveform mode and stops PCM owned by the stream. HuPlayPCM starts or replaces a recording, so putting it at every envelope step would repeatedly restart the sound.</p>
+  <p>The attack takes 18 updates, the hold 36, the falling steps 84, and the silent ending six: about 2.4 seconds total. EndOfStream deliberately cuts off the rest of this longer source recording. Level zero alone does not stop or pause PCM; it still consumes timer time until stopped. If a replacement sample finishes earlier, later volume commands cannot lengthen it or restart it. Choose a longer source, or deliberately use HuLoopPCM with a nonempty sample prepared for looping.</p>
+  <p>This is a simple stepped envelope. Smaller volume changes and shorter waits can make it more gradual, within the hardware’s volume steps. Changing the HuSFX update rate changes its duration. Per-channel and SFX-group volume settings still reduce these levels, so your game’s mix controls continue to work.</p>
+  <p>Combine this with <a href="#pcm-gain-staging">pre-gain during sample preparation</a>: store a strong recording, then shape its output with hardware volume. The stored sample values retain their detail as the hardware turns down the sound and its conversion error together. This does not repair a rough fade already present in a poorly converted asset.</p>
+  <p><strong>List capacity:</strong> the default is 64 samples (IDs 0–63), using 200 bytes of RAM including playback bookkeeping. Define the assembler constant <code>HUSFX_PCM_SLOTS</code> from 1 to 255 before including HuSFX code and variables to choose another capacity, consistently in every translation unit. RAM use is <code>3 × capacity + 8</code> bytes. Samples themselves stay in ROM and can cross banks.</p>
+  <details>
+    <summary>Advanced: HuSFX data format and ROM placement</summary>
+    <p>Channel and bank arguments are bytes; addresses are 16-bit; volume and pan arguments are unsigned bytes. Bank <code>0xFF</code> marks an inactive HuSFX slot, so HuSFX control streams must start in banks <code>0x00–0xFE</code> and must not advance into bank FF. This restriction belongs to HuSFX streams; HuTrack PCM uses a separate activity flag and supports bank FF until its end.</p>
+    <p>See the <a href="../../utils/PSG_SFX/decode.txt">control-code format</a> when constructing streams. <code>FB</code> ends a stream and takes no operand. <code>FC</code> starts a registered PCM sample with an ID and a once/loop flag; <code>FD</code> stops it. PCM uses HuTrack’s existing timer player. Re-export older VGM-derived FC commands: their sample ID and loop flag were encoded incorrectly.</p>
+  </details>
+</section>
+
+<section id="assembly-api">
+  <h2>HuTrack assembly interface</h2>
+  <p>This section covers HuTrack entry points and its calling macros. HuSFX’s C interface is listed separately above; the repository’s general-purpose library macros are not HuTrack playback APIs. See <a href="../../example/pceas/main/pceas_example.asm">the standalone PCEAS example</a> for startup, variables, timer IRQ and VBlank installation.</p>
+  <p>Routines in <a href="../../lib/HuTrack/HuTrack_lib.asm">HuTrack_lib.asm</a> and <a href="../../lib/HuTrack/engine/HuTrack_controls.asm">HuTrack_controls.asm</a> require their assembled bank/page to be mapped. In the C layouts this is <code>SOUND_BANK</code> at MPR6. Except for stated results, treat A/X/Y, arithmetic flags and HuTrack scratch storage as clobbered. <code>_hk.EAX0.l/m/h/u</code> are its four scratch argument bytes, not CPU registers. Serialize main-thread operations with <code>PHP / SEI</code> before argument setup and <code>PLP</code> after the call and bank restoration. Preserve registers that your caller needs.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Entry point</th><th scope="col">Inputs</th><th scope="col">Behavior / result</th></tr></thead>
+    <tbody>
+      <tr><td><code>HuTrackEngine.Init</code></td><td>None</td><td>Reset engine/catalog/reservations and volume defaults. Does not install a standalone program’s interrupt vectors; that is startup’s job.</td></tr>
+      <tr><td><code>HuTrackEngine.QueueSong</code></td><td>EAX0.l = header address low; .m = address high rebased to $4000–$5FFF; .h = bank</td><td>X = assigned ID 0–63, or 64 when full (C translates that to −1). Does not start playback.</td></tr>
+      <tr><td><code>HuTrackEngine.playSong</code></td><td>EAX0.l = registered ID; .m = 0 for normal looping, 1 for PlayOnce</td><td>Load/start that song; invalid ID does nothing. No defined return value. Preserves reserved SFX.</td></tr>
+      <tr><td><code>HuTrackEngine.pause</code><br><code>HuTrackEngine.Continue</code><br><code>HuTrackEngine.stop</code></td><td>None</td><td>Music Pause / Resume / Stop with the same behavior as C. Continue’s capital C is intentional.</td></tr>
+      <tr><td><code>HuTrackEngine.SetVolume</code></td><td>A = packed master 0xLR</td><td>Schedule hardware master volume for the next engine update.</td></tr>
+      <tr><td><code>HuTrackEngine.FadeTo</code></td><td>A = music level 0–31; Y = update interval 0–255</td><td>Fade to target; Y=0 is the assembly equivalent of SetMusicVolume.</td></tr>
+      <tr><td><code>HuTrackEngine.FadeOut</code><br><code>HuTrackEngine.FadeToPause</code><br><code>HuTrackEngine.FadeIn</code></td><td>Y = update interval 0–255</td><td>Same fade completion behavior as C. No defined return value.</td></tr>
+      <tr><td><code>HuTrackEngine.SetSFXVolume</code></td><td>A = SFX level 0–31</td><td>Refresh reserved PCM/integrated HuSFX group volume. Values above 31 clamp.</td></tr>
+      <tr><td><code>HuTrackEngine.setChanForSFX</code></td><td>EAX0.l = channel 0–5</td><td>Unconditional reserve. For TryReserve behavior, atomically test bit 7 of HuTrack.SFX.inProgress[channel] before calling.</td></tr>
+      <tr><td><code>HuTrackEngine.chanReleaseSFX</code></td><td>EAX0.u = channel 0–5</td><td>Release and silence owned SFX; music waits for a fresh note. Invalid/unreserved does nothing. Note the different argument byte from reservation.</td></tr>
+      <tr><td><code>HuTrackEngine.SfxPcmRequest</code></td><td>EAX0.l = bank; .m = raw sample address low; .h = address high; .u = channel</td><td>Always one-shot, reserved channel required. C=0 accepted; C=1 invalid/unreserved. Takes raw samples, <strong>not</strong> the C asset header. A is not an integer result.</td></tr>
+      <tr><td><code>HuTrackEngine.SfxPcmStatus</code></td><td>EAX0.u = channel</td><td>C=0 valid reserved channel, C=1 invalid/unreserved. On success, EAX0.l = current bank, .m/.h = cursor. Carry does <strong>not</strong> mean playing; bit 7 of HuTrack.dda.inactive[channel] is set when inactive, clear when active.</td></tr>
+    </tbody>
+  </table></div>
+  <h3 id="c-integration-details">Advanced C integration details</h3>
+  <p>Channel, song index, bank, volume, interval, packed stereo and mask arguments are 8-bit values; explicit addresses are 16-bit. Song and PCM asset arguments are far pointers. Metadata destinations must be writable RAM. Commands declared through fastcall pragmas have no defined result. The C wrappers protect their hardware operations, but the API is not reentrant: serialize game-side calls and prevent overlapping music updates when using custom interrupt handlers.</p>
+  <p>In <code>#incasmlabel(demo, "...", 2)</code>, <code>2</code> is the CPU page (<code>$4000</code>), not physical ROM bank 2 or a two-bank size limit. The generated asset label carries its bank/address information to the interface.</p>
+  <p id="compiler-helper-details"><code>getDataPtr(label)</code> places an unsigned-char far label’s bank into compiler scratch register <code>__bl</code> and its 16-bit address into <code>__ax</code>. Its <code>__fastcall __nop</code> declaration emits argument setup without a subroutine call or C return value. Only use it when the immediately following inline assembly consumes those registers.</p>
+  <h3>Queries and C-only conveniences</h3>
+  <p>Standalone assembly reads <code>HuTrack.playbackState</code> (0 stopped, 1 playing, 2 paused, 3 ended), <code>31 - HuTrack.musicAttenuation</code> and <code>31 - HuTrack.sfxAttenuation</code>. For an EE event, atomically test <code>HuTrack.externalPending</code>, copy <code>HuTrack.externalValue</code> and clear pending; value zero is valid. The loaded <code>HuTrack.songName</code>/<code>HuTrack.songAuthor</code> buffers contain the metadata. Do not treat these internal arrays as a serialized save-state format.</p>
+  <p>There are no standalone routines named Status, MusicVolume, SFXVolume, PollEvent, TryReserve, stopPcm, SFXrest, PauseDDA or ResumeDDA. Their convenience wrappers live in the C integration and use its compiler ABI. If calling those wrappers from assembly in a C project, follow <a href="../../lib/HuTrack/Huc_interface/HuTrack.c">the fastcall register declarations</a> and <a href="../../lib/HuTrack/Huc_interface/HuTrackEngine.asm">their entry labels</a>: 16-bit C results use high A / low X for HuC, high Y / low A for HuCC. Do not invent a banked HuTrackEngine routine with the C function’s spelling.</p>
+  <h3>Banked calls and music updates</h3>
+  <p><code>HuTrack.CallFar label</code> maps the label’s bank into its assembled page, calls it and restores the previous mapping. <code>HuTrack.CallFarSafe label</code> additionally rejects replacing the page that contains the caller with a different bank. <code>HuTrack.CallFarRemap label, page</code> calls through another page only when the callee is assembled for that page or position independent; it does not relocate absolute instructions. Use a fixed-page trampoline when the caller would otherwise bank itself out.</p>
+  <p>These macros clobber A both before and after the call and do not preserve result flags as a complete status register. For A-input routines such as FadeTo, SetSFXVolume and SetVolume, map first, then load A and use JSR. Consume carry results before restoring the caller’s PHP state with PLP. For example, this fixed-page code sets music level 20:</p>
+  <pre><code id="assembly-volume">        php
+        sei
+        tma #page(HuTrackEngine.FadeTo)
+        pha
+        lda #bank(HuTrackEngine.FadeTo)
+        tam #page(HuTrackEngine.FadeTo)
+        lda #20
+        ldy #0
+        jsr HuTrackEngine.FadeTo
+        pla
+        tam #page(HuTrackEngine.FadeTo)
+        plp</code></pre>
+  <p><code>HutrackEngine.ManualCall</code> is the assembly macro for one update; the C form is <code>HuTrackEngine_ManualCall()</code>. It sets the return vector and jumps to fixed <code>HuTrackEngine.EngineCall</code>, which returns through that vector rather than RTS. Do not JSR EngineCall directly. Use exactly one scheduler and preserve your IRQ context; a second manual call alongside VBlank doubles the music rate. <code>HuTrackEngine.7khz.IRQ</code> is a timer interrupt entry ending in RTI, not a callable function.</p>
+  <p>The former empty assembly placeholders <code>SaveSongPosition</code>, <code>LoadSongPosition</code> and <code>FadeToContinue</code> were removed. Pause/Resume preserves a live position, not a serialized save state.</p>
+  <p><code>HuTrackEngine.Reset</code>, parser/envelope routines, FadeTick, StartFade, EndSong and other worker labels are internal. Use Init for startup and playSong/stop for transport. <code>_htk.*</code> helpers and pattern-emission macros are implementation/data-format tools, not additional game playback controls.</p>
 </section>
 
 <section id="banking">

@@ -20,9 +20,10 @@ C0..CF       2    Period: write the next byte to $802 (low), opcode&15 to
 FB           1    End of Stream for this channel. Stop parsing immediately,
                   mark the stream inactive and silence control/noise. Also
                   disable LFO when ending channel 0 or 1. No operand.
-FC           3    Fixed-sample command: consume TWO operand bytes. Playback
-                  is still a placeholder; parsing continues after both bytes.
-FD           1    Stop-sample placeholder. No operand; parsing continues.
+FC           3    Start registered PCM: sample ID, flags. Flags 0 = play once,
+                  1 = loop the whole sample. Parsing continues immediately.
+FD           1    Stop and silence PCM started by this HuSFX stream. No operand;
+                  parsing continues, keeping the channel reserved.
 FE           2    Wait N updates, where N is the next unsigned byte (1..255).
                   Zero retains the historical minimum of one update.
 FF           1    Wait one update. No operand.
@@ -42,7 +43,7 @@ HuTrack reserve -> HuSFX play/process -> HuTrack release.
 Examples
 --------
 C1 FB FF FB       Set period $1FB, wait one update, then end the stream.
-FC 00 01 C1 FB    Skip the two PCM operands, then set period $1FB. The FB here
+FC 00 01 C1 FB    Loop registered sample 0, then set period $1FB. The FB here
 FF FB            is period data; only the final FB is End of Stream.
 FE FB FB         Wait 251 updates, then end. The first FB is wait data.
 3F FF FB         DDA at volume 31 for one update, then end.
@@ -56,6 +57,50 @@ HuPan(left,right) takes two 0..15 levels. HuPeriod(high,low) takes a 0..15
 high nibble and a 0..255 low byte. Waveform indices and wait counts are bytes.
 Arguments must fit their fields; the macros do not validate or mask them.
 
+HuPlayPCM(id) emits FC,id,00; HuLoopPCM(id) emits FC,id,01.
+HuStopPCM emits FD. A typical combined effect is:
+  FC 00 00 FE 08 FD B0 00 C1 40 9F FE 08 FB
+It starts sample 0, waits eight updates, stops PCM, uploads waveform 0,
+sets period $140 and full waveform volume, waits eight updates, then ends.
+
+Runtime PCM registration
+------------------------
+Initialize HuTrack (including its timer handler) and HuSFX first. Register
+converted WAV asset labels with HuSFX_QueuePCM(label). Calls append bank/address
+entries to a RAM list and return IDs 0, 1, 2, ...; they do not start playback.
+The label must name the three-byte header emitted by waveConvert.py, not raw
+sample bytes. Samples remain in ROM. The list retains their raw sample pointers,
+including any bank carry when skipping the header. Duplicate calls append again.
+
+The default list has 64 slots; a full list returns -1 without changing old IDs.
+HUSFX_PCM_SLOTS can be defined as an assembler constant from 1 to 255 before
+including HuSFX code/variables. Storage is three bytes per slot plus eight bytes
+for count and playback bookkeeping (200 bytes at the default size).
+HuSFX_Init and HuSFX_ClearPCM clear the list. Song changes and HuSFXplay/stop do
+not. ClearPCM leaves existing PCM playback running from its captured pointer,
+but future FC commands use the newly registered list. Usually clear/repopulate
+between levels after stopping effects that still refer to the old IDs.
+
+FC requires an already reserved channel and a registered ID. Invalid IDs,
+unsupported flags, empty looping samples, or unavailable HuTrack PCM support
+end the effect. Without
+a reservation, no PCM is started. A command reuses an explicit enabled-DDA
+volume already in the stream, or starts at volume 31; per-channel HuSFX volume,
+panning and HuTrack's SFX group volume still apply. PCM runs at the existing
+timer rate, not the once-per-frame HuSFX update rate. A wait controls when the
+next sound command runs; it does not automatically wait for sample completion.
+
+FD, FB, HuSFXstop, replacement HuSFXplay and channel release stop owned PCM.
+Waveform uploads and controls that leave enabled DDA mode also stop its timer
+writer first. A naturally completed sample is silenced on the next HuSFXprocess
+call; the remaining stream continues on its own schedule. Nothing automatically
+releases the channel before the entire effect has ended.
+
+Assembly callers may use HuSFX.PCM.Queue bank_operand, low_operand, high_operand;
+it takes the same header address in memory operands and returns A:X = ID or
+$ffff. Clear the count with stz HuSFX.pcm.count. Map the decoder normally and
+keep HuTrack's timer initialized; its sample reader handles PCM bank crossings.
+
 Compatibility notes
 -------------------
 The older copy of this document incorrectly described the compact volume
@@ -68,3 +113,22 @@ The converter internally uses FFFF as a frame marker and stores the two FC
 operands in one packed Python integer. Those are internal tokens, not stream
 bytes. Both the binary and assembler exports must serialize FF and both FC
 operands, followed by one final FB.
+
+Re-export old FC streams: the VGM importer previously selected the high byte of
+the sample ID and forced the loop flag. It now retains the low-byte ID and the
+actual once/loop flag, rejecting IDs above 255 and unsupported reverse flags.
+Register the matching converted PCM assets in that ID order before playback;
+VGM2SFX does not register samples or resample its debug PCM dump for you.
+
+VGM 90 setup maps a stream ID to a PSG channel; the two numbers need not match.
+For example, 90 00 1B 05 06 maps stream 0 to HuC6280 channel 5, DAC register 6.
+Subsequent 94/95 commands use that map. IDs 0..254 are supported and 94 FF stops
+all active mapped streams. Setups for other chips, a second HuC6280, invalid
+channels or registers are rejected. For older setup-free input only, stream
+IDs 0..5 retain their previous channel-number meaning. Once a 90 appears,
+all subsequently referenced streams require explicit setup.
+
+Repeated starts on one stream/channel are supported. The converter does not
+simulate natural sample completion. Stop a started stream explicitly before
+remapping it or assigning its channel to another stream ID, even after a
+one-shot would have ended. Furnace's fixed per-channel setups need no remapping.

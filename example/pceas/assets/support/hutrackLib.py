@@ -1,15 +1,9 @@
 
-import argparse
-import json
-import numpy
 import os
-import pprint
-import resampy
-import sys
-import zlib
 
-from support.huTrackBase import HuTrackContainer, RATE_TABLE, RATE_VAL
+from support.huTrackBase import HuTrackContainer, RATE_TABLE
 from support.dmfReader import ConvertDeflemask
+from support.outputBundle import OutputBundle
 
 
 class HuTrackLib():
@@ -24,9 +18,6 @@ class HuTrackLib():
         result, hutrack = convertDeflemask.process()
         return result, hutrack
 
-    def importHutrackFile(self):
-        pass
-
     def exportHuTrackTextFile(self):
         pceModule = HuTrackExportPCE(hutrack=self.huTrack, params=self.params)
         print("\n\n export params", self.params,"\n")
@@ -36,7 +27,6 @@ class HuTrackLib():
 
     def exportPceHuTrackFile(self):
 
-        filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.HuTrack').replace("\\","/")
 
         self.indentMod  = 0
         self.hutrackMod = []
@@ -268,9 +258,6 @@ class HuTrackLib():
     def __indentReset(self):
         self.indentMod = 0
 
-    def __indentSet(self, indent):
-        self.indentMod = indent*4
-
     def __insYaml(self, text, _indent=None):
         #pre indent
         if _indent == '+':
@@ -322,7 +309,7 @@ class HuTrackExportPCE():
         filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.header.inc').replace("\\","/")
         self.songHeader = filename
 
-        with open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
+        with self.outputs.open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
             hu_out.write(f'\n\n\n')
             self.writeLocation(hu_out, '.song')
             if self.banked:
@@ -335,7 +322,13 @@ class HuTrackExportPCE():
             authorname = (self.huTrack.authorName,'')[ self.params['no_author'] ]
             for label, text in (('songname',songname),('author',authorname)):
                 hu_out.write(f'.{label}\n')
-                data = [ord(c) & 255 for c in text] + [0]
+                # Runtime/C buffers hold 47 text bytes and one terminator.
+                # DMF fields are length-prefixed: an embedded NUL must also
+                # discard the suffix, or it becomes the next field at runtime.
+                data = bytes(ord(c) & 255 for c in text).split(b'\0', 1)[0]
+                if len(data) > 47:
+                    print(f' - Warning: {label} truncated to 47 bytes for HuTrack metadata')
+                data = list(data[:47]) + [0]
                 for start in range(0,len(data),32):
                     hu_out.write('  .db ' + ','.join(str(value) for value in data[start:start+32]) + '\n')
 
@@ -344,13 +337,14 @@ class HuTrackExportPCE():
             for label in ('.attributes','.patternList.table','.instrument.table','.waveform.table','.pattern.table','.samples.table'):
                 self.writePointer(hu_out,label)
             hu_out.write(f'\n')
-            hu_out.write(f'.song.tables.bank\n')
-            hu_out.write(f'  .db bank(.attributes)\n')
-            hu_out.write(f'  .db bank(.patternList.table)\n')
-            hu_out.write(f'  .db bank(.instrument.table)\n')
-            hu_out.write(f'  .db bank(.waveform.table)\n')
-            hu_out.write(f'  .db bank(.pattern.table)\n')
-            hu_out.write(f'  .db bank(.samples.table)\n')
+            if not self.banked:
+                hu_out.write(f'.song.tables.bank\n')
+                hu_out.write(f'  .db bank(.attributes)\n')
+                hu_out.write(f'  .db bank(.patternList.table)\n')
+                hu_out.write(f'  .db bank(.instrument.table)\n')
+                hu_out.write(f'  .db bank(.waveform.table)\n')
+                hu_out.write(f'  .db bank(.pattern.table)\n')
+                hu_out.write(f'  .db bank(.samples.table)\n')
 
 
             hu_out.write(f'\n\n')
@@ -387,7 +381,7 @@ class HuTrackExportPCE():
         filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.instrMatrix.inc').replace("\\","/")
         self.instrMatrix = filename
 
-        with open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
+        with self.outputs.open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
 
             hu_out.write(f'\n\n')
             hu_out.write(f';###########################################################################\n')
@@ -399,13 +393,14 @@ class HuTrackExportPCE():
         filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.instrData.inc').replace("\\","/")
         self.instrData = filename
 
-        with open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
+        with self.outputs.open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
 
             for instrument in range(self.huTrack.instrumentsLen):
                 hu_out.write(f'\n\n')
                 hu_out.write(f';###########################################################################\n')
                 self.writeLocation(hu_out,f'.instrument.{instrument}')
-                hu_out.write(f'; name {self.huTrack.instrumentData[instrument].name}\n')
+                name = ''.join(c if c.isprintable() else ' ' for c in self.huTrack.instrumentData[instrument].name)
+                hu_out.write(f'; name {name}\n')
                 hu_out.write(f'; mode {self.huTrack.instrumentData[instrument].mode}\n')
                 hu_out.write(f'\n')
                 hu_out.write(f'.instrument.{str(instrument)}.table\n')
@@ -458,7 +453,7 @@ class HuTrackExportPCE():
 
         filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.patternMatrix.inc').replace("\\","/")
         self.patternMatrix = filename
-        with open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
+        with self.outputs.open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
 
             hu_out.write(f'\n\n')
             hu_out.write(f';###########################################################################\n')
@@ -475,7 +470,7 @@ class HuTrackExportPCE():
 
         filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.patternData.inc').replace("\\","/")
         self.patternData = filename
-        with open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
+        with self.outputs.open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
 
             # Pattern tables
             hu_out.write(f'\n\n')
@@ -530,7 +525,7 @@ class HuTrackExportPCE():
 
         filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.wfMatrix.inc').replace("\\","/")
         self.wfMatrix = filename
-        with open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
+        with self.outputs.open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
             # waveform table
             hu_out.write(f'\n\n')
             hu_out.write(f';###########################################################################\n')
@@ -542,7 +537,7 @@ class HuTrackExportPCE():
 
         filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.wfData.inc').replace("\\","/")
         self.wfData = filename
-        with open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
+        with self.outputs.open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
             # waveform data
             hu_out.write(f'\n\n')
             hu_out.write(f';###########################################################################\n')
@@ -557,7 +552,7 @@ class HuTrackExportPCE():
 
         filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.pcmMatrix.inc').replace("\\","/")
         self.pcmMatrix = filename
-        with open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
+        with self.outputs.open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
 
             # Sample table
             hu_out.write(f'\n\n')
@@ -578,7 +573,7 @@ class HuTrackExportPCE():
 
         filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.pcmData.inc').replace("\\","/")
         self.pcmData = filename
-        with open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
+        with self.outputs.open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
 
             # Sample data
             hu_out.write(f'\n\n')
@@ -606,9 +601,22 @@ class HuTrackExportPCE():
             hu_out.write(f'\n\n')
 
     def writeHutrackFiles(self):
+        self.outputs = OutputBundle()
+        self._writeHutrackFiles()
+        self.outputs.commit()
+        return True
 
+    def _writeHutrackFiles(self):
+
+        # These strings become assembler include paths. Reject unusable names
+        # before creating the output directory or leaving partial song files.
+        name = self.params['songName']
+        if not name or name in ('.', '..') or any(c in name for c in '/\\\r\n"'):
+            raise ValueError('Song name must be a file name without directories, quotes or line breaks')
+        for key in ('subFolder', 'includePath'):
+            if any(c in self.params[key] for c in '\r\n"'):
+                raise ValueError(f'Invalid assembly include path in {key}')
         self.banked = not self.params.get('legacy_format',False)
-        os.makedirs(os.path.join(self.params['destinationPath'],f'{self.params["subFolder"]}'), exist_ok=True)
 
         self.writeSongHeader()
         self.writeInstruments()
@@ -619,7 +627,7 @@ class HuTrackExportPCE():
 
         filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.song.inc')
         includePath = ("",self.params["includePath"]+"/")[self.params["includePath"] != ""]
-        with open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
+        with self.outputs.open(os.path.join(self.params['destinationPath'],filename),'w') as hu_out:
           hu_out.write(f'  .include "{includePath}{self.songHeader}"\n')
           hu_out.write(f'  .include "{includePath}{self.instrMatrix}"\n')
           hu_out.write(f'  .include "{includePath}{self.instrData}"\n')
@@ -633,7 +641,7 @@ class HuTrackExportPCE():
         # Write the raw data out.. for debug purposes
         if self.params['debug']:
             dmf = getattr(self.huTrack, 'rawDMF', [])
-            with open(os.path.join(self.params['destinationPath'],f'{self.params["subFolder"]}',f'{self.params["songName"]}.debug.txt'), 'w') as fileout:
+            with self.outputs.open(os.path.join(self.params['destinationPath'],f'{self.params["subFolder"]}',f'{self.params["songName"]}.debug.txt'), 'w') as fileout:
                 column = 0
                 for i in range(len(dmf)):
                     outByte = hex(dmf[i]).split("0x")[1]
@@ -642,7 +650,7 @@ class HuTrackExportPCE():
                     column += 1
                     fileout.write(('','\n')[column % 16 == 0 and column > 0])
 
-            with open(os.path.join(self.params['destinationPath'],f'{self.params["subFolder"]}',f'{self.params["songName"]}.debug.bin'), 'wb') as fileout:
+            with self.outputs.open(os.path.join(self.params['destinationPath'],f'{self.params["subFolder"]}',f'{self.params["songName"]}.debug.bin'), 'wb') as fileout:
                 fileout.write(bytearray(dmf))
 
         return True
@@ -651,8 +659,12 @@ class HuTrackExportPCE():
     def writePCMData(self, hu_out, sampleObj, base=10):
 
         if self.params['debug']:
+            if hasattr(sampleObj, 'sample8bit'):
+                filename = os.path.join(self.params['subFolder'], f'{self.params["songName"]}.{sampleObj.sampleNum}.8bit.bin')
+                with self.outputs.open(os.path.join(self.params['destinationPath'], filename), 'wb') as fout:
+                    fout.write(sampleObj.sample8bit)
             filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.{sampleObj.sampleNum}.5bit.bin').replace("\\","/")
-            with open(os.path.join(self.params['destinationPath'],filename),'wb') as fout:
+            with self.outputs.open(os.path.join(self.params['destinationPath'],filename),'wb') as fout:
                 fout.write(bytearray(sampleObj.samplePCE))
 
         # The driver skips this historical word and reads until the control

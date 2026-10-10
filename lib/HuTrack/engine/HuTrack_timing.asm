@@ -128,8 +128,7 @@ HuTrackEngine.channel.DelayAndCut:
         dec HuTrack.P.cutTick,x
       bne .ready
         stz HuTrack.Enabled,x
-        lda #$80
-        jsr HuTrackEngine._htk.WSG.DDA
+        jsr HuTrackEngine._htk.WSG.DDAstop
         lda #0
         jsr HuTrackEngine._htk.WSG.control
         clc

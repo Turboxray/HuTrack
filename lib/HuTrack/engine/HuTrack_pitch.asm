@@ -1,11 +1,8 @@
 ; Period slides follow released-Furnace legacy state semantics.
 ; Fast note, fine-tune and vibrato numerics retain the original HuTrack model.
 
-; Unsigned 16 * 16 -> 32. Inputs M.a (word), M.b (word); output M.p.
+; Unsigned 16 * 8 -> 32. Inputs M.a (word), M.b (byte); output M.p.
 ; Preserves X. Scratch belongs to the music tick, never the DDA interrupt.
-HuTrack.Math.multiply:
-        ldy #16
-        bra HuTrack.Math.multiplyStart
 HuTrack.Math.multiply8:
         ldy #8
 HuTrack.Math.multiplyStart:
@@ -42,10 +39,7 @@ HuTrack.Math.multiplyStart:
       bne .loop
         rts
 
-; Unsigned 32 / 16 -> 32 quotient in M.p. Divisor M.b must be nonzero.
-HuTrack.Math.divide:
-        stz HuTrack.M.b+2
-        stz HuTrack.M.b+3
+; Unsigned 32 / 32 -> 32 quotient in M.p. Divisor M.b must be nonzero.
 HuTrack.Math.divideWide:
         stz HuTrack.M.r
         stz HuTrack.M.r+1
@@ -97,11 +91,8 @@ HuTrack.Math.divideWide:
       bne .loop
         rts
 
-; Vibrato's nonnegative numerator fits 19 bits; divide a 24-bit value by 240.
+; Divide a 24-bit numerator by the nonzero byte in M.b.
 ; Keeping the remainder in A avoids the general four-byte division loop.
-HuTrack.Math.divide240:
-        lda #240
-        sta HuTrack.M.b
 HuTrack.Math.divideByte:
         cla
         ldy #24

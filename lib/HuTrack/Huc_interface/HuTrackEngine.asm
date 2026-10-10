@@ -4,10 +4,11 @@
 ;//
 ;//
 
+HuTrack.FixedCodeStart:
   .include "HuTrack/engine/HuTrack_engine.asm"
 
 
-  ;// This is a quick fix because current version of HuC doesn't have the proper VDC mask hanlder code.
+  ; Translate a 16-bit result from HuCC Y:A to HuC A:X when needed.
 
 HUTRACK_HUC_HUCC_RETURN .macro
 
@@ -62,6 +63,8 @@ _HuTrackEngine.CORE.VBL.IRQ:
 ;
 ;#pragma fastcall HuTrackEngine_QueueSong(farptr __fbank:__fptr);
 _HuTrackEngine_QueueSong.1:
+        php
+        sei
         lda __fptr
         sta <_hk.EAX0.l
         lda __fptr+1
@@ -77,6 +80,15 @@ _HuTrackEngine_QueueSong.1:
         jsr HuTrackEngine.QueueSong
         pla
         tam #$06
+        plp
+        txa
+        cly
+        cpx #64
+      bcc .return
+        lda #$ff
+        tay
+.return
+        HUTRACK_HUC_HUCC_RETURN
   rts
 
 
@@ -84,6 +96,8 @@ _HuTrackEngine_QueueSong.1:
 ;
 ;#pragma fastcall HuTrackEngine_PlaySong(byte __al);
 _HuTrackEngine_PlaySong.1:
+        php
+        sei
 
         lda __al
         sta <_hk.EAX0.l
@@ -97,6 +111,7 @@ _HuTrackEngine_PlaySong.1:
         jsr HuTrackEngine.playSong
         pla
         tam #$06
+        plp
   rts
 
 
@@ -104,6 +119,8 @@ _HuTrackEngine_PlaySong.1:
 ;
 ;#pragma fastcall HuTrackEngine_PlayOnce(byte __al);
 _HuTrackEngine_PlayOnce.1:
+        php
+        sei
 
         lda __al
         sta <_hk.EAX0.l
@@ -117,47 +134,152 @@ _HuTrackEngine_PlayOnce.1:
         jsr HuTrackEngine.playSong
         pla
         tam #$06
+        plp
   rts
 
 ;...............................................
 ;
 ; #pragma fastcall HuTrackEngine_Pause();
 _HuTrackEngine_Stop:
+        php
+        sei
+        HuTrack.CallFar HuTrackEngine.stop
+        plp
+        rts
+
 _HuTrackEngine_Pause:
-        tma #$06
+        php
+        sei
+        HuTrack.CallFar HuTrackEngine.pause
+        plp
+        rts
+
+_HuTrackEngine_Resume:
+        php
+        sei
+        HuTrack.CallFar HuTrackEngine.Continue
+        plp
+        rts
+
+_HuTrackEngine_FadeIn.1:
+        php
+        sei
+        ldy <__al
+        HuTrack.CallFar HuTrackEngine.FadeIn
+        plp
+        rts
+
+_HuTrackEngine_FadeOut.1:
+        php
+        sei
+        ldy <__al
+        HuTrack.CallFar HuTrackEngine.FadeOut
+        plp
+        rts
+
+_HuTrackEngine_FadeToPause.1:
+        php
+        sei
+        ldy <__al
+        HuTrack.CallFar HuTrackEngine.FadeToPause
+        plp
+        rts
+
+_HuTrackEngine_SetMusicVolume.1:
+        stz <__ah
+_HuTrackEngine_FadeTo.2:
+        php
+        sei
+        tma #6
         pha
-        lda #bank(HuTrackEngine.pause)
-        tam #$06
-        jsr HuTrackEngine.pause
+        lda #bank(HuTrackEngine.FadeTo)
+        tam #6
+        lda <__al
+        ldy <__ah
+        jsr HuTrackEngine.FadeTo
         pla
-        tam #$06
-          php
-          sei
-        ldx #5
-.loop
-        bit HuTrack.SFX.inProgress,x
-      bmi .next
-        stx $800
-        stz $804
-        stz $807
-        lda #$80
-        sta <HuTrack.dda.inactive,x
-        sta <HuTrack.dda.bank,x
-        sta HuTrack.channel.waitNote,x
-.next
-        dex
-      bpl .loop
-        lda HuTrack.SFX.inProgress
-        ora HuTrack.SFX.inProgress+1
-      bne .out
-        stz $809
-.out
-          plp
+        tam #6
+        plp
+        rts
+
+_HuTrackEngine_Status:
+        lda HuTrack.playbackState
+        cly
+        HUTRACK_HUC_HUCC_RETURN
+        rts
+
+_HuTrackEngine_MusicVolume:
+        lda HuTrack.musicAttenuation
+        eor #31
+        cly
+        HUTRACK_HUC_HUCC_RETURN
+        rts
+
+_HuTrackEngine_SetSFXVolume.1:
+        php
+        sei
+        tma #6
+        pha
+        lda #bank(HuTrackEngine.SetSFXVolume)
+        tam #6
+        lda <__al
+        jsr HuTrackEngine.SetSFXVolume
+        pla
+        tam #6
+        plp
+        rts
+
+_HuTrackEngine_SFXVolume:
+        lda HuTrack.sfxAttenuation
+        eor #31
+        cly
+        HUTRACK_HUC_HUCC_RETURN
+        rts
+
+; Latest EE event, including EE00; -1 means no unread event.
+_HuTrackEngine_PollEvent:
+        php
+        sei
+        lda HuTrack.externalPending
+      beq .empty
+        stz HuTrack.externalPending
+        lda HuTrack.externalValue
+        cly
+      bra .return
+.empty
+        lda #$ff
+        tay
+.return
+        plp
+        HUTRACK_HUC_HUCC_RETURN
+        rts
+
+; Acquire only a free channel. Never interrupt an existing SFX owner.
+_HuTrackEngine_TryReserve.1:
+        php
+        sei
+        ldx <__al
+        cpx #6
+      bcs .busy
+        lda HuTrack.SFX.inProgress,x
+      bmi .busy
+        jsr _HuTrackEngine_chanReserve.1
+        lda #1
+      bra .return
+.busy
+        cla
+.return
+        cly
+        plp
+        HUTRACK_HUC_HUCC_RETURN
         rts
 
 ; Global stereo attenuation, either packed nibbles or two 8-bit levels.
 
 _HuTrackEngine_SetGlobal.1:
+        .ifndef HUCC
+        txa                     ; HuC's acc argument is low X / high A.
+        .endif
         sta HuTrack.Global.SetVolume
         lda #$80
         sta HuTrack.Global.VolUpdate
@@ -165,6 +287,8 @@ _HuTrackEngine_SetGlobal.1:
 
 ;#pragma fastcall HuTrackEngine_SetGlobal(byte __al, byte __ah);
 _HuTrackEngine_SetGlobal.2:
+        php
+        sei
         lda <__al
         and #$f0
         sta HuTrack.Global.SetVolume
@@ -177,6 +301,7 @@ _HuTrackEngine_SetGlobal.2:
         sta HuTrack.Global.SetVolume
         lda #$80
         sta HuTrack.Global.VolUpdate
+        plp
   rts
 
 ; #pragma fastcall HuTrackEngine_getCurrSongTitle(farptr __fbank:__fptr);
@@ -307,6 +432,7 @@ _HuTrackEngine_chanRelease.1:
         lda #$ff
         sta HuSFX.stream.bnk,x
         stz HuSFX.delay,x
+        stz HuSFX.pcm.owned,x
         .endif
         stx $800
         stz $804
@@ -388,15 +514,66 @@ _HuTrackEngine_PcmRequest.3:
 ; int __fastcall HuTrackEngine_PcmRequest(unsigned char channel<__al>, char far *pcm<__fbank:__fptr>, char mask1<__cl>, char mask2<__ch> );
 _HuTrackEngine_PcmRequest.4:
 _HuTrackEngine_PcmRequest.5:
+        php
+        sei
         ldx <__al
         cpx #$06
-      bcs .error
+      bcc .channel.valid
+        jmp .error
+.channel.valid
         bit HuTrack.SFX.inProgress,x
-      bpl .error
+      bmi .reserved
+        jmp .error
+.reserved
+
+        ; Validate before replacing an existing stream. Skip the three-byte
+        ; header without wrapping the physical bank past $ff.
+        lda <__fptr
+        clc
+        adc #3
+        sta <HuTrack.dda.ptr
+        lda <__fptr+1
+        and #$1f
+        adc #0
+        tay
+        and #$1f
+        ora #$40
+        sta <HuTrack.dda.ptr+1
+        tya
+        cmp #$20
+        lda <__fbank
+        adc #0
+      bcc .bank.valid
+        jmp .error
+.bank.valid
+        tay
+        phy
+        tma #2
+        pha
+        tya
+        tam #2
+        lda [HuTrack.dda.ptr]
+        tay
+        pla
+        tam #2
+        tya
+        ply                     ; Y = normalized sample bank
+        cmp #$80
+      bcc .sample.ready
+        ; A marker at the first byte must stop. If the requested masks make
+        ; it repeat, the timer would reread that marker forever in one IRQ.
+        ora <__cl
+        and <__ch
+        and #$7f
+      beq .sample.ready
+        jmp .error
+.sample.ready
 
         lda #$80
         sta <HuTrack.dda.inactive,x
         sta <HuTrack.dda.bank,x
+        tya
+        sta <HuTrack.dda.loop.bank,x
 
         lda <__ch
         ora #$80
@@ -405,37 +582,28 @@ _HuTrackEngine_PcmRequest.5:
         lda <__cl
         sta <HuTrack.dda.cntr0,x
 
-        lda <__fptr
-        clc
-        adc #$03
+        lda <HuTrack.dda.ptr
         sta <HuTrack.dda.addr.lo,x
         sta <HuTrack.dda.addr.loop.lo,x
-        lda <__fptr+1
-        and #$1f
-        adc #$00
-        tay
-        and #$1f
-        ora #$40
+        lda <HuTrack.dda.ptr+1
         sta <HuTrack.dda.addr.hi,x
         sta <HuTrack.dda.addr.loop.hi,x
-        tya
-        cmp #$20
-        lda <__fbank
-        adc #$00
-        sta <HuTrack.dda.loop.bank,x
-          php
-          sei
         stx $800
         stz $807
-        lda #$df
+        lda #31
+        sec
+        sbc HuTrack.sfxAttenuation
+        ora #$c0
         sta $804
         lda #$10
         sta $806
         lda <HuTrack.dda.loop.bank,x
-        sta <HuTrack.dda.inactive,x
         sta <HuTrack.dda.bank,x
         stz <HuTrack.dda.inactive,x
+        lda HuTrack.DDApaused
+      bne .suspended
         rmb7 <HuTrack.DDAprocess
+.suspended
           plp
 
         ; No error
@@ -447,38 +615,55 @@ _HuTrackEngine_PcmRequest.5:
   rts
 
 .error
+        plp
         cly
         cla
         sec
   HUTRACK_HUC_HUCC_RETURN
   rts
 
-_getFarBank.1
-    ldx __bl
-  rts
-
-_getFarAddress.1
-    lda __si+1
-    ldx __si
-  rts
-
 ;//.........................................................
 ; int __fastcall HuTrackEnginePauseDDA();
 _HuTrackEnginePauseDDA:
+        php
+        sei
+        lda HuTrack.DDApaused
+      bne .unchanged
+        inc HuTrack.DDApaused
+        smb7 <HuTrack.DDAprocess
+        lda #1
+      bra .return
+.unchanged
+        cla
+.return
+        cly
+        plp
+        HUTRACK_HUC_HUCC_RETURN
+        rts
 
-        lda HuTrack.DDAprocess
-        sta HuTrack.DDAprocessBackup
-        ora #$80
-        sta HuTrack.DDAprocess
-  rts
-
-;//.........................................................
-; int __fastcall HuTrackEngineResumeDDA();
 _HuTrackEngineResumeDDA:
-        lda HuTrack.DDAprocessBackup
-        sta HuTrack.DDAprocess
-  rts
-
+        php
+        sei
+        lda HuTrack.DDApaused
+      beq .return
+        stz HuTrack.DDApaused
+        ; Do not wake the 7 kHz channel scan when no stream is active.
+        ldx #5
+.scan
+        lda <HuTrack.dda.inactive,x
+      bpl .enable
+        dex
+      bpl .scan
+        bra .changed
+.enable
+        rmb7 <HuTrack.DDAprocess
+.changed
+        lda #1
+.return
+        cly
+        plp
+        HUTRACK_HUC_HUCC_RETURN
+        rts
 
 ;//.........................................................
 ; int __fastcall HuTrackEngineSFXrest(unsigned char channel<__al>);
@@ -563,6 +748,11 @@ _HuTrackEngine_SFXmode.1:
   rts
 
 ;//.........................................................
+
+HuTrack.FixedCodeEnd:
+  .if (bank(HuTrack.FixedCodeEnd-1)!=bank(HuTrack.FixedCodeStart))
+    .fail HuTrack fixed code exceeds its library bank.
+  .endif
 
   .bank SOUND_BANK, "HuTrack"
   .page $06

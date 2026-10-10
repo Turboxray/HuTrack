@@ -9,7 +9,7 @@ set "PCE_INCLUDE=%CD%\..\..\..\lib;%HUCC_HOME%\include\hucc"
 set "PCE_BINPATH=%HUCC_HOME%\bin"
 set "PCE_PCEAS=%HUCC_HOME%\bin\pceas.exe"
 
-hucc.exe -v -v -gL -msmall -fno-recursive hucc_pcm_example.c > C_log.txt 2>&1
+"%HUCC_HOME%\bin\hucc.exe" -v -v -gL -msmall -fno-recursive hucc_pcm_example.c > C_log.txt 2>&1
 set "BUILD_RESULT=%ERRORLEVEL%"
 type C_log.txt
 exit /b %BUILD_RESULT%

@@ -32,6 +32,7 @@ _HuSFXplay.5
 
       php
       sei
+      HuSFX.PCM.Stop
       stz HuSFX.delay,x
       stz HuSFX.rawControl,x
       stz HuSFX.control,x
@@ -40,6 +41,10 @@ _HuSFXplay.5
       stx $800
       stz $804
       stz $807
+      ; Raw pan is $ff, so its mixed value is the persistent pan setting.
+      lda HuSFX.vol.pan,x
+      sta HuSFX.pan,x
+      sta $805
       cpx #2
     bcs .pointers
       stz $809
@@ -90,6 +95,7 @@ HuSFX.process
         cmp #$ff
       beq .skip_entry
 
+        HuSFX.PCM.CheckEnd
         jsr .refresh.gain
         lda HuSFX.delay,x
       beq .do_entry
@@ -202,6 +208,7 @@ HuSFX.process
 
 ;..............
 .804
+        HuSFX.PCM.Control
         sta HuSFX.rawControl,x
         HuSFX.MixVolume
         sta HuSFX.control,x
@@ -214,6 +221,7 @@ HuSFX.process
 
 ;..............
 .wf_update
+        HuSFX.PCM.Stop
 
         ;// This is a slow, but for now it works.
 
@@ -352,6 +360,7 @@ HuSFX.process
 
 ;..............
 .eof
+        HuSFX.PCM.Stop
         lda #$ff
         sta HuSFX.stream.bnk,x
           php
@@ -369,13 +378,19 @@ HuSFX.process
 ;..............
 .play_pcm
       jsr .fetch_byte
+        pha
       jsr .fetch_byte
-        ; Skip PCM operands for now
+        tay
+        pla
+        HuSFX.PCM.Start
+      bcc .pcm.started
+      jmp .eof
+.pcm.started
       jmp .decode_byte
 
 ;..............
 .stop_pcm
-        ; TODO
+        HuSFX.PCM.Stop
       jmp .decode_byte
 
 ;..............

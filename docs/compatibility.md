@@ -12,6 +12,10 @@ Later official development removed partial pitch linearity at Furnace engine/fil
 
 Use Furnace 0.6.8.3 for playback comparisons and export legacy DMF for conversion. A constant period slide changes the musical interval differently at different notes; adopting the later linear model would change existing songs. A newer reference must therefore be evaluated explicitly. Native Furnace features are not automatically available through DMF export.
 
+## Metadata strings
+
+Song titles and author names export as at most 47 text bytes plus NUL each. Longer fields are truncated with a converter warning; an embedded NUL ends the field and discards its suffix. The runtime still accepts older exports with up to 255 bytes plus NUL per field, but rejects unterminated fields instead of scanning beyond that limit. Both C copy APIs require a writable buffer of at least 48 bytes. See [metadata string limits](huc/huc_hutrack_doc.html#metadata-strings).
+
 ## Effect support
 
 Values below are hexadecimal. The converter supports four effect columns and preserves independently present effect arguments. Nonzero pattern breaks seek through compressed rows without executing skipped effects.
@@ -38,6 +42,12 @@ Values below are hexadecimal. The converter supports four effect columns and pre
 
 `E7` has no release point to trigger in the legacy instrument format and is a no-op. Custom experimental `18`, `19`, `20`, native Furnace effects and other unsupported codes are not implemented; the converter warns for unsupported codes. `EE` holds the most recent event, not a queue.
 
+`EC` stops the music PCM writer as well as silencing the channel. An `ED` delay
+keeps a preceding `0C` retrigger running until the delayed row actually executes,
+matching the released Furnace order of operations. Music attenuation also applies
+to temporary control writes during waveform uploads, so changing waves does not
+briefly bypass a mute or fade.
+
 ## SFX channel ownership
 
 Reserve a channel before an SFX writes to it. Music continues advancing its logical state while the channel belongs to SFX. Release **silences the channel and waits for a fresh music note**. It does not resume the middle of a held note.
@@ -47,7 +57,7 @@ On that fresh note, HuTrack restarts the instrument envelopes, restores pan/nois
 | Interface | Reserve | Release |
 | --- | --- | --- |
 | HuC/HuCC | `HuTrackEngine_chanReserve(channel)` | `HuTrackEngine_chanRelease(channel)` |
-| Assembly | Set `_hk.EAX0.l`, call `HuTrackEngine.setChanForSFX` | Set `_hk.EAX0.l`, call `HuTrackEngine.chanReleaseSFX` |
+| Assembly | Set `_hk.EAX0.l`, call `HuTrackEngine.setChanForSFX` | Set `_hk.EAX0.u`, call `HuTrackEngine.chanReleaseSFX` |
 
 C status results now follow each compiler's register convention. `HuTrackEngine_SFXmode()` returns bits 0..5 for the reserved channels; its channel overload returns 1 when reserved and 0 otherwise. `HuTrackEngine_PCMStatus(channel)` returns 1 while streaming, 0 when stopped, and 2 for an invalid/unreserved channel.
 
@@ -63,11 +73,11 @@ HuTrackEngine_chanRelease(channel);
 
 Reservation is explicit: `HuSFXplay()` does not reserve, and stream EOF does not release. Applications can retain a channel between consecutive sounds. Release cancels an active HuSFX stream when `HuSFX_vars.inc` is included before the HuTrack implementation; stop an external/custom SFX writer before releasing.
 
-Hardware LFO couples channels 0/1. HuTrack suspends it while either is reserved or waiting for a note, then reapplies the stored mode/speed when both are available. Borrowing channels 2..5 does not disable it. C pause/stop preserve reserved SFX channels. Song initialization/reset is a full engine reset and should be coordinated with SFX by the application.
+Hardware LFO couples channels 0/1. HuTrack suspends it while either is reserved or waiting for a note, then reapplies the stored mode/speed when both are available. Borrowing channels 2..5 does not disable it. Pause, Stop and song changes preserve reserved SFX channels. Pause/Resume also preserve music PCM positions; after an SFX release, Resume still waits for a fresh music note. Only HuTrack_Init performs a full engine/reservation reset and must be coordinated with other SFX writers.
 
-PCM requests explicitly enable DDA again after a rest. The C PCM API takes the existing three-byte-header asset pointer; the assembly SFX PCM API takes its existing raw-data pointer. These conventions are not interchangeable. HuSFX stream commands `FC`/`FD` remain placeholders; use the separate PCM request API. HuSFX's waveform pool is shared, so concurrent streams must use the same pool.
+PCM requests explicitly enable DDA again after a rest, unless PauseDDA has globally suspended streaming. The C PCM API takes the existing three-byte-header asset pointer; the assembly SFX PCM API takes its existing raw-data pointer. These conventions are not interchangeable. HuSFX stream commands `FC`/`FD` start/stop samples registered at runtime through `HuSFX_QueuePCM(label)`. `FC` takes an ID and a flag (0 once, 1 loop); the same effect can continue with waveform/noise commands after PCM. Both decoders stop the timer writer before a waveform/mode transition and clean up owned PCM on stop, replacement, EOF or release. Empty loops are rejected. `HuSFX_ClearPCM()` clears future ID lookups without changing an already-playing sample. Default capacity is 64; configurable `HUSFX_PCM_SLOTS` uses three bytes per entry plus eight bytes of bookkeeping. HuSFX's waveform pool is shared, so concurrent streams must use the same pool.
 
-HuSFX command lengths and C byte-stream macros are documented in [the control-code format](../utils/PSG_SFX/decode.txt). `FB` ends the stream with no operand; `FC` still consumes two operands even though playback is a placeholder. `FE` supports unsigned waits of 1..255 updates (zero means one), and `FF` waits one. Compact DDA volume `20..3F` expands to `C0..DF`; raw `A4` operands do not expand. Re-export old binary streams containing `FC`: the former binary writer omitted an operand byte, which could misdecode later data as EOF. Assembler exports already emitted both bytes.
+HuSFX command lengths and C byte-stream macros are documented in [the control-code format](../utils/PSG_SFX/decode.txt). `FB` ends the stream with no operand; `FC` consumes two operands: registered sample ID and loop flag. `FE` supports unsigned waits of 1..255 updates (zero means one), and `FF` waits one. Compact DDA volume `20..3F` expands to `C0..DF`; raw `A4` operands do not expand. Re-export old binary streams containing `FC`: the former binary writer omitted an operand byte, which could misdecode later data as EOF. Assembler exports already emitted both bytes. Re-export VGM PCM effects as well: the importer formerly selected the high byte of the sample ID and forced looping. It now preserves IDs 0..255 and the actual loop flag, rejecting larger IDs and unsupported reverse flags. Register matching converted PCM labels in that order; the VGM tool does not automatically register or resample PCM.
 
 ## Format constraints and deliberate differences
 
@@ -82,12 +92,43 @@ HuSFX command lengths and C byte-stream macros are documented in [the control-co
 
 ## Export and integration changes
 
+DMF, WAV and VGM assembly exports prepare all output before replacing files.
+An ordinary write or installation failure restores the previous bundle,
+including debug output and shared VGM waveforms. This protects against partial
+exports; it is not a power-loss or concurrent-writer guarantee. DMF instrument
+names are sanitized for assembly comments, so embedded line breaks cannot add
+data or move instrument descriptors.
+
+VGM PCM routing follows each `90` stream setup: the stream ID is independent
+of its destination PSG channel. Starts/stops use that mapping, including IDs
+above five, and `94 FF` stops active mapped streams. Only the first HuC6280,
+channels 0–5 and DAC register 6 are supported. Older setup-free inputs retain
+the former stream-ID-as-channel convention for IDs 0–5; after an explicit setup,
+each referenced stream must have its own setup. Register converted PCM labels
+in sample-ID order; this routing change does not generate the runtime catalog.
+Repeated starts on the same stream/channel are supported, as used by Furnace.
+The converter does not simulate natural sample completion: remapping a started
+stream or reusing its channel under a different stream ID requires an explicit
+VGM stop first, even after a one-shot would have ended. Unsupported overlaps
+are rejected rather than silently converted into a different sound.
+
 New exports use **banked asset format revision 1** and require this engine. A zero word and revision byte identify the header; the following address/bank points to six root descriptors. Every order list, pattern table, pattern, instrument descriptor, envelope and waveform has its own address/bank pointer. Readers normalize addresses into a two-bank window. The converter rebases each object without moving its physical output, so long songs do not wrap a 16-bit CPU address.
 
 Old exports remain readable through the original layout and corrected mapping base. Old assets still have the addressing limits inherent in their near pointers; **reconvert large songs** to obtain the new addressing. Attributes retain the zero marker, initial arpeggio speed and legacy-volume mode, with defaults for old exports. Canonical and bundled converter support files match.
 
 PCM has separate playback state and a full-byte bank field; crossing `$7F` to `$80` no longer stops playback. Crossing the end of bank `$FF` stops instead of wrapping to bank zero. The cartridge/platform must actually map the requested banks to sample data. Music PCM resets its control/loop state after SFX. Its historical two-byte size field is informational (low 16 bits); the stream ends at its control marker, so converted samples can exceed 64 KB.
 
+All direct C PcmRequest overloads reject a header whose sample start would wrap
+past bank FF, and a sample beginning with a marker that its selected masks would
+repeat forever. These failures return 0 without replacing existing playback.
+Empty one-shots remain valid and stop at their first marker. The API does not
+scan or validate the complete asset; it still requires valid converter output.
+
 The lookup data occupies 2,868 bytes outside the fixed library and music code. HuC uses its constants bank and restores the constants' normal page afterward. HuCC needs `RESERVE_BANKS >= 1` defined before startup allocates banks; the supplied `hucc-sound.inc` reserves one bank for these tables. Standalone PCEAS integration must include `HuTrack_pitch_tables.inc` at an 8 KB boundary assembled for `$8000`, as the example does. Assembly assertions guard table and music-code overflow. Tables change ROM placement, not the period-slide representation.
 
-Source tests, native builds, Mesen playback and benchmarks pass; physical-console listening and an exhaustive worst-case frame/IRQ budget remain unverified. Existing fade/save-position and low-level assembly-stop placeholders are outside this FX work.
+Source tests, native builds, Mesen playback and benchmarks pass; physical-console listening and an exhaustive worst-case frame/IRQ budget remain unverified. Playback status, pause/resume, music fades, independent music/SFX group volumes, EE event polling and non-stealing channel reservation are documented in the [integration guide](huc/huc_hutrack_doc.html#huc_functions). The unused save/load-position and FadeToContinue placeholders were removed. Group volumes subtract attenuation from each final 5-bit channel volume with a zero clamp; they do not change the hardware master volume.
+
+The optional assembly note constants now give F its correct semitone value, with
+F-sharp available in both spellings (`F0.S` / `F0_sharp`, through octave 7).
+The existing E-sharp aliases still mean F. This fixes handwritten assembly
+patterns; converted DMF notes and the pitch tables are unchanged.

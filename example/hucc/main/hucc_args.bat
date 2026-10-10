@@ -1,9 +1,13 @@
-rem ***************************************************************************
-
+@echo off
 setlocal
+cd /d "%~dp0"
 
-set PCE_INCLUDE=%CD%\..\..\..\lib;C:\huc\include\hucc
-set PATH=%PATH%;c:\huc\bin
+rem Override HUCC_HOME to select a matching 4.x compiler, assembler and headers.
+if not defined HUCC_HOME set "HUCC_HOME=C:\huc"
+set "PATH=%HUCC_HOME%\bin;%PATH%"
+set "PCE_INCLUDE=%CD%\..\..\..\lib;%HUCC_HOME%\include\hucc"
+set "PCE_BINPATH=%HUCC_HOME%\bin"
+set "PCE_PCEAS=%HUCC_HOME%\bin\pceas.exe"
 
-hucc.exe  
-pause
+"%HUCC_HOME%\bin\hucc.exe"
+exit /b %ERRORLEVEL%

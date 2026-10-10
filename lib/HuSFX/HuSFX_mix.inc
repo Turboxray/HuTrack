@@ -15,6 +15,13 @@ HuSFX.MixVolume .macro
       bcs .volume\@
         cla
 .volume\@
+        .ifdef HUTRACK_SFX_VOLUME
+        sec
+        sbc HuTrack.sfxAttenuation
+      bcs .group\@
+        cla
+.group\@
+        .endif
         ora HuSFX.mix.mode
     .endm
 

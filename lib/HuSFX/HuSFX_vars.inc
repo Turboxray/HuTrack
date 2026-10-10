@@ -1,14 +1,14 @@
 ; \file: HuSFX_vars.inc
 
+    .include "HuSFX/HuSFX_pcm.inc"
+
       .zp
 
 HuSFX.A0:                           .ds 2
-HuSFX.bnk:                          .ds 1
 
       .bss
 
 
-HuSFX.inProgress:                   .ds (1* 6)
 
 HuSFX.stream.bnk:                   .ds 6
 HuSFX.stream.lo:                    .ds 6
@@ -26,7 +26,16 @@ HuSFX.mix.raw:                      .ds 1
 HuSFX.mix.low:                      .ds 1
 HuSFX.vol.chan:                     .ds 6
 HuSFX.vol.pan:                      .ds 6
-HuSFX.DMA:                          .ds (1+2+2+2+1)   ; this needs to be initialized to TIN and RTS.
+HuSFX.DMA:                          .ds (1+2+2+2+1)   ; waveform command prepares the RAM TIN/RTS
+
+    .ifdef HUTRACK_SFX_VOLUME
+HuSFX.pcm.count:                    .ds 1
+HuSFX.pcm.bank:                     .ds HUSFX_PCM_SLOTS
+HuSFX.pcm.lo:                       .ds HUSFX_PCM_SLOTS
+HuSFX.pcm.hi:                       .ds HUSFX_PCM_SLOTS
+HuSFX.pcm.owned:                    .ds 6
+HuSFX.pcm.flags:                    .ds 1
+    .endif
 
 HuSFXEngine.VarEnd
 

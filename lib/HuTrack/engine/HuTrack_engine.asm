@@ -24,11 +24,21 @@ HuTrackEngine.EngineCall:
         sta $801
 .skip
 
-      BBS7 <HuTrack.Status, .engine.PAUSE       ; Everything is paused.. music and SFX
+      BBS7 <HuTrack.Status, .engine.PAUSE       ; Music engine suspended
 
       BBS6 <HuTrack.Status, .process.sfx        ; Song is paused, check SFX
+        lda HuTrack.fadeInterval
+      beq .fade.done
+        HuTrack.CallFar HuTrackEngine.FadeTick
+        BBS6 <HuTrack.Status, .process.sfx
+.fade.done
         dec HuTrack.tick
       bne .skip.song.parser
+        lda HuTrack.endPending
+      beq .parse
+        HuTrack.CallFar HuTrackEngine.EndSong
+        bra .process.sfx
+.parse
         HuTrack.CallFar HuTrackEngine.Parser
 .skip.song.parser
         BBS6 <HuTrack.Status, .process.sfx      ; recheck if song stopped itself.
@@ -36,7 +46,7 @@ HuTrackEngine.EngineCall:
 
 .process.sfx
 
-    ;// TODO: Need handler/func pointer
+    ; HuSFX has its own explicit per-frame call: HuSFXprocess().
 
 .process.done
 ;---------------------------------

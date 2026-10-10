@@ -1,7 +1,7 @@
 #include "huc.h"
 #include "HuTrack/Huc_interface/HuTrack.c"
-#include "HuSFX/Huc_interface/HucSFX.h"
-#include "HuSFX/Huc_interface/HucSFX.c"
+#include "HuSFX/HuC_interface/HucSFX.h"
+#include "HuSFX/HuC_interface/HucSFX.c"
 #include "HuCsupport/HuCsupport.h"
 
 #asm
@@ -78,18 +78,15 @@ int main()
 {
 
     // var setup and init start 
-    int song_number, j1, j2, last_song, cur_channel, song_playing, sfxSelect, sfxMode;
-    int i,j,k;
-    HU_SFX_STREAMNIG_t sfx_streaming;
+    int song_number, j2, last_song, cur_channel, sfxSelect, sfxMode;
+    int i;
 
     last_song    = 4;    // variable to control number of songs available. base 0, should align with number of songs queued in song queue section
     song_number  = 0;    // currently selected song
     cur_channel  = 0;    // toggle variable for which channel of sfx is being used
-    song_playing = 1;
     sfxSelect    = 0;
     sfxMode      = 0;
 
-    getDataPtr(SMB3Overworld);
 
     for(i=0;i<6;i++) { chanMask[i] = '-'; }
     chanMask[6] = 0;    // Set the string null terminator
@@ -134,10 +131,11 @@ int main()
 
     put_string("(Toggle) SELECT:  SFX / Song mode.", 0, 21);
     put_string("(Song)   UP/DOWN: Choose song.", 0, 22);
-    put_string("(Song)   I/II:    Start / Stop song.", 0, 23);
+    put_string("(Song)   I/II:    Start / Fade out.", 0, 23);
     put_string("(SFX)    START:   En/Dis chan for SFX.", 0, 24);
     put_string("(SFX)    UP/DOWN: Choose SFX.", 0, 25);
     put_string("(SFX)    I/II:    Play/Stop SFX.", 0, 26);
+    put_string("(Song)   START:   Pause / Resume.", 0, 27);
 
     put_string("    Set SFX ", 0, 19);
     put_number(sfxSelect,2,12,19);
@@ -147,7 +145,6 @@ int main()
     {
         vsync();
         updateChipSFX();
-        j1 = joy(0);
         j2 = joytrg(0);
 
         put_string("      ",9,18);
@@ -171,14 +168,14 @@ int main()
                 put_string("                                                     \0",  1,  3);
                 put_string(title,  1,  5);
                 put_string(author,  1,  3);
-                chanMask[0] = '-';
-                chanMask[1] = '-';
-                chanMask[2] = '-';
-                chanMask[3] = '-';
-                chanMask[4] = '-';
-                chanMask[5] = '-';
             }
-            else if (j2 & JOY_II)   { HuTrackEngine_Stop(); }
+            else if (j2 & JOY_II)   { HuTrackEngine_FadeOut(2); }
+            else if (j2 & JOY_STRT) {
+                if (HuTrackEngine_Status() == HUTRACK_PAUSED)
+                    HuTrackEngine_Resume();
+                else if (HuTrackEngine_Status() == HUTRACK_PLAYING)
+                    HuTrackEngine_Pause();
+            }
             else if (j2 & JOY_UP)   { song_number += (song_number < last_song) ? 1: 0; }
             else if (j2 & JOY_DOWN) { song_number -= (song_number > 0) ? 1: 0; }
         }

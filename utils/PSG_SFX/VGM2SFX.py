@@ -8,10 +8,10 @@ import traceback
 from pathlib import Path
 from tkinter import filedialog as fd
 from tkinter import messagebox
-from functools import partial
 
-HEXbase = 16
-DECbase = 10
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from support.outputBundle import OutputBundle
+
 version = "1.0.0"
 
 def hexPrintList(aList):
@@ -44,15 +44,6 @@ def decodeWaveformList(waveformlist):
 
     if len(wf_block)>256 or any(len(w)!=32 or any(v<0 or v>31 for v in w) for w in wf_block):
         raise ValueError('Invalid shared pool: expected at most 256 complete five-bit waveforms')
-    wf_block_check = []
-
-    if wf_block_check:
-        print(f"Error: failed to decode full waveform sets. Found {len(wf_block_check)} sets with incorrect size.")
-        for num, wf_set in enumerate(wf_block):
-            print(f'Wave set {num} is len {len(wf_set)}')
-
-    wf_block = [wf_set[:] for wf_set in wf_block]
-    # print(f'debug - {wf_block}')
 
     return wf_block
 
@@ -234,25 +225,22 @@ class ConvertVGM():
                         0x67:  6
                     }
 
-        self.op_chan = {
-                        0x90 : 2,
-                        0xB9 : 0,
-                    }
-
-        self.op_reg = {
-                        0xB9 : 0,
-                        0x94 : 0,
-                        0x95 : 0,
-                    }
-
-        self.op_reg_data = {
-                        0xB9 : 1,
-                        0x94 : 1,
-                        0x95 : 4
-                    }
-
-
     def process(self, wf_block=None):
+        name = self.args.sfxname
+        if not name or name in ('.', '..') or any(c in name for c in '/\\\r\n"'):
+            raise ValueError('SFX name must be a file name without directories, quotes or line breaks')
+        for value in (self.args.dir, self.args.waveformlist):
+            if any(c in value for c in '\r\n"'):
+                raise ValueError('Invalid assembly include path')
+        if not self.args.chanproc or any(ch not in range(6) for ch in self.args.chanproc):
+            raise ValueError('Select at least one HuSFX channel from 0..5')
+        self.outputs = OutputBundle()
+        if not self._process(wf_block):
+            return False
+        self.outputs.commit()
+        return True
+
+    def _process(self, wf_block=None):
         self.wf_block = [list(wave) for wave in (wf_block or [])]
         if len(self.wf_block)>256 or any(len(w)!=32 or any(v<0 or v>31 for v in w) for w in self.wf_block):
             raise ValueError('Expected at most 256 waveforms of 32 five-bit samples')
@@ -299,7 +287,7 @@ class ConvertVGM():
 
         print(f'debug log: {self.args.debugLog}')
         if self.args.debugLog:
-            with open(f"{self.args.destfolder}/{self.args.sfxname}.debugLog.txt",'w') as f:
+            with self.outputs.open(f"{self.args.destfolder}/{self.args.sfxname}.debugLog.txt",'w') as f:
                 for line in self.debugLog:
                     f.write(f'{line}\n')
 
@@ -334,7 +322,11 @@ class ConvertVGM():
             raise ValueError('VGM data offset is outside the file')
         ended = False
 
-        channelCount = []
+        stream_channels = {}
+        # We do not simulate PCM completion. A stream remains reserved until
+        # an explicit stop, but retriggering the same ID/channel is supported.
+        # Furnace configures a fixed stream per PCE channel before playback.
+        active_streams = {}
         chan_data = { 0:[], 1:[], 2:[], 3:[], 4:[], 5:[] }
 
 
@@ -360,8 +352,7 @@ class ConvertVGM():
                 return False
 
             if current_channel > 5:
-                #print(f'op: [{hex(op)}], operand: {[hex(val) for val in operand]}, data offset: [{hex(dataOffset)}], chan offset {hex(self.op_chan[op])}')
-                error = (f'Error: found channel entry [{hex(operand[self.op_chan[op]])}] at offset {hex(old_offset)}. Channels must be between 0 to 5.')
+                error = (f'Error: found channel entry [{current_channel}] at offset {hex(old_offset)}. Channels must be between 0 to 5.')
                 if self.guiMode:
                     raise ValueError(error)
                 print(error)
@@ -397,8 +388,15 @@ class ConvertVGM():
 
 
             if op == 0x90:
-                channelCount.append(operand[self.op_chan[op]])
-                self.debugPrint(f'     90 NO STORE')
+                # 90: stream ID, chip type, channel (port), DAC register.
+                # Furnace can bind stream 0 to channel 5, for example.
+                stream, chip, channel, register = operand
+                if stream == 255 or chip != 0x1b or channel > 5 or register != 6:
+                    raise ValueError('Unsupported PCM stream setup: expected stream 0..254, first HuC6280 chip, channel 0..5, register 6')
+                if stream in active_streams and active_streams[stream] != channel:
+                    raise ValueError('Stop the PCM stream before remapping its channel; automatic sample completion is not tracked')
+                stream_channels[stream] = channel
+                self.debugPrint(f'PCM stream {stream} targets channel {channel}')
                 continue
 
             if op in [0x91, 0x92]:
@@ -412,28 +410,44 @@ class ConvertVGM():
                 print(error)
                 return False
 
-            if op in (0x94,0x95) and operand[0]>5:
-                raise ValueError('PCM stream ID must be a HuSFX channel 0..5')
             if op==0xb9 and operand[0]>9:
                 raise ValueError('Unsupported PCE register or second chip')
 
-            if op in [0x94]:
-                self.debugPrint(f'&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& found op {hex(op)} at offset {hex(dataOffset)}, {operand}, chan {current_channel}')
-                reg = 0x94
-                data = 0
-                chan_data[operand[0]].append((reg,data))
-                self.debugPrint(f'PCM PCM PCM    chan [{operand[0]}], Data: {reg}, {data}')
-                continue
-
-            if op in [0x95]:
-                self.debugPrint(f'&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& found op {hex(op)} at offset {hex(dataOffset)}, {operand}, chan {current_channel}')
-                reg = 0x95
-                data = 0x01<<24
-                data |= operand[1]<<16
-                data |= operand[2]<<8
-                data |= operand[3]<<0
-                chan_data[operand[0]].append((reg,data))
-                self.debugPrint(f'PCM PCM PCM    chan [{operand[0]}], Data: {reg}, {data}')
+            if op in (0x94, 0x95):
+                stream = operand[0]
+                if op == 0x94 and stream == 255:
+                    # FF is stop-all, never a channel or an ordinary stream ID.
+                    for channel in sorted(set(active_streams.values())):
+                        chan_data[channel].append((0x94, 0))
+                    active_streams.clear()
+                    continue
+                if stream in stream_channels:
+                    channel = stream_channels[stream]
+                elif not stream_channels and stream < 6:
+                    # Compatibility with old setup-free HuSFX command files.
+                    # Once 90 is used, every referenced stream needs a setup.
+                    channel = stream
+                else:
+                    raise ValueError(f'PCM stream {stream} has no HuC6280 setup')
+                if op == 0x94:
+                    # An inactive stream may alias another stream's channel.
+                    # Stopping it must not stop that channel's actual owner.
+                    if stream in active_streams:
+                        chan_data[active_streams.pop(stream)].append((op, 0))
+                else:
+                    # 95: stream ID, little-endian block ID, flags. FC retains
+                    # one byte for the ID and one for forward/loop flags.
+                    sample_id = operand[1] | (operand[2] << 8)
+                    flags = operand[3]
+                    if sample_id > 255:
+                        raise ValueError('HuSFX PCM sample IDs must fit 0..255')
+                    if flags & ~1:
+                        raise ValueError('HuSFX PCM supports forward playback and looping, not reverse/other flags')
+                    if any(other != stream and target == channel for other, target in active_streams.items()):
+                        raise ValueError('Stop the previous PCM stream before starting another ID on its channel; automatic sample completion is not tracked')
+                    chan_data[channel].append((op, (flags << 24) | (sample_id << 8)))
+                    active_streams[stream] = channel
+                self.debugPrint(f'PCM stream {stream}, channel {channel}, command {op:#x}')
                 continue
 
             if op in [0x62, 0x66]:
@@ -452,8 +466,7 @@ class ConvertVGM():
                     continue
 
 
-            reg = operand[self.op_reg[op]]
-            data = operand[self.op_reg_data[op]]
+            reg, data = operand
 
             chan_data[current_channel].append((reg,data))
             self.debugPrint(f'    chan [{current_channel}], Data: reg {reg}, val {data}')
@@ -465,7 +478,6 @@ class ConvertVGM():
         if not ended:
             raise ValueError('Truncated VGM: missing end command')
         waveforms, bin_channels = self.consilidateWFupdates()
-        Path(self.args.destfolder).mkdir(parents=True, exist_ok=True)
 
         #...........................................................................................................................
         #...........................................................................................................................
@@ -477,7 +489,7 @@ class ConvertVGM():
 
         # Write actual PCM blocks
         if self.args.debugBin:
-            with open(f"{self.args.destfolder}/{self.args.sfxname}.pcm.bin", 'wb') as f:
+            with self.outputs.open(f"{self.args.destfolder}/{self.args.sfxname}.pcm.bin", 'wb') as f:
                 for sample in self.samplePCM:
                     for val in sample:
                         val += 0x20
@@ -492,7 +504,7 @@ class ConvertVGM():
             waveform_block = waveform_block + [val&0xff for val in waveform]
 
         if self.args.debugBin:
-            with open(f"{self.args.destfolder}/{self.args.sfxname}.wf.bin", 'wb') as f:
+            with self.outputs.open(f"{self.args.destfolder}/{self.args.sfxname}.wf.bin", 'wb') as f:
                 f.write(bytearray(waveform_block))
 
         #...........................................................................................................................
@@ -507,7 +519,7 @@ class ConvertVGM():
 
         # Write actual waveform blocks
         wf_list_file = (self.args.waveformlist,f"{self.args.destfolder}/{self.args.sfxname}.wf.inc")[self.args.waveformlist=='']
-        with open(wf_list_file, 'w') as f:
+        with self.outputs.open(wf_list_file, 'w') as f:
             for idx,waveform in enumerate(waveforms):
                 waveform = list(waveform)
                 f.write(f'\n  .page 2\n.wf.block{idx}\n')
@@ -544,7 +556,7 @@ class ConvertVGM():
                 continue
 
             if self.args.debugBin:
-                with open(f"{self.args.destfolder}/{self.args.sfxname}.chan{num}.bin",'wb') as f:
+                with self.outputs.open(f"{self.args.destfolder}/{self.args.sfxname}.chan{num}.bin",'wb') as f:
                     self.debugPrint(f' saving {num}: {chan_block}')
                     prep_block = self.encodeChannel(chan_block)
                     f.write(bytearray(prep_block))
@@ -552,7 +564,7 @@ class ConvertVGM():
                 totalSongdataBinsize += len(prep_block)
 
             wait_frame = 0
-            with open(f"{self.args.destfolder}/{self.args.sfxname}.chan{num}.inc",'w') as f:
+            with self.outputs.open(f"{self.args.destfolder}/{self.args.sfxname}.chan{num}.inc",'w') as f:
                 output_str = f"\n  .page 2\n.data.chan{num}\n"
                 data_labels.append(f".data.chan{num}")
                 output_str += f"\n\n;..........................\n; frame 0\n"
@@ -570,12 +582,6 @@ class ConvertVGM():
                         output_str += self.commentDecode(val, 0 , len(build_str))
                         wait_frame += 1
                         output_str += f"\n\n;..........................\n; frame {wait_frame}\n"
-                        if skip_byte > 0:
-                            error = (f'Error converting channel block {num}, offset {idx}.')
-                            if self.guiMode:
-                                raise ValueError(error)
-                            print(error)
-                            return False
                         skip_byte = 0
                         continue
 
@@ -658,7 +664,7 @@ class ConvertVGM():
         # Support files
 
         # Write waveform table file.
-        with open(f"{self.args.destfolder}/{self.args.sfxname}.wfTable.inc", 'w') as f:
+        with self.outputs.open(f"{self.args.destfolder}/{self.args.sfxname}.wfTable.inc", 'w') as f:
             f.write(f'\n;'+("#"*75)+'\n')
             f.write(f'\n  .page 2\n.waveform.table\n')
             f.write(f'\n  .dw ${hex(len(waveform_labels)*2)[2:]}       ; offset to bank table\n\n')
@@ -669,7 +675,7 @@ class ConvertVGM():
                 f.write(f"  .db bank({wf_label})\n")
 
         # Write data table file.
-        with open(f"{self.args.destfolder}/{self.args.sfxname}.dataTable.inc", 'w') as f:
+        with self.outputs.open(f"{self.args.destfolder}/{self.args.sfxname}.dataTable.inc", 'w') as f:
             f.write(f'\n;'+("#"*75)+'\n')
             f.write(f'\n  .page 2\n.data.table\n')
             f.write(f'\n  .dw ${hex(len(data_labels)*2)[2:]}       ; offset to bank table\n\n')
@@ -681,19 +687,19 @@ class ConvertVGM():
 
 
         # Separate waveform inc
-        with open(f"{self.args.destfolder}/{self.args.sfxname}.sfx_wf.inc","w") as f:
+        with self.outputs.open(f"{self.args.destfolder}/{self.args.sfxname}.sfx_wf.inc","w") as f:
             f.write(f' .include "{self.includPathName+".wfTable.inc"}"\n')
             f.write(f' .include "{(self.args.waveformlist.replace("\\","/") if self.args.waveformlist else self.includPathName+".wf.inc")}"\n')
 
         # Separate data inc
-        with open(f"{self.args.destfolder}/{self.args.sfxname}.sfx_data.inc","w") as f:
+        with self.outputs.open(f"{self.args.destfolder}/{self.args.sfxname}.sfx_data.inc","w") as f:
             f.write(f' .include "{self.includPathName+".dataTable.inc"}"\n')
             for num in range(6):
                 if num not in self.args.chanproc:
                     continue
                 f.write(f' .include "{self.includPathName}.chan{num}.inc"\n')
 
-        with open(f"{self.args.destfolder}/{self.args.sfxname}.sfx_main.inc","w") as f:
+        with self.outputs.open(f"{self.args.destfolder}/{self.args.sfxname}.sfx_main.inc","w") as f:
             f.write(f' .include "{self.includPathName+".sfx_wf.inc"}"\n')
             f.write(f' .include "{self.includPathName+".sfx_data.inc"}"\n')
 
@@ -730,111 +736,6 @@ class ConvertVGM():
                 raise ValueError(f'Unknown HuSFX token {op:#x}')
         output.append(0xfb)
         return output
-
-    def decodePatterns(self, bin_channels):
-
-        print("######################################################################################")
-        print("Processing compressed pattern sizes:")
-        channelPatterData = {}
-        for num, chan_block in bin_channels.items():
-            print(f'chan mask: {self.args.chanproc }, {num}')
-            if num not in self.args.chanproc:
-                print(f' - skipping')
-                continue
-
-            pattern_idx = -1
-            channelPatterData[num] = { }
-
-            if chan_block[0] != 0xaa:
-                print(f'\nVGM does not have Pattern index markers.\n')
-                self.debugPrint(f'\nVGM does not have Pattern index markers.\n')
-                return
-
-            skip_byte = 0
-            for idx, val in enumerate(chan_block):
-
-                    if skip_byte > 0 :
-                        skip_byte -= 1
-                        continue
-
-                    if val == 0xffff:
-                        channelPatterData[num][pattern_idx].append(0xff)
-                        skip_byte = 0
-                        continue
-
-                    elif val >= 0x00 and val <= 0x1f:
-                        channelPatterData[num][pattern_idx].append(val)
-                        skip_byte = 0
-                    elif val >= 0x20 and val <= 0x3f:
-                        channelPatterData[num][pattern_idx].append(val)
-                        skip_byte = 0
-                    elif val >= 0x40 and val <= 0x5f:
-                        channelPatterData[num][pattern_idx].append(val)
-                        skip_byte = 0
-                    elif val >= 0x80 and val <= 0x9f:
-                        channelPatterData[num][pattern_idx].append(val)
-                        skip_byte = 0
-                    elif val >= 0xA0 and val <= 0xA9:
-                        channelPatterData[num][pattern_idx].append(val)
-                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
-                        skip_byte = 1
-                    elif val == 0xAA:
-                        skip_byte = 1
-                    elif val == 0xAB:
-                        pattern_idx += 1
-                        channelPatterData[num][pattern_idx] = []
-                        channelPatterData[num][pattern_idx].append(val)
-                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
-                        skip_byte = 1
-                    elif val >= 0xC0 and val <= 0xCf:
-                        channelPatterData[num][pattern_idx].append(val)
-                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
-                        skip_byte = 1
-                    elif val == 0xB0:
-                        channelPatterData[num][pattern_idx].append(val)
-                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
-                        skip_byte = 1
-                    elif val == 0xFC:
-                        channelPatterData[num][pattern_idx].append(val)
-                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
-                        skip_byte = 1
-                    elif val == 0xFD:
-                        channelPatterData[num][pattern_idx].append(val)
-                        skip_byte = 0
-                    elif val == 0xFE:
-                        channelPatterData[num][pattern_idx].append(val)
-                        channelPatterData[num][pattern_idx].append(chan_block[idx+1])
-                        skip_byte = 1
-                    else:
-                        error = (f'Error: cannot identify token command: chan {num}, offset {hex(idx)}, val {hex(val)}.')
-                        print(error)
-                        return False
-
-        # print(channelPatterData)
-        song_binary = []
-        for num, chan_block in bin_channels.items():
-            try:
-                pattern_blocks = channelPatterData[num]
-            except:
-                print(f'Skipping chan {num} blocks.')
-                continue
-            pattern_list_order = []
-            pattern_list_tracking = []
-            pattern_block_data = {}
-            track_binary = []
-            for patt_num, pattern_data in pattern_blocks.items():
-                pattern_list_order.append(pattern_data[1])
-                if pattern_data[1] not in pattern_list_tracking:
-                    pattern_list_tracking.append(pattern_data[1])
-                    pattern_block_data[patt_num] = pattern_data[:]
-                    track_binary = track_binary + pattern_data[:]
-            song_binary = song_binary + track_binary[:]
-            print(f' Chan {num}, plattern play list {pattern_list_order}')
-            print(f'  - binary size: {len(track_binary)}')
-
-        print(f' Song binary size: {len(song_binary)}')
-
-        pass
 
     def asciiWaveform(self, waveform):
 
@@ -1194,10 +1095,6 @@ class ConvertVGM():
 #.....................................
 # END CLASS
 
-
-def auto_int(val):
-    val = int(val, (DECbase,HEXbase)['0x' in val])
-    return val
 
 if __name__ == "__main__":
 

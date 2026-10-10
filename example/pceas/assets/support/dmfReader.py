@@ -1,19 +1,11 @@
 
-import argparse
-import json
 import numpy
 import os
-import pprint
 import resampy
-import sys
 import zlib
 
-from support.huTrackBase import HuTrackContainer, RATE_TABLE, RATE_VAL, PITCH_VAL
+from support.huTrackBase import HuTrackContainer, RATE_VAL, PITCH_VAL
 
-HEXbase = 16
-DECbase = 10
-INT_MAX = 2**32 - 1
-INT_MIN = (INT_MAX) / -2 - 1
 
 PCE_VER       = 0x05
 VER_IDX       = 16
@@ -33,14 +25,8 @@ class DMFcontainer():
     def getDMF(self):
         return self.contents
 
-    def getByte(self):
-        return self.contents[self.index]
-
     def setIndex(self, val):
         self.index = val
-
-    def getIndex(self):
-        return self.index
 
 
 
@@ -65,6 +51,8 @@ class ConvertDeflemask():
     def _process(self, runOptions=None):
 
         self.params = (self.params, runOptions)[runOptions is not None]
+        self.huTrack = None
+        self.warnings = []
 
         result = True
 
@@ -508,6 +496,9 @@ class ConvertDeflemask():
 
 
     def convertPCMData(self, sampleObj):
+        # Import is read-only. Keep diagnostic PCM with the decoded sample so
+        # the exporter installs it in the same transaction as the song.
+        sampleObj.sample8bit = b''
         sampleDepth = sampleObj.sampleDepth
         data        = sampleObj.sampleData
         sampleRate  = sampleObj.sampleRate
@@ -562,19 +553,7 @@ class ConvertDeflemask():
         newSampleData = [ (sample, -32768)[sample < -32768] for sample in newSampleData]
         newSampleData = [ (sample, 32767)[sample > 32767] for sample in newSampleData]
 
-        # DEBUG
-        # if sampleDepth == 8:
-        #     eightbitSampleData = [ ((sample + 32768) >> 8)   for sample in newSampleData ]
-            # with open(f'{sampleData.sampleName}.pre.bin','wb') as fout:
-            #     fout.write(bytearray(eightbitSampleData))
-
-        if self.params['debug']:
-            filename = os.path.join(f'{self.params["subFolder"]}',f'{self.params["songName"]}.{sampleNum}.8bit.bin').replace("\\","/")
-            debug_path = os.path.join(self.params['destinationPath'], filename)
-            os.makedirs(os.path.dirname(debug_path), exist_ok=True)
-            with open(debug_path,'wb') as fout:
-                eightbitSampleData = [ ((sample + 32768) >> 8)   for sample in newSampleData ]
-                fout.write(bytearray(eightbitSampleData))
+        sampleObj.sample8bit = bytes((sample + 32768) >> 8 for sample in newSampleData)
 
         # Convert the data to PCE 5bit format
         newSampleData = [ (sample + 32768) >> 11 for sample in newSampleData ]
@@ -594,7 +573,7 @@ class ConvertDeflemask():
             dmf = numpy.asarray(dmf)
 
             self.dmf.setDMF(dmf)
-        except:
+        except (OSError, zlib.error):
             dmf = None
             print(f"\n\nException - {os.path.split(self.params['filein'])[-1]} is not a zlib or dmf file, or is damaged/missing.",end="")
 
@@ -623,12 +602,6 @@ class ConvertDeflemask():
 
     def getString(self):
         return ''.join(chr(self.getNextByte()) for _ in range(self.getNextByte()))
-
-    def getNextByteFromDword(self):
-        return self.getNextDword() & 0xff
-
-    def getNextByteFromWord(self):
-        return self.getNextWord() & 0xff
 
     def getNextWord(self):
         val = self.getNextByte()

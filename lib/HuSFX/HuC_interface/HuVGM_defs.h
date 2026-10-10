@@ -24,6 +24,11 @@
 
 #define HuEndOfStream 0xfb
 
+/* IDs are assigned by runtime calls to HuSFX_QueuePCM, in registration order. */
+#define HuPlayPCM(id) 0xfc, (id), 0
+#define HuLoopPCM(id) 0xfc, (id), 1
+#define HuStopPCM 0xfd
+
 #define HuPeriod(x,y) (0xC0 | (x)), (y)
 
 #endif

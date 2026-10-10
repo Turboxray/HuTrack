@@ -30,6 +30,7 @@ Mesen 2.2.1; physical-console listening has not been performed.
 With Python, NumPy, resampy and tkinter available, run:
 
 ```powershell
+python -m pip install -r requirements.txt
 python example/hucc_pcm/convert_samples.py
 ```
 
@@ -44,7 +45,8 @@ path for this folder layout.
 
 The example initializes HuTrack, reserves channel 5 with
 `HuTrackEngine_chanReserve()`, and uses `HuTrackEngine_PcmRequest()`,
-`HuTrackEngine_stopPcm()` and `HuTrackEngine_PCMStatus()`. Playback needs no
+`HuTrackEngineSFXrest()` and `HuTrackEngine_PCMStatus()`. Stopping or finishing
+a sample explicitly silences its channel while keeping the reservation. Playback needs no
 HuSFX stream initialization or per-frame HuSFX processing. It keeps channel 5
 reserved; a game sharing that channel with music should explicitly release it
 when finished, following the [ownership contract](../../docs/compatibility.md#sfx-channel-ownership).

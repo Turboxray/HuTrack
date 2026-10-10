@@ -26,6 +26,13 @@ HuTrackEngine.Init:
 
         ; Clear song list
         stz song_slot
+        stz HuTrack.DDApaused
+        stz HuTrack.sfxAttenuation
+        ldx #5
+.clear.reservations
+        stz HuTrack.SFX.inProgress,x
+        dex
+      bpl .clear.reservations
 
         lda #$ff
         sta HuTrack.Global.SetVolume
@@ -68,10 +75,14 @@ HuTrackEngine.Reset
 
         lda #$ff
         sta HuTrack.channel.patternBreak ;New tech
+        lda HuTrack.Global.SetVolume
         sta $801
 
         clx
 .loop
+        stz HuTrack.Enabled,x
+        bit HuTrack.SFX.inProgress,x
+      bmi .keep.sfx.hardware
         stx $800
         lda #$ff
         sta $805
@@ -88,6 +99,7 @@ HuTrackEngine.Reset
         cpy #32
       bcc .clear.wave
 
+.keep.sfx.hardware
         lda #$80
         sta HuTrack.channel.detune,x
         lda #15
@@ -116,18 +128,26 @@ HuTrackEngine.Reset
         sta HuTrack.channel.lastEnvWaveform,x
         sta HuTrack.channel.uploadedWaveform,x
 
+        bit HuTrack.SFX.inProgress,x
+      bmi .keep.sfx.pcm
         lda #$80
         sta <HuTrack.dda.inactive,x
         sta <HuTrack.dda.bank,x
         lda #$8F
         sta <HuTrack.dda.cntr1,x
+      bra .pcm.ready
+.keep.sfx.pcm
+        lda #$80
+        sta HuTrack.channel.waitNote,x
+        lda <HuTrack.dda.inactive,x
+      bmi .pcm.ready
+        jsr HuTrackEngine.EnableDDA
+.pcm.ready
 
         lda #$ff
         sta HuTrack.channel.panState,x
 
 
-        lda #$ff
-        sta HuTrack.SFXstream.bnk,x
 
         inx
         cpx #$06
@@ -172,108 +192,15 @@ HuTrackEngine.QueueSong:
 
 ;...............................................
 ;
-HuTrackEngine.pause:
+    .include "HuTrack/engine/HuTrack_controls.asm"
 
-        smb6 <HuTrack.Status
-
-  rts
-
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-;...............................................
-;
-HuTrackEngine.FadeToPause:
-
-  rts
-
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-;...............................................
-;
-HuTrackEngine.FadeOut:
-
-  rts
-
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-;...............................................
-;
-HuTrackEngine.FadeIn:
-
-;         cmp #$20
-;       bcc .skip
-;         lda #$1f
-; .skip
-;         ora #$80
-;         sta HuTrackEngine.FadeToLevel
-  rts
-
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-;...............................................
-;
+; Global PSG volume (music and SFX).
 HuTrackEngine.SetVolume:
         sta HuTrack.Global.SetVolume
         lda #$80
         sta HuTrack.Global.VolUpdate
-  rts
+        rts
 
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-;...............................................
-;
-HuTrackEngine.stop:
-
-  rts
-
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-;...............................................
-;
-HuTrackEngine.Continue:
-
-        rmb6 <HuTrack.Status
-
-  rts
-
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-;...............................................
-;
-HuTrackEngine.FadeToContinue:
-
-  rts
-
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-;...............................................
-;
-HuTrackEngine.SaveSongPosition:
-
-  rts
-
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-;...............................................
-;
-HuTrackEngine.LoadSongPosition:
-
-  rts
-
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-;...............................................
-;
 ; Assembly reservation uses EAX0.l; release uses EAX0.u.
 HuTrackEngine.setChanForSFX:
 
@@ -321,6 +248,7 @@ HuTrackEngine.chanReleaseSFX:
         lda #$ff
         sta HuSFX.stream.bnk,x
         stz HuSFX.delay,x
+        stz HuSFX.pcm.owned,x
         .endif
         stx $800
         stz $804
@@ -338,22 +266,22 @@ HuTrackEngine.chanReleaseSFX:
     rts
 
 ;//.........................................................
-; int __fastcall HuTrackEngine_PCMStatus(unsigned char channel<_hk.EAX0.u>);
-; NOTE: HuCC return style (Y:A). Return macro swaps back to HuC format (A:X).
 
 HuTrackEngine.SfxPcmRequest:
 ;...............................................
 ; Input <_hk.EAX0.l     bank#
 ; Input <_hk.EAX0.m     lsb
 ; Input <_hk.EAX0.h     msb
-; Input <_hk.EAX0.h     chan #
+; Input <_hk.EAX0.u     chan #
+; Raw sample address, without the C API's three-byte header. Always one-shot.
+; Carry clear = accepted; carry set = invalid or unreserved channel.
 
         sec
         ldx <_hk.EAX0.u
         cpx #$06
       bcs .out
         bit HuTrack.SFX.inProgress,x
-      bpl .out
+      bpl .error
 
         ; No error
         clc
@@ -372,7 +300,11 @@ HuTrackEngine.SfxPcmRequest:
           php
           sei
         stx $800
-        lda #$df
+        stz $807
+        lda #31
+        sec
+        sbc HuTrack.sfxAttenuation
+        ora #$c0
         sta $804
         lda #$10
         sta $806
@@ -380,9 +312,12 @@ HuTrackEngine.SfxPcmRequest:
         sta <HuTrack.dda.inactive,x
         sta <HuTrack.dda.bank,x
         stz <HuTrack.dda.inactive,x
-        rmb7 <HuTrack.DDAprocess
+        jsr HuTrackEngine.EnableDDA
           plp
 .out
+  rts
+.error
+        sec
   rts
 
 ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -392,14 +327,16 @@ HuTrackEngine.SfxPcmRequest:
 ;
 HuTrackEngine.SfxPcmStatus:
 ;...............................................
-; Input <_hk.EAX0.h     chan #
+; Input <_hk.EAX0.u     chan #
+; Carry clear = valid reserved channel; carry set = invalid or unreserved.
+; Output EAX0.l = bank, EAX0.m/h = cursor. Read dda.inactive for active/stopped.
 
         sec
         ldx <_hk.EAX0.u
         cpx #$06
       bcs .out
         bit HuTrack.SFX.inProgress,x
-      bpl .out
+      bpl .error
 
         ; No error
         clc
@@ -410,6 +347,9 @@ HuTrackEngine.SfxPcmStatus:
         lda <HuTrack.dda.addr.hi,x
         sta <_hk.EAX0.h
 .out
+  rts
+.error
+        sec
   rts
 
 ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -428,7 +368,6 @@ HuTrackEngine.playSong:
         lda <_hk.EAX0.m
         sta force_no_repeat
 
-        _htk.MOVE.b <_hk.EAX0.l, current_song
         _htk.MOVE.b <_hk.EAX0.l, REG_X
 
 
@@ -452,6 +391,7 @@ HuTrackEngine.playSong:
         cmp #1
       beq .banked.header
         ; Unknown format: remain stopped rather than following invalid data.
+.invalid.header
         _htk.PULLBANK.4 _htk.PAGE_4000
         rts
 .banked.header
@@ -469,12 +409,17 @@ HuTrackEngine.playSong:
 .old.header
         _htk.ADD.w #$04, <_hk.R1
 
-        ; Consume full strings, retaining at most 47 characters in RAM.
+        ; Consume full strings, retaining at most 47 text bytes in RAM.
         ; Advancing the pointer also handles combined names longer than 255.
+        ; Legacy DMF permits 255 bytes per field plus its exported terminator.
+        ; Y wraps after 256 reads; reject an unterminated field at that point.
         clx
+        cly
 .name.loop
         jsr HuTrackEngine.readNameByte
       beq .author
+        cpy #0
+      beq .invalid.metadata
         cpx #47
       bcs .name.loop
         sta HuTrack.songName,x
@@ -483,9 +428,12 @@ HuTrackEngine.playSong:
 .author
         stz HuTrack.songName,x
         clx
+        cly
 .author.loop
         jsr HuTrackEngine.readNameByte
       beq .author.end
+        cpy #0
+      beq .invalid.metadata
         cpx #47
       bcs .author.loop
         sta HuTrack.songAuthor,x
@@ -493,6 +441,12 @@ HuTrackEngine.playSong:
       bra .author.loop
 .author.end
         stz HuTrack.songAuthor,x
+        bra .metadata.ready
+.invalid.metadata
+        stz HuTrack.songName
+        stz HuTrack.songAuthor
+        jmp .invalid.header
+.metadata.ready
 
 
 .debug001
@@ -584,41 +538,35 @@ HuTrackEngine.playSong:
         ; get bank table
         _htk.ADD.w #$02, <_hk.A0    ; skip past the last ptr (sample)
 
-        _htk.INC.w <_hk.A0    ; Skip this attribute bank for now (it was already handle above). #TODO: need to figure out if this should be used or not.
+        _htk.INC.w <_hk.A0    ; Attributes were already read through the song window.
 
-        _htk.MOVE.b [_hk.A0], HuTrack.patternList.table.bank
+        ; Legacy pattern-list bank is unused: use the song window mapping.
         _htk.INC.w <_hk.A0
         _htk.MOVE.b [_hk.A0], HuTrack.instr.table.bank
         _htk.INC.w <_hk.A0
         _htk.MOVE.b [_hk.A0], HuTrack.waveform.table.bank
         _htk.INC.w <_hk.A0
-        _htk.MOVE.b [_hk.A0], HuTrack.pattern.table.bank
+        ; Legacy pattern bank is likewise represented by the song window.
         _htk.INC.w <_hk.A0
         _htk.MOVE.b [_hk.A0], HuTrack.samples.table.bank
 
 
 .song.loaded
-        clx
-.loop
-
-        lda #$80
-        sta <HuTrack.dda.inactive,x
-        sta <HuTrack.dda.bank,x
-
-        inx
-        cpx #$06
-      bne .loop
-
-        rmb6 <HuTrack.Status     ;// start song
+        ; Reset stopped music PCM and preserved any reserved SFX PCM.
+        lda #1
+        sta HuTrack.playbackState
+        rmb6 <HuTrack.Status     ; start song
 
         _htk.PULLBANK.4 _htk.PAGE_4000
   rts
 
 
 
-; Return the next NUL-terminated metadata byte, advancing the banked pointer.
+; Return the next metadata byte, advancing the pointer and Y's read count.
+; Z reports whether the byte is NUL, not whether the counter wrapped.
 HuTrackEngine.readNameByte:
         lda [_hk.R1]
         _htk.INC.w <_hk.R1
+        iny
         ora #0
         rts

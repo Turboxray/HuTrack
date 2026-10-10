@@ -1,5 +1,4 @@
 import argparse
-import os
 import numpy
 import sys
 import resampy
@@ -11,13 +10,9 @@ from tkinter import filedialog as fd
 import tkinter as tk
 from tkinter import ttk
 
-HEXbase = 16
-DECbase = 10
-INT_MAX = 2**32 - 1
-INT_MIN = (INT_MAX) / -2 - 1
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+from support.outputBundle import OutputBundle
 
-runOptions = {}
-components = {}
 filterValues    = ['kaiser_best','kaiser_fast']
 bitdepthValues  = ['5bit']
 playerateValues = ['6960','6991','7020','9279','10440','11090','12180','13920','14040','no resample']
@@ -60,19 +55,9 @@ class CmdInterface():
         filename = (args.overridename.strip(),filename)[args.overridename == ""]
         includePath = args.includePath
 
-        writePCM(saveDir, filename, includePath, newSampleData)
+        writePCM(saveDir, filename, includePath, newSampleData,
+                 eightBitData if args.debug else None)
         print('HuPCM file saved.')
-
-        if args.debug:
-            with open(f'{os.path.join(saveDir,filename)}.debug.8bit.bin','wb') as f:
-                f.write(bytearray(eightBitData))
-
-            with open(f'{os.path.join(saveDir,filename)}.debug.5it_as_8bit.bin','wb') as f:
-                [ ((sample) >> 3)<<3 for sample in eightBitData ]
-                f.write(bytearray([ ((sample) >> 3)<<3 for sample in eightBitData ]))
-
-            with open(f'{os.path.join(saveDir,filename)}.debug.5bit.bin','wb') as f:
-                f.write(bytearray(newSampleData))
 
 
 
@@ -139,7 +124,8 @@ class WavRead():
                 frames = source.getnframes()
                 if channels != 1 or width not in (1, 2) or rate <= 0:
                     raise ValueError('Expected mono 8-bit or 16-bit PCM with a positive sample rate')
-                data = source.readframes(frames)
+                # Read any partial final frame too, so odd 16-bit data fails.
+                data = source.readframes(frames + 1)
                 if not frames or len(data) != frames * width:
                     raise ValueError('Empty or truncated PCM data')
                 samples = [int.from_bytes(data[i:i+width], 'little')
@@ -151,23 +137,39 @@ class WavRead():
             return False, str(error), {}, []
 
 
-def writePCM(saveDir, filename, includePath, samples):
+def writeDebugPCM(saveDir, filename, samples, eightBitData, outputs=None):
+    standalone = outputs is None
+    outputs = OutputBundle() if standalone else outputs
+    folder = pathlib.Path(saveDir or '.')
+    for suffix, data in (('8bit', eightBitData),
+                         ('5it_as_8bit', [(sample >> 3) << 3 for sample in eightBitData]),
+                         ('5bit', samples)):
+        with outputs.open(folder / f'{filename}.debug.{suffix}.bin', 'wb') as output:
+            output.write(bytes(data))
+    if standalone:
+        outputs.commit()
+
+
+def writePCM(saveDir, filename, includePath, samples, eightBitData=None):
     """Use the same bank-safe output for GUI and command line conversion."""
     folder = pathlib.Path(saveDir or '.')
-    folder.mkdir(parents=True, exist_ok=True)
-    if not filename or pathlib.Path(filename).name != filename:
+    if not filename or filename in ('.', '..') or any(c in filename for c in '/\\\r\n"'):
         raise ValueError('PCM name must be a file name without directories')
     include = (pathlib.PurePosixPath(includePath.replace('\\', '/')) / (filename+'.data.inc')).as_posix()
     if any(c in include for c in '\r\n"'):
         raise ValueError('Invalid assembly include path')
-    (folder/(filename+'.inc')).write_text(
-        '  .db bank(.sample)\n  .dw .sample\n  .page 2\n.sample\n'
-        f'  .include "{include}"\n', encoding='utf-8')
-    with (folder/(filename+'.data.inc')).open('w', encoding='utf-8') as output:
+    outputs = OutputBundle()
+    with outputs.open(folder/(filename+'.inc')) as output:
+        output.write('  .db bank(.sample)\n  .dw .sample\n  .page 2\n.sample\n'
+                     f'  .include "{include}"\n')
+    with outputs.open(folder/(filename+'.data.inc')) as output:
         for offset in range(0, len(samples), 16):
             if offset % 4096 == 0:
                 output.write('  .page 2\n')
             output.write('  .db '+','.join(f'${value:02x}' for value in samples[offset:offset+16])+'\n')
+    if eightBitData is not None:
+        writeDebugPCM(saveDir, filename, samples, eightBitData, outputs)
+    outputs.commit()
 
 
 class GuiFrontend():
@@ -189,6 +191,8 @@ class GuiFrontend():
         result, convertInfo, self.pcmHeader, self.pcmData = WavRead(filename).readFile()
 
         if not result:
+            self.componentState(tk.DISABLED)
+            self.filename = ''
             messagebox.showerror(title="Failed...", message=convertInfo)
             return
         
@@ -205,28 +209,38 @@ class GuiFrontend():
         saveDir = fd.askdirectory()
         if not saveDir:
             return
+        try:
+            self.exportFile(saveDir)
+        except (OSError, ValueError) as error:
+            messagebox.showerror(title='PCM export failed', message=str(error))
+            return
+        messagebox.showinfo(title='Export complete', message='HuPCM assembly files saved.')
+
+    def exportFile(self, saveDir):
         playbackRate = self.components['playback'].get()
         self.pcmHeader['resampleFilter'] = self.components['filter'].get()
         self.pcmHeader['playbackRate']   = int( (playbackRate,self.pcmHeader['SamplesPerSec'])[playbackRate == "no resample"] )
 
         message, newSampleData, eightBitData = ConvertWave().convertPCMData(self.pcmHeader,self.pcmData)
 
-        # TODO, need to add a switch in the GUI for this
+        # All streams need the end marker, including "no resample" exports.
         newSampleData = newSampleData + [0x80]
 
 
         filename = (self.sfxnameVar.get().strip(),self.filename)[self.sfxnameVar.get().strip() == ""]
         includePath = self.includePath.get().strip()
 
-        writePCM(saveDir, filename, includePath, newSampleData)
-        messagebox.showinfo(title=None, message='HuPCM file saved.')
+        writePCM(saveDir, filename, includePath, newSampleData,
+                 eightBitData if self.components['debug'].get() == 'On' else None)
 
     def componentState(self, compState):
-            for child in self.components["subframe1"].winfo_children():
-                child.configure(state=compState)
-            for child in self.components["subframe2"].winfo_children():
-                child.configure(state=compState)
-            self.components["save"].config(state=compState)
+        for frame in ('subframe1', 'subframe2'):
+            for child in self.components[frame].winfo_children():
+                state = 'readonly' if compState == tk.NORMAL and isinstance(child, ttk.Combobox) else compState
+                child.configure(state=state)
+        self.components['bitdepth'].configure(state=tk.DISABLED)
+        self.components['bitpack'].configure(state=tk.DISABLED)
+        self.components['save'].configure(state=compState)
 
 
     def process(self):
@@ -247,7 +261,8 @@ class GuiFrontend():
         filterCombo = ttk.Combobox(subframe1, values=filterValues)
         self.components['filter'] = filterCombo
         filterCombo.grid(column=0, row=1)
-        filterCombo.current(0)
+        # no_resample is represented by the playback selector in the GUI.
+        filterCombo.set('kaiser_best' if self.args.resampleFilter == 'no_resample' else self.args.resampleFilter)
 
         labelTop = ttk.Label(subframe1, text = "Bit Depth")
         labelTop.grid(column=0, row=2)
@@ -261,18 +276,19 @@ class GuiFrontend():
         playerateCombo = ttk.Combobox(subframe1, values=playerateValues)
         self.components['playback'] = playerateCombo
         playerateCombo.grid(column=0, row=5)
-        playerateCombo.current(0)
+        playerateCombo.set('no resample' if self.args.resampleFilter == 'no_resample'
+                          else self.args.playback.replace('_', ' '))
 
         labelTop = ttk.Label(subframe1, text = "Debug")
         labelTop.grid(column=0, row=6)
         debugCombo = ttk.Combobox(subframe1, values=['Off','On'])
         self.components['debug'] = debugCombo
         debugCombo.grid(column=0, row=7)
-        debugCombo.current(0)
+        debugCombo.current(int(bool(self.args.debug)))
 
         labelTop = ttk.Label(subframe1, text = "Bit Pack PCM")
         labelTop.grid(column=0, row=8)
-        bitpackCombo = ttk.Combobox(subframe1, values=['Off','On'])
+        bitpackCombo = ttk.Combobox(subframe1, values=['Off'])
         self.components['bitpack'] = bitpackCombo
         bitpackCombo.grid(column=0, row=9)
         bitpackCombo.current(0)
@@ -322,15 +338,11 @@ class GuiFrontend():
 # Main                                                                                                      .
 #............................................................................................................
 
-def auto_int(val):
-    val = int(val, (DECbase,HEXbase)['0x' in val])
-    return val
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert WAV to PCE PCM.',
                                         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    runOptionsGroup = parser.add_argument_group('Run options', 'Run options for DMF converter')
+    runOptionsGroup = parser.add_argument_group('Run options', 'Run options for WAV converter')
     runOptionsGroup.add_argument('--filein',
                                     '-f',
                                     required=False,
@@ -354,22 +366,22 @@ if __name__ == "__main__":
                                     '-nosub',
                                     required=False,
                                     action="store_true",
-                                    help='Stops util from using the song name as a sub folder.')
+                                    help=argparse.SUPPRESS)
     runOptionsGroup.add_argument('--bitpackPCM',
                                     '-pack',
                                     action="store_true",
                                     default=False,
-                                    help='Bit packs the 5bit the samples.')
+                                    help=argparse.SUPPRESS)
     runOptionsGroup.add_argument('--debug',
                                     '-dbg',
                                     default=False,
                                     action="store_true",
-                                    help='Output uncompressed DMF as raw bin and hex s-record.')
+                                    help='Write raw 8-bit and 5-bit PCM debug files.')
     runOptionsGroup.add_argument('--alignPCM256',
                                     '-align256',
                                     action="store_true",
                                     default=False,
-                                    help='Forces all samples to take up a multiple of 256 bytes and block aligns to 256byte boundaries - remaining values will be 0.')
+                                    help=argparse.SUPPRESS)
     runOptionsGroup.add_argument('--resampleFilter',
                                     '-refil',
                                     choices=['kaiser_best','kaiser_fast','no_resample'],
@@ -377,7 +389,7 @@ if __name__ == "__main__":
                                     help='See https://resampy.readthedocs.io/ documentation for info on filters.')
     runOptionsGroup.add_argument('--bitDepth',
                                     '-bdpth',
-                                    choices=['4bit','4.5bit','5bit','5.5bit','6bit','6.5bit','7bit'],
+                                    choices=bitdepthValues,
                                     default='5bit',
                                     help='The bit depth for streaming PCM samples.')
     runOptionsGroup.add_argument('--playback',
@@ -389,21 +401,19 @@ if __name__ == "__main__":
                                     '-ng',
                                     action="store_true",
                                     default=False,
-                                    help='The bit depth for streaming PCM samples.')
+                                    help='Forces command line only.')
 
     args = parser.parse_args()
+    if args.bitpackPCM or args.alignPCM256:
+        parser.error('Only unpacked 5-bit PCM is supported; packing and alignment options are unavailable.')
 
-    runOptions['destinationPath'] = args.destinationPath
-    runOptions['subFolder']       = ('songName','')[args.NoSongNameSubfolder]
-    runOptions['includePath']     = args.includePath
-    runOptions['bitpackPCM']      = args.bitpackPCM
-    runOptions['bitDepth']        = args.bitDepth
-    runOptions['resampleFilter']  = args.resampleFilter
-    runOptions['playback']        = args.playback
-    runOptions['alignPCM256']     = args.alignPCM256
-    runOptions['debug']           = args.debug
+    if args.NoSongNameSubfolder:
+        parser.error('WAV exports already use destinationPath directly; omit --NoSongNameSubfolder.')
 
     if not args.noGui:
         GuiFrontend(args).process()
     else:
-        CmdInterface(args).process()
+        try:
+            CmdInterface(args).process()
+        except (OSError, ValueError) as error:
+            parser.exit(1, f"Error: {error}\n")

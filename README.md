@@ -4,26 +4,11 @@ HuTrack is a library and convertor for playing legacy DefleMask DMF files in HuC
 
 The compatibility reference for current development is **official Furnace 0.6.8.3's legacy-DMF playback**. The chosen design retains HuTrack's fast note, vibrato and fine-tune approximations while keeping period-based slides. See [Legacy DMF compatibility](docs/compatibility.md) for the pinned reference and implementation status, including the new banked asset format and long-song/shared-waveform support.
 
-# Usage 
-To create a song, you need to first convert the deflemask file into files that can be included in your project. First, extract the HuTrack Project to your project directory. 
-Run the convertor like this: 
-python HuTrack/utils/HuTrackConverter.py
+# Usage
 
-Open the song you wish to convert: 
-![image](https://github.com/Turboxray/HuTrack/assets/14317892/6c1f9876-543e-40a1-ad8d-03366d3e752a)
+Open the [HuC 4.x and HuCC integration guide](docs/huc/huc_hutrack_doc.html) in a browser. It covers Furnace export, DMF conversion, separate compiler setup files and build commands, ROM/RAM placement, music playback, PCM and HuSFX ownership. The guide and its screenshots work offline from a checkout.
 
-Export the song to HuTrack files: 
-Save.Image. 
-
-For HuC- Include the library like this: 
-#include "/HuTrack/lib/HuTrack/Huc_interface/HuTrack.c"
-You can include songs as shown below: 
-#incasmlabel(singcatsing, "SingCatSingDMF/SingCatSingDMF.song.inc", 2);
-
-In your main function, you'll need to intialize HuTrack, and then also queue any song you intend to play: 
-  HuTrack_Init();      
-	HuTrackEngine_QueueSong(singcatsing);
-
+Use the setup for your compiler: HuC installs the assembly through `libslot1.asm`, while HuCC uses `hucc-final-extra.asm` and a separate reserved bank for lookup data. Including `HuTrack.c` alone does not install the engine.
 
 Channel handoff for SFX uses explicit reserve/release calls. After release, music waits silently for a fresh note and then restores the channel state. See [SFX ownership and the FX support matrix](docs/compatibility.md).
 

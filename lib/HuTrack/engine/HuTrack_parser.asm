@@ -1160,8 +1160,6 @@ HuTrack.channel.FX.handler:
         sta HuTrack.channel.noiseMode,x
         lda HuTrack.channel.proccessState,x
         and #$1f
-        tay
-        lda NoiseVolumeAdjust,y
         ora #$80
         jsr HuTrackEngine._htk.WSG.control
         stz HuTrack.channel.ddaState,x
@@ -1682,11 +1680,6 @@ HuTrackEngine.Channel.volumeEnv
         ora #$80
         sta HuTrack.channel.proccessState,x
         and #31
-        tst #$ff, HuTrack.channel.noiseMode,x
-      beq .regular
-        tay
-        lda NoiseVolumeAdjust,y
-.regular
         ora #$80
         bit HuTrack.channel.ddaState,x
       bpl .control
@@ -1989,20 +1982,6 @@ NoiseTable:
 
 ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-NoiseVolumeAdjust
-  .ifdef HUTRACK_OLD_NOISE_VOL
-  .if HUTRACK_OLD_NOISE_VOL = 1
-    .db $00,$00,$00
-  .endif
-  .endif
-  .db $00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0a,$0b,$0c,$0d,$0e,$0f
-  .db $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$1a,$1b,$1c,$1d,$1e,$1f
-
-
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 ; No alignment requirement for the compressed pitch tables.
       ;.ds    256 - (* & 255)

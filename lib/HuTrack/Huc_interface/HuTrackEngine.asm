@@ -566,6 +566,9 @@ _HuTrackEngine_SFXmode.1:
 
   .bank SOUND_BANK, "HuTrack"
   .page $06
+  ; HuCC can pack procedures into this bank's spare space between passes.
+  ; Keep the driver anchored when a code-size change alters that packing.
+  .org $c000
 
     .include "HuTrack/engine/HuTrack_parser.asm"
     .include "HuTrack/HuTrack_lib.asm"

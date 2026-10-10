@@ -1,83 +1,514 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<title>HuTrack</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Convert legacy DMF music and integrate HuTrack into current HuC 4.x and HuCC HuCard projects.">
+<title>HuTrack • HuC 4.x and HuCC integration</title>
+<style>
+  :root { color-scheme: dark; --bg: #11171e; --panel: #19232d; --text: #e3eaf1; --muted: #adbbc9; --line: #354454; --accent: #89d8c3; }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 1.5rem; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.65 system-ui, sans-serif; }
+  a { color: var(--accent); text-underline-offset: .2em; }
+  a:hover { color: #c3f5e6; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .skip { position: absolute; left: 1rem; top: -5rem; background: var(--panel); padding: .5rem; }
+  .skip:focus { top: 1rem; }
+  header { max-width: 1280px; margin: auto; padding: 3rem 2rem 2rem; border-bottom: 1px solid var(--line); }
+  .eyebrow { color: var(--accent); text-transform: uppercase; letter-spacing: .12em; font-size: .8rem; font-weight: 700; }
+  h1 { font-size: clamp(2rem, 4vw, 3rem); line-height: 1.15; margin: .6rem 0 1rem; }
+  header p { max-width: 820px; margin: .6rem 0; }
+  .meta { color: var(--muted); font-size: .9rem; }
+  .layout { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 3rem; max-width: 1280px; margin: auto; padding: 2rem; }
+  nav { position: sticky; top: 1.5rem; align-self: start; max-height: calc(100vh - 3rem); overflow: auto; }
+  nav p { margin-top: 0; font-weight: 700; }
+  nav ul { list-style: none; padding: 0; margin: 0; }
+  nav li { margin: 0 0 .7rem; }
+  nav a { text-decoration: none; }
+  main { min-width: 0; }
+  section { margin-bottom: 3rem; }
+  h2 { font-size: 1.65rem; line-height: 1.3; padding-top: .25rem; }
+  h3 { font-size: 1.13rem; margin-top: 2rem; }
+  p, ul, ol { margin: .8rem 0 1rem; }
+  li { margin-bottom: .45rem; }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; overflow-wrap: anywhere; }
+  :not(pre) > code { background: #25313e; padding: .1em .25em; border-radius: 3px; }
+  pre { background: #0b1117; border: 1px solid var(--line); border-radius: 6px; padding: 1rem 1.2rem; overflow-x: auto; line-height: 1.5; }
+  pre code { overflow-wrap: normal; font-size: .85rem; }
+  .note { background: var(--panel); border-left: 3px solid var(--accent); padding: .8rem 1.1rem; margin: 1.2rem 0; }
+  .note p { margin: .3rem 0; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .94rem; }
+  th, td { text-align: left; vertical-align: top; padding: .8rem; border: 1px solid var(--line); }
+  th { background: var(--panel); }
+  caption { text-align: left; color: var(--muted); margin-bottom: .6rem; }
+  figure { margin: 1.5rem 0; }
+  figure img { display: block; max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; }
+  figcaption { color: var(--muted); font-size: .9rem; margin-top: .65rem; }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.4rem 0; }
+  .choices a { display: block; border: 1px solid var(--line); border-radius: 6px; padding: 1rem; background: var(--panel); text-decoration: none; }
+  .choices strong { display: block; font-size: 1.2rem; }
+  .choices span { color: var(--muted); font-size: .9rem; }
+  footer { padding-top: 1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .9rem; }
+  @media (max-width: 850px) {
+    header { padding: 2rem 1.2rem 1.5rem; }
+    .layout { display: block; padding: 1.2rem; }
+    nav { position: static; max-height: none; border-bottom: 1px solid var(--line); padding-bottom: 1rem; margin-bottom: 2rem; }
+    nav ul { columns: 2; column-gap: 1.5rem; }
+    nav li { break-inside: avoid; }
+    .choices { grid-template-columns: 1fr; }
+  }
+  @media print {
+    :root { --text: #111; --muted: #444; --line: #bbb; --accent: #175b4a; --panel: #f4f4f4; }
+    body { background: white; font-size: 10pt; }
+    header, .layout { max-width: none; padding: 0; }
+    .layout { display: block; }
+    nav, .skip, .choices { display: none; }
+    pre { background: #fafafa; white-space: pre-wrap; overflow-wrap: anywhere; }
+    :not(pre) > code { background: #eee; }
+    h2, h3 { break-after: avoid; }
+    tr, .note { break-inside: avoid; }
+  }
+</style>
 </head>
-<body bgcolor="000000">
-<font face="Arial" color="AAAAAAA">
-<h1>HuTrack in HuC</h1>
-<p style="margin-left: 15px">
-	HuTrack use in HuC documentation - Updated1.15.2023
-</p>
-<hr>
-	<h2>Index</h2>
-<ul>
-	<a href="#about"<li>What is HuTrack</li></a><br>
-	<a href="#workflow_overview"<li>Workflow overview</li></a><br>
-	<a href="#furnace"<li> Furnace Song Creation and Exporting Data</li></a><br>
-	<a href="#conversion"<li> Converting a DMF to HuC usable INC data</li></a><br>
-	<a href="#huc_use>"<li> HuC Implementation and use </li></a><br>
-	<a href="#huc_functions>"<li> HuTrack functions available in HuC </li></a><br>
-</ul>
-<hr>
-	<dt id="about"><h2>What is HuTrack</h2></dt>
-<p style="margin-left: 15px">
-	This tool was created by Turboxray to enable homebrew developers the ability to add songs to their HuC PC-Engine / TurboGrafx-16 development projects.<br>
-	HuTrack a tool suite that allows music to be created in the furnace tracker software, and then exported data from Furnace can be converted to usable data by HuC for HuCard PSG driven audio.
-</p>
-<hr>
-	<dt id="workflow_overview"><h2>Workflow Overview</h2></dt>
-<ol>
-<li>Create a song file in Furnace</li>
-<li>Export the song from Furnace as .dmf file</li>
-<li>Convert the .dmf file to a bundle of .inc files using hutrackconverter.bat</li>
-<li>Include the HuTrack.c library in yoru application</li>
-<li>Include the song into your application with #incasmlabel(alias name for asset, include path)</li>
-<li>Instantiate the HuTrack functions with HuTrack_Init();</li>
-<li>Queue up a song you want to play with  HuTrackEngine_QueueSong(alias name of asset);</li>
-<li>Between vsyncs begin playing a song with HuTrackEngine_PlaySong(index value of song to play);</li>
-</ol>
-<hr>
-<dt id="furnace"><h2>Furnace Song Creation and Exporting Data </h2></dt>
-<p style="margin-left: 15px">
-	<strong>Compatibility target for current development: official Furnace 0.6.8.3 legacy-DMF playback.</strong><br>
-	This preserves period-based pitch slides with linear vibrato and fine tuning. Later official development builds removed that mixed pitch mode and can change how old DMFs sound.<br>
-	Use the pinned release for playback comparisons. The mixed pitch model and feasible legacy effects are implemented; documented exceptions and hardware-validation limits remain. See <a href="../compatibility.md">Legacy DMF compatibility</a> for the reference version, deliberate noise correction, and format limits.
-</p>
-<p style="margin-left: 15px">
-	Furnace is the tracker style music creation software that HuTrack requires be used to export the data for use in HuC.<br>
-	Furnace	download link: <a href="https://github.com/tildearrow/furnace">https://github.com/tildearrow/furnace</a><br>
-	When using furnace it is important to note that it can be used to create music and sound effects for a variety of systems, so be certain you're working in the PC-Engine mode.<br>
-	Once in Furnace follow these steps to set the system:
-</p>
-		<ol>
-			<li>Click on the file menu </li>
-			<li>Click on Add System</li>
-			<li>Click on PC-Engine/Turbografx-16</li>
-			<dl></dl><img src="furnace_set_system.png" width="1195" height="623" alt=""/></dl>
-			<br>
-		</ol>
-<p style="margin-left: 15px">
-	From here you will need to create music using the tool until you're happy with something you make and want to get it into the game<br>
-	[TODO: ADD tutorial links, and criteria for needs of HuTrack]<br>	
-	[TODO: ADD info on how to export]<br>
-</p>
-<hr>
-<dt id="conversion"><h2>Converting a DMF to HuC usable INC data </h2></dt>
-<p style="margin-left: 15px">
-	[TODO: Add information here]<br>	
-</p>
-<hr>
-<dt id="huc_use"><h2>HuC Implementation and use </h2></dt>
-<p style="margin-left: 15px">
-	[TODO: Add information here]<br>	
-</p>
-<hr>
-<dt id="huc_functions"><h2>HuTrack functions available in HuC </h2></dt>
-<p style="margin-left: 15px">
-	[TODO: Add information here]<br>	
-</p>
-</font>
+<body>
+<a class="skip" href="#content">Skip to guide</a>
+<header>
+  <div class="eyebrow">HuTrack integration guide</div>
+  <h1>Music and SFX in HuC &amp; HuCC</h1>
+  <p>Convert PC Engine legacy DMF songs, install HuTrack in your project's library layout, and play music alongside sound effects.</p>
+  <p class="meta">For newer 4.x toolchains • HuCard builds • Updated 10 October 2026</p>
+  <p class="meta">Examples checked with HuC, HuCC and PCEAS 4.10.574.g54f5c73. HuC and HuCC are separate compiler/runtime choices in the current toolchain distribution.</p>
+</header>
+<div class="layout">
+<nav aria-label="Guide contents">
+  <p>In this guide</p>
+  <ul>
+    <li><a href="#about">Requirements</a></li>
+    <li><a href="#workflow_overview">Project layout</a></li>
+    <li><a href="#furnace">Create and export music</a></li>
+    <li><a href="#conversion">Convert a DMF</a></li>
+    <li><a href="#memory-layout">Code, data and RAM</a></li>
+    <li><a href="#huc_use">HuC setup</a></li>
+    <li><a href="#hucc_use">HuCC setup</a></li>
+    <li><a href="#huc_functions">Music API</a></li>
+    <li><a href="#pcm">WAV / PCM effects</a></li>
+    <li><a href="#husfx">HuSFX streams</a></li>
+    <li><a href="#banking">Large songs and banking</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
+    <li><a href="#references">Examples and references</a></li>
+  </ul>
+</nav>
+<main id="content">
+<section id="about">
+  <h2>Requirements</h2>
+  <p>HuTrack, by Turboxray, provides a DMF converter and a HuC6280 playback engine for the PC Engine / TurboGrafx-16. Both C compilers use the same music engine and converted assets; their startup hooks, ROM allocation and library integration differ.</p>
+  <ul>
+    <li>A recent <a href="https://github.com/pce-devel/huc/releases">4.x toolchain distribution</a>, including the matching compiler, PCEAS and headers. Choose <code>huc.exe</code> with <code>include/huc</code>, or <code>hucc.exe</code> with <code>include/hucc</code>.</li>
+    <li>This HuTrack checkout. Its <code>lib</code> directory belongs on the include path.</li>
+    <li>Python 3 with <code>numpy</code>, <code>resampy</code> and Tkinter for conversion. The converters import Tkinter even in command-line mode.</li>
+    <li>Furnace to edit/export songs, and an emulator or console to check the resulting ROM.</li>
+  </ul>
+  <p>The commands below are Windows <strong>Command Prompt / <code>.bat</code></strong> syntax. Set these paths to your installations in the same command prompt:</p>
+  <pre><code id="environment">set "HUC_HOME=C:\huc"
+set "HUTRACK_HOME=C:\Projects\PCE_DEV\HuTrack"
+python -m pip install numpy resampy
+python -c "import numpy, resampy, tkinter"</code></pre>
+  <p>Keep the compiler, assembler and include directory from the same toolchain build. These instructions cover current HuCard integration; CD overlays need their own memory and interrupt integration.</p>
+</section>
+
+<section id="workflow_overview">
+  <h2>Project layout</h2>
+  <p>Use one of the following configurations. Keep its customization files beside <code>main.c</code>, so the assembler finds them before the stock library files. There is no need to modify your installed toolchain.</p>
+  <pre><code>game/
+  music/
+    my_song.dmf
+  assets/
+    song/
+      demo/                 generated .inc bundle
+    pcm/                    optional converted WAV files
+  main/
+    main.c
+    build.bat
+    HuC:  lib_exclude.asm, libslot1.asm, sound.inc
+    HuCC: hucc-config.inc, hucc-sound.inc, hucc-final-extra.asm</code></pre>
+  <ol>
+    <li>Export a single-system PC Engine song as legacy DMF.</li>
+    <li>Run the converter from <code>game/main</code> and retain its whole output bundle.</li>
+    <li>Install the configuration for your compiler, include the C interface and song, then build.</li>
+    <li>Call <code>HuTrack_Init()</code>, register songs with <code>HuTrackEngine_QueueSong()</code>, and start a registered song by index.</li>
+  </ol>
+  <div class="choices">
+    <a href="#huc_use"><strong>HuC 4.x</strong><span>libslot1.asm • include/huc</span></a>
+    <a href="#hucc_use"><strong>HuCC in the 4.x toolchain</strong><span>hucc-final-extra.asm • include/hucc</span></a>
+  </div>
+</section>
+
+<section id="furnace">
+  <h2>Create and export music</h2>
+  <p>The playback reference is <strong>official Furnace 0.6.8.3's legacy-DMF support</strong>. HuTrack keeps period-based slides, with its original fast approximations for notes, vibrato and E5 fine tuning. It does not apply an extra noise-volume correction. See the <a href="../compatibility.md">compatibility notes and complete effect matrix</a> for deliberate differences and format limits.</p>
+  <ol>
+    <li>In Furnace, use <strong>File → New</strong> and select <strong>PC Engine / TurboGrafx-16</strong>, or open an existing PC Engine DMF. Keep one six-channel PC Engine system.</li>
+    <li>Compose/edit the song and save a <code>.fur</code> working copy if desired.</li>
+    <li>Choose <strong>File → Export…</strong>, open the <strong>DMF</strong> tab, and select <strong>1.0/legacy (0.12)</strong>. Click <strong>Export</strong>, then save the conversion input as <code>game/music/my_song.dmf</code>. Review Furnace's export warnings: native Furnace features can be lost in DMF.</li>
+    <li>Reopen the exported DMF in the reference release and listen to it before comparing with HuTrack. This includes Furnace's DMF import behavior in the comparison.</li>
+  </ol>
+  <p>For these default VBlank setups, use the normal approximately 60 Hz music tick rate. PAL and custom-Hz songs require a custom scheduler; conversion does not retime them automatically.</p>
+  <figure>
+    <a href="furnace_set_system.png"><img src="furnace_set_system.png" width="1195" height="623" alt="Original Furnace screenshot highlighting PC Engine/TurboGrafx-16 in the Add System menu."></a>
+    <figcaption>Choose the PC Engine/TurboGrafx-16 system. This picture from the original guide shows an older Furnace menu layout; use File → New and File → Export → DMF in 0.6.8.3 as described above. Do not add a second system to an existing PCE song. Click a picture to view it at full size.</figcaption>
+  </figure>
+  <h3 id="furnace-legacy-export">Export legacy DMF: illustrated steps</h3>
+  <p>These screenshots show the <strong>official Furnace 0.6.8.3 release</strong> with a PC Engine song loaded. The legacy choice is in the Export dialog, before the file picker.</p>
+  <figure>
+    <a href="furnace_legacy_export_menu.png"><img src="furnace_legacy_export_menu.png" width="1283" height="831" alt="Furnace 0.6.8.3 with the File menu open, showing export below save as."></a>
+    <figcaption><strong>1. Open File → export….</strong> Keep a .fur working copy separately if you use Furnace features that DMF cannot store.</figcaption>
+  </figure>
+  <figure>
+    <a href="furnace_legacy_dmf_format.png"><img src="furnace_legacy_dmf_format.png" width="1283" height="831" alt="Furnace Export dialog on the DMF tab, with 1.0/legacy (0.12) selected and the Export button below it."></a>
+    <figcaption><strong>2. Select DMF → 1.0/legacy (0.12), then Export.</strong> Confirm that the radio button beside the legacy option is selected; the other option is 1.1.3 and higher.</figcaption>
+  </figure>
+  <figure>
+    <a href="furnace_legacy_dmf_save.png"><img src="furnace_legacy_dmf_save.png" width="841" height="221" alt="Save As dialog with my_song.dmf as the filename and DefleMask 1.0/legacy module as the file type."></a>
+    <figcaption><strong>3. Choose your game/music folder, enter my_song.dmf, and Save.</strong> The file type should read <strong>DefleMask 1.0/legacy module</strong>. The screenshot uses the repository's sample-song folder; choose your own destination. Reopen the exported DMF in Furnace for comparison, then convert it using the next section.</figcaption>
+  </figure>
+  <div class="note"><p>Newer Furnace playback is not automatically the same reference: later development changed the mixed legacy pitch model. Use <a href="https://github.com/tildearrow/furnace/releases/tag/v0.6.8.3">release 0.6.8.3</a> for parity comparisons. A native <code>.fur</code> file, VGM or audio export is not input to the DMF converter.</p></div>
+  <p>Keep notes within C0–B6, 1–256 rows per pattern, 1–127 orders, 1–4 effect columns and 32-sample waveforms. Effective row speeds must fit 1–255; instrument, waveform and sample tables each allow up to 128 entries. The converter rejects unrepresentable data and warns about unsupported effects. See <a href="../compatibility.md">the full constraints</a> before using advanced macros or PCM features.</p>
+</section>
+
+<section id="conversion">
+  <h2>Convert a DMF</h2>
+  <p>From <code>game/main</code>, run:</p>
+  <pre><code id="convert-dmf">python "%HUTRACK_HOME%\utils\HuTrackConverter.py" --no_gui ^
+  --filein "..\music\my_song.dmf" ^
+  --destinationPath "..\assets\song" ^
+  --subfolder demo --songname demo ^
+  --includePath "../assets/song"</code></pre>
+  <p>This writes <code>assets/song/demo/demo.song.inc</code> and its companion header, instrument, pattern, waveform and PCM files. Use a simple assembler-safe name such as <code>demo</code>. Keep all generated files together, including empty PCM includes.</p>
+  <div class="table-wrap"><table>
+    <caption>Paths are relative to the directory where you build: game/main.</caption>
+    <thead><tr><th scope="col">Option</th><th scope="col">Meaning in this example</th></tr></thead>
+    <tbody>
+      <tr><td><code>--destinationPath</code></td><td>Filesystem output parent: <code>../assets/song</code>.</td></tr>
+      <tr><td><code>--subfolder</code></td><td>Child directory: <code>demo</code>.</td></tr>
+      <tr><td><code>--songname</code></td><td>Generated file/label prefix: <code>demo</code>. Use distinct prefixes for multiple songs.</td></tr>
+      <tr><td><code>--includePath</code></td><td>Path written into nested assembly includes. Use <code>../assets/song</code>; the exporter adds <code>/demo/</code> itself.</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Using the converter GUI</h3>
+  <p>Run <code>python "%HUTRACK_HOME%\utils\HuTrackConverter.py"</code> and choose <strong>Open DMF</strong>. After loading, set <strong>Include Path</strong> to <code>../assets/song</code>, <strong>Song name</strong> and <strong>subFolder</strong> to <code>demo</code>, and <strong>dest path</strong> to <code>../assets/song</code>. Then use <strong>Save DMF</strong>.</p>
+  <p>The current button names are misleading: <strong>Save DMF writes the assembly <code>.inc</code> bundle</strong>; <strong>Export Hutrack</strong> writes a separate textual <code>.hutrack</code> file. Use the assembly bundle for the C builds below.</p>
+  <figure>
+    <a href="dmf_converter_settings.png"><img src="dmf_converter_settings.png" width="923" height="444" alt="DMF converter with Include Path and dest path set to ../assets/song, Song name and subFolder set to demo, five-bit PCM at 6960 Hz and the Save DMF button visible."></a>
+    <figcaption>The current converter with the settings used in this guide. After opening a DMF, enter these paths and names, then select Save DMF to write the .inc bundle.</figcaption>
+  </figure>
+  <p>Song PCM defaults to unpacked five-bit data at 6960 Hz, matching the supplied timer path. Changing a converter's sample-rate setting alone does not change the runtime timer rate.</p>
+</section>
+
+<section id="memory-layout">
+  <h2>Code, data and RAM</h2>
+  <p>The C interface alone does not install the assembly engine. The configuration files below allocate its variables and include its implementation once.</p>
+  <div class="table-wrap"><table>
+    <caption>Symbols describe ROM allocation; their physical bank numbers depend on your build.</caption>
+    <thead><tr><th scope="col">Resource</th><th scope="col">HuC 4.x</th><th scope="col">HuCC</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Startup customization</th><td><code>lib_exclude.asm</code>, <code>sound.inc</code></td><td><code>hucc-config.inc</code>, <code>hucc-sound.inc</code></td></tr>
+      <tr><th scope="row">Assembly installation</th><td><code>libslot1.asm</code></td><td><code>hucc-final-extra.asm</code>, included by the toolchain's final-pass file</td></tr>
+      <tr><th scope="row">C wrappers and IRQ glue</th><td>Fixed library context, <code>LIB1_BANK</code></td><td>Core library context, <code>CORE_BANK</code></td></tr>
+      <tr><th scope="row">Music engine</th><td colspan="2"><code>SOUND_BANK</code>, assembled at <code>$C000</code> for CPU page 6 (MPR6). The driver asserts that its code fits this 8 KB bank.</td></tr>
+      <tr><th scope="row">Pitch / volume lookup data</th><td>2,868 bytes aligned in <code>CONST_BANK</code>, assembled for page 4. The include then restores HuC's normal constants page.</td><td>2,868 bytes at <code>RESERVED_BANK:$8000</code>. Requires <code>RESERVE_BANKS &gt;= 1</code> before startup allocates banks.</td></tr>
+      <tr><th scope="row">Song and PCM assets</th><td>This guide uses <code>HUC_USER_RESERVED</code>, with <code>HUC_RESERVE_BANKS</code> providing room.</td><td>This guide uses normal <code>.data</code> allocation through <code>#incasmlabel</code>. <code>HUC_RESERVE_BANKS</code> instead reserves space for compiler/user code.</td></tr>
+      <tr><th scope="row">C constants</th><td>HuC's constants allocation remains distinct from song data.</td><td>The runtime has its own <code>.rodata</code> / <code>CONST_BANK</code> arrangement. Do not place HuTrack tables there using HuC's recipe.</td></tr>
+      <tr><th scope="row">RAM</th><td><code>HuTrack_vars.inc</code> allocates zero-page and BSS state. The custom <code>sound.inc</code> starts HuC's subsequent internal RAM allocation at <code>$2680</code>.</td><td><code>HuTrack_vars.inc</code> participates in HuCC's zero-page/BSS allocation. <code>HUCC_STACK_SZ</code> also consumes zero page; no HuC-style <code>.org $2680</code> goes here.</td></tr>
+      <tr><th scope="row">Music tick</th><td><code>__sound_vsync</code> in the local <code>sound.inc</code></td><td><code>HuTrack_Init()</code> installs <code>sound_hook</code></td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><p><strong><code>RESERVE_BANKS</code> and <code>HUC_RESERVE_BANKS</code> are different allocations.</strong> In HuCC, increasing the second one does not reserve the lookup-table bank. Keep <code>RESERVED_BANK</code> available for HuTrack; if another library also uses it, coordinate that allocation.</p></div>
+  <p>HuTrack owns the configured music hook and timer handler used for PCM. Its readers temporarily map asset banks and restore the caller's mappings. The timer IRQ streams PCM independently of VBlank; waveform uploads protect PSG channel selection with saved interrupt flags (<code>PHP / SEI / PLP</code>), which can briefly delay the timer.</p>
+</section>
+
+<section id="huc_use">
+  <h2>HuC 4.x setup</h2>
+  <p>Create these files in <code>game/main</code>. This is a complete music-only starting point. If your project already customizes these hooks, merge the contents instead of including the engine twice.</p>
+  <h3>1. lib_exclude.asm</h3>
+  <pre><code id="huc-lib-exclude">  .data
+  .include "HuTrack/hutrack.inc"
+  .code
+
+HUC_RESERVE_BANKS = 10
+HUTRACK_VBLANK_CALLBACK = 1</code></pre>
+  <p>The ten user banks follow the supplied HuC example; size this reservation for your assets and inspect the assembler's allocation report. This is an allocation choice, not a ten-bank song-format limit.</p>
+  <h3>2. libslot1.asm</h3>
+  <pre><code id="huc-libslot">  .include "HuTrack/HuTrack_vars.inc"
+  ; For HuSFX streams, include HuSFX/HuSFX_vars.inc here too.
+  .code
+  .include "HuTrack/Huc_interface/HuTrackEngine.asm"</code></pre>
+  <h3>3. sound.inc</h3>
+  <pre><code id="huc-sound">NEED_SOUND_BANK = 1
+NEED_SOUND_CODE = 0
+
+__sound_init .macro
+  stz &lt;HuTrack.Status
+  smb6 &lt;HuTrack.Status
+  smb5 &lt;HuTrack.Status
+  .endm
+
+__sound_vsync .macro
+  .if HUTRACK_VBLANK_CALLBACK = 1
+  HuTrack.setVDCreturnVector HutrackEngine.irq1.vsyncRTN, HuTrack.returnVec
+  jmp HuTrackEngine.EngineCall
+HutrackEngine.irq1.vsyncRTN:
+  .endif
+  .endm
+
+__sound_timer .macro
+  .endm
+
+  ; RAM: starting address for HuC's internal variables.
+  .org $2680</code></pre>
+  <p>The final <code>.org</code> is a <strong>RAM allocation</strong> directive in startup's BSS context, not a ROM address. The empty timer macro is intentional: <code>HuTrack_Init()</code> installs the timer jump vector.</p>
+  <h3>4. main.c</h3>
+  <pre><code id="huc-main">#include "huc.h"
+#include "HuTrack/Huc_interface/HuTrack.c"
+
+#asm
+  .bank HUC_USER_RESERVED
+#endasm
+#incasmlabel(demo, "../assets/song/demo/demo.song.inc", 2);
+
+int main()
+{
+    HuTrack_Init();
+    HuTrackEngine_QueueSong(demo);
+    HuTrackEngine_PlaySong(0);
+
+    for (;;) {
+        vsync();
+    }
+}</code></pre>
+  <h3>5. build.bat</h3>
+  <pre><code id="huc-build">@echo off
+setlocal
+cd /d "%~dp0"
+if not defined HUC_HOME set "HUC_HOME=C:\huc"
+if not defined HUTRACK_HOME set "HUTRACK_HOME=C:\Projects\PCE_DEV\HuTrack"
+set "PATH=%HUC_HOME%\bin;%PATH%"
+set "PCE_INCLUDE=%CD%;%HUTRACK_HOME%\lib;%HUC_HOME%\include\huc"
+set "PCE_BINPATH=%HUC_HOME%\bin"
+set "PCE_PCEAS=%HUC_HOME%\bin\pceas.exe"
+huc.exe -v -v -msmall -fno-recursive main.c -T
+exit /b %ERRORLEVEL%</code></pre>
+  <p>Run <code>build.bat</code> and load <code>main.pce</code>. The VBlank callback advances music automatically; the loop does not call the parser itself.</p>
+</section>
+
+<section id="hucc_use">
+  <h2>HuCC setup</h2>
+  <p>Create these files in <code>game/main</code>. HuCC uses its core/final-pass integration, rather than the HuC <code>libslot1.asm</code> hook. Leave the installed <code>hucc-final.asm</code> intact.</p>
+  <h3>1. hucc-config.inc</h3>
+  <pre><code id="hucc-config">  include "hucc-sound.inc"
+
+HUCC_STACK_SZ = 32
+HUCC_DEBUG_SP = 1
+HUC_NUM_SCROLLS = 8
+HUC_RESERVE_BANKS = 8
+SUPPORT_2ISO = 0</code></pre>
+  <p>This small configuration is for the example compiled with <code>-fno-recursive</code>. Size the zero-page stack for your own call depth and library use; 32 bytes is not a guarantee for an arbitrary game. Merge other application settings from your matching toolchain's configuration as needed. The eight user code banks are separate from the table reservation below.</p>
+  <h3>2. hucc-sound.inc</h3>
+  <pre><code id="hucc-sound">NEED_SOUND_BANK = 1
+
+  .ifndef RESERVE_BANKS
+RESERVE_BANKS = 1
+  .endif
+
+__sound_init .macro
+  stz &lt;HuTrack.Status
+  smb6 &lt;HuTrack.Status
+  smb5 &lt;HuTrack.Status
+  .endm</code></pre>
+  <h3>3. hucc-final-extra.asm</h3>
+  <pre><code id="hucc-final">  .data
+  include "HuTrack/hutrack.inc"
+  include "HuTrack/HuTrack_vars.inc"
+  ; For HuSFX streams, include HuSFX/HuSFX_vars.inc here too.
+  .code
+  include "HuTrack/Huc_interface/HuTrackEngine.asm"</code></pre>
+  <p>HuCC includes this local file at the end of each assembly pass. The HuTrack wrapper places its parser in <code>SOUND_BANK</code>, its tables in <code>RESERVED_BANK</code>, and returns to the core code context.</p>
+  <h3>4. main.c</h3>
+  <pre><code id="hucc-main">#include "huc.h"
+#include "HuTrack/Huc_interface/HuTrack.c"
+
+#incasmlabel(demo, "../assets/song/demo/demo.song.inc", 2);
+
+int main()
+{
+    HuTrack_Init();
+    HuTrackEngine_QueueSong(demo);
+    HuTrackEngine_PlaySong(0);
+
+    for (;;) {
+        vsync();
+    }
+}</code></pre>
+  <p>Let <code>#incasmlabel</code> use HuCC's normal data allocation here. Some older project examples use <code>HUC_USER_RESERVED</code>, a compatibility alias for HuCC's user code-bank area; that explicit placement is not needed for this setup.</p>
+  <h3>5. build.bat</h3>
+  <pre><code id="hucc-build">@echo off
+setlocal
+cd /d "%~dp0"
+if not defined HUC_HOME set "HUC_HOME=C:\huc"
+if not defined HUTRACK_HOME set "HUTRACK_HOME=C:\Projects\PCE_DEV\HuTrack"
+set "PATH=%HUC_HOME%\bin;%PATH%"
+set "PCE_INCLUDE=%CD%;%HUTRACK_HOME%\lib;%HUC_HOME%\include\hucc"
+set "PCE_BINPATH=%HUC_HOME%\bin"
+set "PCE_PCEAS=%HUC_HOME%\bin\pceas.exe"
+hucc.exe -v -v -gL -msmall -fno-recursive main.c
+exit /b %ERRORLEVEL%</code></pre>
+  <p>Run <code>build.bat</code> and load <code>main.pce</code>. <code>HuTrack_Init()</code> connects the music callback to HuCC's <code>sound_hook</code>.</p>
+</section>
+
+<section id="huc_functions">
+  <h2>Music API</h2>
+  <div class="note"><p>In <code>#incasmlabel(demo, "...", 2)</code>, <strong><code>2</code> is the CPU page (<code>$4000</code>)</strong>, not physical ROM bank 2 or a two-bank size limit. The generated asset label carries its bank/address information to the interface.</p></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Call</th><th scope="col">Behavior</th></tr></thead>
+    <tbody>
+      <tr><td><code>HuTrack_Init()</code></td><td>Initialize the engine and interrupt integration once before use. Reinitialization resets engine state, so coordinate it with active SFX.</td></tr>
+      <tr><td><code>HuTrackEngine_QueueSong(song)</code></td><td>Register an included song. First registration is index 0, then 1, etc., up to 64 songs. This is a catalog, not an automatic playback queue. Further registrations are ignored once full.</td></tr>
+      <tr><td><code>HuTrackEngine_PlaySong(index)</code></td><td>Start/restart a registered song and allow its looping behavior.</td></tr>
+      <tr><td><code>HuTrackEngine_PlayOnce(index)</code></td><td>Start a registered song without repeating it.</td></tr>
+      <tr><td><code>HuTrackEngine_Stop()</code><br><code>HuTrackEngine_Pause()</code></td><td>Aliases that halt and silence music while preserving reserved SFX channels. There is no public C resume-position function; <code>PlaySong</code> restarts.</td></tr>
+      <tr><td><code>HuTrackEngine_SetGlobal(0xFF)</code></td><td>Set packed global stereo volume: high nibble left, low nibble right; 0 is silent, F full. Applied by the music update.</td></tr>
+      <tr><td><code>HuTrackEngine_SetGlobal(left, right)</code></td><td>Accept 0–255 per side; each upper nibble becomes the hardware level. <code>(255, 255)</code> is full volume.</td></tr>
+      <tr><td><code>HuTrackEngine_getCurrSongTitle(buffer)</code><br><code>HuTrackEngine_getCurrSongAuthor(buffer)</code></td><td>Copy current loaded metadata into a writable RAM buffer of at least 48 bytes, including the terminating zero. Call after starting a song. Text omitted during conversion is empty.</td></tr>
+    </tbody>
+  </table></div>
+  <p>For more songs, include each complete bundle under a unique label, call <code>QueueSong</code> once per label after initialization, and select the corresponding registration index. Queueing does not start playback.</p>
+  <h3>Tick ownership</h3>
+  <p>The default setups call the engine once per VBlank. Use ordinary <code>vsync()</code> in your game loop. Do not also call <code>HuTrackEngine_ManualCall()</code>: that would advance music twice. The <code>HuTrackEngine_Vsync</code> declarations in the interface have no implementation; use the installed hook.</p>
+  <p>A custom scheduler may use <code>HuTrackEngine_ManualCall()</code> only after removing the automatic callback: set <code>HUTRACK_VBLANK_CALLBACK = 0</code> for HuC, or replace/disconnect the HuCC <code>sound_hook</code> installed by initialization. Coordinate register, bank and interrupt handling in that integration. This is also where a project must handle nonstandard song tick rates.</p>
+  <p>The library's fade/save-position and low-level assembly-stop placeholders are not completed C features. For supported tracker FX, use the <a href="../compatibility.md">effect matrix</a>.</p>
+</section>
+
+<section id="pcm">
+  <h2>WAV / PCM sound effects</h2>
+  <p>HuTrack's timer-driven PCM API can borrow any PSG channel 0–5. It does not require HuSFX. Convert a WAV from <code>game/main</code>:</p>
+  <pre><code id="convert-wav">python "%HUTRACK_HOME%\utils\PCM_SFX\waveConvert.py" --noGui ^
+  --filein "..\music\explosion.wav" ^
+  --destinationPath "..\assets\pcm" ^
+  --includePath "../assets/pcm" ^
+  --playback 6960 --bitDepth 5bit --resampleFilter kaiser_best</code></pre>
+  <p>The CLI switch here is <code>--noGui</code>; the DMF converter uses <code>--no_gui</code>. Keep both <code>explosion.inc</code> and <code>explosion.data.inc</code>. Include the header asset beside your song include, and add these functions before <code>main</code>:</p>
+  <pre><code id="pcm-code">#incasmlabel(explosion, "../assets/pcm/explosion.inc", 2);
+
+char explosion_active;
+
+void play_explosion(void)
+{
+    HuTrackEngine_chanReserve(5);
+    if (HuTrackEngine_PcmRequest(5, explosion)) {
+        explosion_active = 1;
+    } else {
+        HuTrackEngine_chanRelease(5);
+        explosion_active = 0;
+    }
+}
+
+void update_explosion(void)
+{
+    if (explosion_active &amp;&amp; HuTrackEngine_PCMStatus(5) != 1) {
+        HuTrackEngine_chanRelease(5);
+        explosion_active = 0;
+    }
+}</code></pre>
+  <p>Set <code>explosion_active = 0</code> during your game's initialization. Call <code>play_explosion()</code> on the event, then <code>update_explosion()</code> once per loop after <code>vsync()</code>. The flag prevents releasing a channel every frame after completion. Coordinate this channel with any other SFX owner.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Call</th><th scope="col">Result / ownership</th></tr></thead>
+    <tbody>
+      <tr><td><code>HuTrackEngine_chanReserve(channel)</code></td><td>Give the channel to SFX before starting a sound.</td></tr>
+      <tr><td><code>HuTrackEngine_PcmRequest(channel, asset)</code></td><td>1 on success, 0 on failure. The C API expects the asset's three-byte header, not its raw sample-data label.</td></tr>
+      <tr><td><code>HuTrackEngine_PCMStatus(channel)</code></td><td>1 playing, 0 stopped, 2 invalid/unreserved channel.</td></tr>
+      <tr><td><code>HuTrackEngine_stopPcm(channel)</code></td><td>Stop streaming; 1 on success, 0 for an invalid/unreserved channel. Does not release ownership.</td></tr>
+      <tr><td><code>HuTrackEngine_chanRelease(channel)</code></td><td>Silence and return the channel to music, waiting for its next fresh note.</td></tr>
+      <tr><td><code>HuTrackEngine_SFXmode()</code><br><code>HuTrackEngine_SFXmode(channel)</code></td><td>Return the reserved-channel bit mask, or 1/0 for a single channel's reservation.</td></tr>
+    </tbody>
+  </table></div>
+  <p>For early cancellation, call <code>HuTrackEngine_stopPcm(5)</code>, release channel 5, and clear the application flag. The <a href="../../example/hucc_pcm/README.md">complete HuCC PCM example</a> includes a menu, six WAVs and reproducible conversion/build scripts.</p>
+  <figure>
+    <a href="../../example/hucc_pcm/waveConvert_settings.jpg"><img src="../../example/hucc_pcm/waveConvert_settings.jpg" width="662" height="361" alt="WAV converter showing kaiser_best resampling, 5bit depth, 6960 playback rate, Debug Off and Bit Pack PCM Off."></a>
+    <figcaption>WAV converter settings from the PCM example: kaiser_best, 5bit, 6960, packing off. For this guide's folder layout, change the pictured Include Path to <code>../assets/pcm</code> and the PCM name to <code>explosion</code>. Open WAV loads the source; Save HuPCM writes the asset files.</figcaption>
+  </figure>
+  <div class="note"><p><strong>Release waits for a new music note.</strong> Music's logical state advances while SFX owns the channel. On release, it stays silent until a fresh note restarts the instrument and restores waveform, pan, noise and PCM mode. It does not resume a held note midway. Effect-only rows and retriggers do not end this wait.</p></div>
+  <p>Hardware LFO couples channels 0/1; borrowing either temporarily suspends that LFO until both are available to music. Channels 4/5 are the hardware noise channels. Numbering in these APIs starts at zero.</p>
+</section>
+
+<section id="husfx">
+  <h2>HuSFX streams (optional)</h2>
+  <p>HuSFX is the separate PSG control-stream player in this repository. Its setup and per-frame processing are additional to HuTrack's music/PCM setup.</p>
+  <ol>
+    <li>Include <code>HuSFX/HuSFX_vars.inc</code> <strong>before</strong> <code>HuTrackEngine.asm</code> in your <code>libslot1.asm</code> or <code>hucc-final-extra.asm</code>. This also enables HuTrack's stream-cancellation support on release.</li>
+    <li>In C, include <code>HuSFX/HuC_interface/HucSFX.c</code>. The capital C in <code>HuC_interface</code> is intentional; HuTrack's directory is spelled <code>Huc_interface</code>.</li>
+    <li>Initialize with <code>HuSFX_Init(wave_bank, wave_address)</code> using the exported shared waveform pool. All concurrent streams must refer to that same pool.</li>
+    <li>Reserve a channel, then call <code>HuSFXplay(channel, stream_bank, stream_address)</code>. It returns <code>HU_SFX_OK</code> (1) or <code>HU_SFX_ERROR</code> (0). Release your reservation if starting fails.</li>
+    <li>Call <code>HuSFXprocess()</code> once per SFX tick, typically after <code>vsync()</code>. The music hook does not call it.</li>
+    <li>When <code>HuSFXstate(channel) == HU_SFX_STOPPED</code>, release the channel once. Use an application ownership flag as in the PCM example.</li>
+  </ol>
+  <p><code>HuSFXplay()</code> does not reserve a channel, and stream EOF does not release it. <code>HuSFXstop(channel)</code> stops the stream; release afterward when music should regain ownership. Stop any external/custom PSG writer before returning its channel.</p>
+  <p><strong>HuSFX status values differ from PCM:</strong> <code>HU_SFX_PLAYING = 1</code>, <code>HU_SFX_STOPPED = 2</code>, and <code>HU_SFX_STATE_ERROR = 0</code>. Test the named constants instead of reusing PCM status tests.</p>
+  <p>The supplied <a href="../../example/huc/main/huc_example.c">HuC</a> and <a href="../../example/hucc/main/hucc_example.c">HuCC</a> examples show asset bank/address helpers and waveform-pool initialization. See the <a href="../../utils/PSG_SFX/decode.txt">control-code format</a> when constructing streams. <code>FB</code> is EOF with no operand; <code>FC</code>/<code>FD</code> remain PCM placeholders, so use HuTrack's separate PCM API for WAV playback.</p>
+</section>
+
+<section id="banking">
+  <h2>Large songs and banking</h2>
+  <p><strong>The 8 KB sound bank holds engine code, not the entire soundtrack.</strong> Songs, waveforms, envelopes and PCM live in asset ROM banks. Larger songs do not require enlarging the fixed library bank or placing their data in <code>SOUND_BANK</code>.</p>
+  <p>Current conversions use banked asset format revision 1. Order lists, pattern tables, patterns, instruments, envelopes and waveforms carry bank/address descriptors. Runtime readers handle crossings through two mapped pages, including objects that cross an 8 KB boundary. Long songs still have to fit the compressed format's row/order limits and your cartridge's mapped ROM.</p>
+  <ul>
+    <li><strong>Reconvert older large songs.</strong> The engine can read old exports, but their original near pointers cannot represent all large layouts. A new engine alone cannot repair those stored pointers.</li>
+    <li><strong>Keep generated wrappers and placement directives.</strong> Do not flatten the bundle into a hand-written near-pointer table or remove its page rebasing.</li>
+    <li><strong>Budget the allocation you actually use.</strong> In the HuC setup, all song/PCM data placed in <code>HUC_USER_RESERVED</code> must fit its reserved region without colliding with later allocations. In HuCC, inspect normal data/procedure allocation in the build report.</li>
+    <li><strong>Shared waves need far descriptors too.</strong> If consolidating assets into a shared waveform pool, preserve the current address/bank entries and all references. The DMF command above converts one song; it does not automatically deduplicate a collection into a master pool.</li>
+    <li><strong>PCM must remain in mapped ROM.</strong> The runtime tracks full-byte banks and can cross <code>$7F → $80</code>; it stops at the end of bank <code>$FF</code> rather than wrapping. Those banks must actually be available on the target cartridge.</li>
+  </ul>
+  <p>The fixed wrappers/timer code, sound-engine bank, lookup bank and assets are separate budgets. Increasing a song reservation cannot cure overflow in a fixed library bank. Preserve the engine's bank assertions and check the assembler's used/free ranges when integrating other libraries.</p>
+</section>
+
+<section id="troubleshooting">
+  <h2>Troubleshooting</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Symptom</th><th scope="col">Check</th></tr></thead>
+    <tbody>
+      <tr><td>Undefined HuTrack functions or variables</td><td>Both the C interface and the correct assembly installation hook are required. Use the local configuration files for the selected compiler and include the engine once.</td></tr>
+      <tr><td>Missing/wrong startup symbols</td><td>Do not mix <code>include/huc</code> with <code>hucc.exe</code> or <code>include/hucc</code> with <code>huc.exe</code>. Put the project and HuTrack paths before the stock headers.</td></tr>
+      <tr><td>HuCC table reservation error</td><td>Define <code>RESERVE_BANKS &gt;= 1</code> in the early sound configuration. <code>HUC_RESERVE_BANKS</code> does not substitute for it.</td></tr>
+      <tr><td>Missing generated includes</td><td>Build from <code>main</code>. Match <code>--includePath</code> to that working directory, with the song subfolder added only once. Keep every companion file.</td></tr>
+      <tr><td>Build succeeds, but music is silent</td><td>Initialize, register, then play index 0. Verify the VBlank hook and that interrupts are running. Check converter warnings and test a known song before custom integration.</td></tr>
+      <tr><td>Music too fast</td><td>Remove a second manual parser call. The default hook already advances music each frame. Check the DMF's original tick rate.</td></tr>
+      <tr><td>Stack / zero-page overflow</td><td>Review HuCC's stack size and all included libraries' variables. Keep <code>-fno-recursive</code> for these examples; reducing stack size blindly is not a fix.</td></tr>
+      <tr><td>ROM bank overflow or overlapping allocations</td><td>Identify the bank in the assembler report. Keep assets out of fixed code and lookup banks, and size HuC's user data reservation for the full bundle.</td></tr>
+      <tr><td>Long song corrupts after a boundary</td><td>Reconvert with the current converter, retain far descriptors, and check the ROM allocation. Do not use an old near-pointer export to test the new format.</td></tr>
+      <tr><td>Noise level differs from an older HuTrack build</td><td>Runtime noise-volume compensation was removed. Noise now uses the same calculated 0–31 volume as waveform playback.</td></tr>
+      <tr><td>Pitch differs from newer Furnace</td><td>Compare the exported/reopened DMF in 0.6.8.3, then account for HuTrack's documented note/vibrato/fine-tune approximations.</td></tr>
+      <tr><td>SFX ends, music channel stays silent</td><td>Release the reservation once. Silence until the next fresh music note is intentional. Check the correct status enum: PCM stopped is 0; HuSFX stopped is 2.</td></tr>
+      <tr><td>PCM is silent or reads garbage</td><td>Reserve first; pass the header label to the C API; retain the timer handler and generated terminator. Confirm converted rate and runtime timer agree.</td></tr>
+      <tr><td>HuSFX stalls</td><td>Call <code>HuSFXprocess()</code> at the intended tick rate. For old binary streams containing <code>FC</code>, re-export to obtain its corrected two-operand encoding.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="references">
+  <h2>Examples and references</h2>
+  <ul>
+    <li><a href="../compatibility.md">HuTrack compatibility, effects and SFX ownership</a></li>
+    <li><a href="../../example/huc/main/huc_example.c">HuC music + HuSFX example</a> and <a href="../../example/hucc/main/hucc_example.c">HuCC music + HuSFX example</a></li>
+    <li><a href="../../example/hucc_pcm/README.md">HuCC WAV / PCM example</a></li>
+    <li><a href="../../lib/HuTrack/Huc_interface/HuTrack.c">HuTrack C interface declarations</a> and <a href="../../lib/HuTrack/Huc_interface/HuTrackEngine.asm">assembly integration</a></li>
+    <li><a href="https://github.com/pce-devel/huc">Official HuC / HuCC source and toolchain</a></li>
+    <li>Furnace 0.6.8.3: <a href="https://github.com/tildearrow/furnace/blob/v0.6.8.3/doc/2-interface/menu-bar.md">menus</a>, <a href="https://github.com/tildearrow/furnace/blob/v0.6.8.3/doc/2-interface/export.md#dmf">DMF export</a>, <a href="https://github.com/tildearrow/furnace/blob/v0.6.8.3/doc/7-systems/pce.md">PC Engine system</a></li>
+  </ul>
+</section>
+<footer>
+  <p>The setup examples are checked against the stated 4.x build. Compiler/library layout can change between releases; consult the matching toolchain sources when merging an existing project's customization files. Emulator checks do not replace listening on the intended hardware.</p>
+</footer>
+</main>
+</div>
 </body>
 </html>

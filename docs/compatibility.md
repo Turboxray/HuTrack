@@ -1,6 +1,6 @@
 # Legacy DMF compatibility and SFX
 
-HuTrack targets **official Furnace 0.6.8.3's import and playback of PC Engine legacy DMF**, with its default DMF compatibility settings. The reference is upstream `tildearrow/furnace`, tag `v0.6.8.3`, commit `f2619dbd988c92bf9c7173648d191648f60aecbf`. The local Furnace fork is not used.
+HuTrack targets **official Furnace 0.6.8.3's import and playback of PC Engine legacy DMF**, with its default DMF compatibility settings. The reference is upstream `tildearrow/furnace`, tag `v0.6.8.3`, commit `f2619dbd988c92bf9c7173648d191648f60aecbf`.
 
 Period slides and effect state follow that released legacy model. Notes, normal vibrato and E5 fine tuning retain **HuTrack's original fast approximations**, as requested. The original quarter-square interpolation and sine magnitudes are preserved; slides add an integer period offset after interpolation. This intentionally differs from Furnace's rounded notes and post-slide pitch scaling, especially when combining large slides with modulation. There is no per-tick period-to-note conversion.
 
@@ -75,7 +75,7 @@ HuSFX command lengths and C byte-stream macros are documented in [the control-co
 - Compressed notes are C0..B6; patterns contain 1..256 rows, orders 1..127, effect columns 1..4, and effective row speeds 1..255. Instrument/wave/sample pointer tables each support 128 entries. Unrepresentable values are rejected instead of silently truncated.
 - Relative arpeggio steps fit signed bytes; fixed notes are 0..195. Internal pitch bases cover notes -60..195 using 16-bit periods. Extreme combinations outside that range or very large global detunes can differ from Furnace's wider arithmetic. Final PSG periods clamp to 1..4095.
 - Waveforms must contain 32 samples. Empty tables and the historical single zero-length placeholder get Furnace's constant-15 null wave; empty instrument tables get a no-envelope instrument. Missing waveform references are rejected. Arbitrary Furnace wave lengths/synthesis are unsupported.
-- With `HUTRACK_OLD_NOISE_VOL=1`, noise volume remains `max(volume - 3, 0)`. This intentional correction differs from the released Furnace fixture, which writes volume 31 for a full-volume noise note. Register values do not establish equal perceived loudness.
+- Noise uses the same calculated 0..31 channel volume as waveform playback, matching the released Furnace behavior. The former `HUTRACK_OLD_NOISE_VOL` option and runtime compensation table have been removed.
 - Vibrato shapes 0..11 are implemented. Shape 7 uses a deterministic small PRNG, not Furnace's host `rand()` sequence; its modulation is not trace-identical.
 - PCM remains converted, five-bit, fixed-rate playback. Dynamic sample pitch and all Furnace sample features are outside this runtime. Import now applies legacy gain, pitch preprocessing, depth and cut metadata. Actual resampling and interrupt-driven playback have been exercised, but listening quality has not been assessed.
 - PAL and custom-Hz modules require the application to supply the proper music tick rate. The VBlank hook does not reschedule itself; conversion warns.

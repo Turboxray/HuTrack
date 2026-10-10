@@ -11,6 +11,9 @@
 // ;
 
 #asm
+    ; HuCC expands these C macros before including its final BSS definitions.
+    .include "HuSFX/HuSFX_mix.inc"
+    .include "HuSFX/HuSFX_pcm.inc"
 HuSFX_RETURN .macro
 
   .ifdef HUCC
@@ -20,6 +23,18 @@ HuSFX_RETURN .macro
 
   .endm
 
+#endasm
+
+#asm
+_HuSFX_QueuePCM.1 .macro
+        HuSFX.PCM.Queue <__fbank, <__fptr, <__fptr+1
+        HuSFX_RETURN
+    .endm
+_HuSFX_ClearPCM .macro
+        .ifdef HUTRACK_SFX_VOLUME
+        stz HuSFX.pcm.count
+        .endif
+    .endm
 #endasm
 
 //..........................................................................
@@ -34,12 +49,12 @@ _HuSFXstop_intf.1   .macro
         cpx #$06
       bcs .error\@
 
+        HuSFX.PCM.Stop
         lda #$ff
         sta HuSFX.stream.bnk,x
 
             php
         sei
-        lda #$d0
         stx $800
         stz $804
             plp
@@ -49,6 +64,10 @@ _HuSFXstop_intf.1   .macro
         nop
         stx $800
         stz $807
+        cpx #2
+      bcs .lfo.stopped\@
+        stz $809
+.lfo.stopped\@
             plp
                         ; HU_SFX_OK
         ldx #$01
@@ -72,10 +91,22 @@ _HuSFXstop_intf.1   .macro
 void __fastcall __macro HuSFX_Init_intf( unsigned char bank1<__fbank>, unsigned int addr1<__fptr> );
 #asm
 _HuSFX_Init_intf.2    .macro
+        .ifdef HUTRACK_SFX_VOLUME
+        stz HuSFX.pcm.count
+        .endif
         clx
-        lda #$ff
 .loop\@
+        HuSFX.PCM.Stop
+        lda #$ff
         sta HuSFX.stream.bnk,x
+        sta HuSFX.vol.pan,x
+        sta HuSFX.rawPan,x
+        sta HuSFX.pan,x
+        lda #31
+        sta HuSFX.vol.chan,x
+        stz HuSFX.delay,x
+        stz HuSFX.control,x
+        stz HuSFX.rawControl,x
         inx
         cpx #$06
       bne .loop\@
@@ -90,10 +121,6 @@ _HuSFX_Init_intf.2    .macro
         ora #$40
         sta HuSFX.wf.hi
 
-        lda #$1f
-        sta HuSFX.vol.chan
-        lda #$ff
-        sta HuSFX.vol.pan
 .endm
 
 #endasm   
@@ -110,8 +137,15 @@ _HuSFXplay_intf.3 .macro
         cpx #$06
       bcs .error\@
 
-        lda <__fbank
+        HuSFX.PCM.Stop
+        lda #$ff
         sta HuSFX.stream.bnk,x
+        stz HuSFX.delay,x
+        stz HuSFX.control,x
+        stz HuSFX.rawControl,x
+        lda #$ff
+        sta HuSFX.rawPan,x
+
         lda <__fptr
         sta HuSFX.stream.lo,x
         lda <__fptr + 1
@@ -121,15 +155,24 @@ _HuSFXplay_intf.3 .macro
         sei
         nop
         stx $800
+        stz $804
         stz $807
+        ; A new stream starts with raw pan $ff. Restore its persistent mix
+        ; and the matching cache after music/reservation changed hardware.
+        lda HuSFX.vol.pan,x
+        sta HuSFX.pan,x
+        sta $805
             plp
 
+        cpx #2
+      bcs .lfo.done\@
             php
         sei
-        nop
-        stx $800
-        stz $808
+        stz $809
             plp
+.lfo.done\@
+        lda <__fbank
+        sta HuSFX.stream.bnk,x
                         ; HU_SFX_OK
         ldx #$01
       bra .return\@
@@ -158,6 +201,7 @@ _HuSFXchanVol_intf.2 .macro
       bcs .error\@
 
         lda <__bl
+        and #31
         sta HuSFX.vol.chan,x
 
                         ; HU_SFX_OK
@@ -232,8 +276,9 @@ _HuSFXprocess_intf  .macro
         cmp #$ff
       beq .skip_entry\@
 
+        HuSFX.PCM.CheckEnd
+        jsr .refresh.gain\@
         lda HuSFX.delay,x
-      bmi .skip_entry\@
       beq .do_entry\@
         dec HuSFX.delay,x
       bra .skip_entry\@
@@ -249,6 +294,31 @@ _HuSFXprocess_intf  .macro
 ;   rts    
     .db $60
 
+
+.refresh.gain\@
+        lda HuSFX.rawControl,x
+        HuSFX.MixVolume
+        cmp HuSFX.control,x
+      beq .refresh.pan\@
+        sta HuSFX.control,x
+        php
+        sei
+        stx $800
+        sta $804
+        plp
+.refresh.pan\@
+        lda HuSFX.rawPan,x
+        HuSFX.MixPan
+        cmp HuSFX.pan,x
+      beq .refresh.done\@
+        sta HuSFX.pan,x
+        php
+        sei
+        stx $800
+        sta $805
+        plp
+.refresh.done\@
+        .db $60 ; Local JSR return, not a return from the enclosing HuCC proc.
 
 .process\@
         ; Map in stream
@@ -275,14 +345,22 @@ _HuSFXprocess_intf  .macro
 
         cmp #$A0
       bcs .next1\@
-        jmp .804\@            ; < #$A0
+        ; Expand compact DDA controls only at an opcode boundary.
+        ; Raw A4 operands jump directly to .804.
+        cmp #$20
+      bcc .control.ready\@
+        cmp #$40
+      bcs .control.ready\@
+        eor #$e0
+.control.ready\@
+        jmp .804\@
 .next1\@
         cmp #$B0
       bcs .next2\@
         jmp .reg_update\@     ; < #$B0
 .next2\@
       bne .next3\@
-        jmp .wf_update\@      ; == #$A0
+        jmp .wf_update\@      ; == #$B0
 .next3\@
         cmp #$D0
       bcs .next4\@
@@ -312,6 +390,9 @@ _HuSFXprocess_intf  .macro
 
 ;..............
 .804\@
+        HuSFX.PCM.Control
+        sta HuSFX.rawControl,x
+        HuSFX.MixVolume
         sta HuSFX.control,x
             php
         sei
@@ -322,6 +403,7 @@ _HuSFXprocess_intf  .macro
 
 ;..............
 .wf_update\@
+        HuSFX.PCM.Stop
 
         ;// This is a slow, but for now it works.
 
@@ -330,12 +412,14 @@ _HuSFXprocess_intf  .macro
         lda #(HuSFX.DMA.RTSop)
         sta HuSFX.DMA + 7
 
+        ; Save the stream mapping after fetching a possibly crossing operand.
+        jsr .fetch_byte\@
+        tay
         tma #$02
         pha
         tma #$03
         pha
-
-      jsr .fetch_byte\@
+        tya
 
           cly
           asl a
@@ -418,6 +502,21 @@ _HuSFXprocess_intf  .macro
         and #$0f
         tay
       jsr .fetch_byte\@
+        ; AA/AB metadata consumes one operand without touching the PSG.
+        cpy #10
+      bcc .register.hardware\@
+        jmp .decode_byte\@
+.register.hardware\@
+        cpy #4
+      bne .register.notControl\@
+        jmp .804\@
+.register.notControl\@
+        cpy #5
+      bne .register.write\@
+        sta HuSFX.rawPan,x
+        HuSFX.MixPan
+        sta HuSFX.pan,x
+.register.write\@
             php
         sei
         stx $800
@@ -442,14 +541,14 @@ _HuSFXprocess_intf  .macro
 
 ;..............
 .eof\@
+        HuSFX.PCM.Stop
         lda #$ff
         sta HuSFX.stream.bnk,x
 
             php
         sei
-        lda #$d0
         stx $800
-        sta $804
+        stz $804
             plp
 
             php
@@ -459,12 +558,13 @@ _HuSFXprocess_intf  .macro
         stz $807
             plp
 
+        cpx #2
+      bcs .lfo.done\@
             php
         sei
-        nop
-        stx $800
-        stz $808
+        stz $809
             plp
+.lfo.done\@
 
 
       jmp .exit_parse\@
@@ -472,19 +572,27 @@ _HuSFXprocess_intf  .macro
 ;..............
 .play_pcm\@
       jsr .fetch_byte\@
+        pha
       jsr .fetch_byte\@
-        ; Skip PCM operands for now
+        tay
+        pla
+        HuSFX.PCM.Start
+      bcc .pcm.started\@
+      jmp .eof\@
+.pcm.started\@
       jmp .decode_byte\@
 
 ;..............
 .stop_pcm\@
-        ; TODO
+        HuSFX.PCM.Stop
       jmp .decode_byte\@
 
 ;..............
 .wait_n_frames\@
       jsr .fetch_byte\@
-        and #$7f
+      beq .wait.store\@
+        dec a
+.wait.store\@
         sta HuSFX.delay,x
       jmp .exit_parse\@
 ;..............

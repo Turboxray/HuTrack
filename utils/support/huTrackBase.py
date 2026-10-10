@@ -2,7 +2,7 @@
 
 RATE_TABLE = ['???','8000hz','11025hz','16000hz','22050hz','32000hz']
 RATE_VAL   = [1,8000,11025,16000,22050,32000]
-PITCH_VAL  = [1/6, 1/5, 1/4, 1/3, 1/2, 1, 2, 3, 4, 5]
+PITCH_VAL  = [0.1666666666, 0.2, 0.25, 0.333333333, 0.5, 1, 2, 3, 4, 5, 6]
 
 class HuTrackContainer():
 
@@ -60,7 +60,7 @@ class HuTrackContainer():
 
             if self.rowLen != other.rowLen:
                 result = False
-            elif self.fxLen != other.fxLen:
+            elif self.fxLen != other.fxLen or len(self.patternData) != len(other.patternData):
                 result = False
             else:
                 for i in range(len(other.patternData)):
@@ -101,10 +101,10 @@ class HuTrackContainer():
         self.compressedPatternMatrix = []
         self.instrumentsLen = totalInstruments
         self.instrumentData = []
-        self.patternData             = self.CHANNEL_LIST
-        self.uncompPatternData       = self.CHANNEL_LIST
-        self.PatternListUnique       = self.CHANNEL_LIST
-        self.PatternMatrixCompressed = self.CHANNEL_LIST
+        self.patternData             = list(self.CHANNEL_LIST)
+        self.uncompPatternData       = list(self.CHANNEL_LIST)
+        self.PatternListUnique       = list(self.CHANNEL_LIST)
+        self.PatternMatrixCompressed = list(self.CHANNEL_LIST)
         self.wavetableLen   = 0
         self.wavetableData  = []
         self.samples        = []

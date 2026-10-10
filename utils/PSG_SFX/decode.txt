@@ -1,87 +1,134 @@
+HuSFX byte-stream control codes
+==============================
 
+Each channel has an independent stream. The decoder reads commands until a
+wait or End of Stream. Lengths below INCLUDE the opcode. Operand bytes are
+data even when their values equal FB, FC, FD, FE or FF.
 
-0x00 to 0x1f
--===========-
-                volume                  no operand
-                   |
-                   |-> Write this directly to $804
+Opcode     Bytes  Meaning
+------     -----  -------
+00..1F       1    Write the byte to $804 (channel off, volume 0..31).
+20..3F       1    DDA control: expand to C0..DF and write to $804.
+40..5F       1    Write the byte to $804 (DDA selected, channel off).
+80..9F       1    Write the byte to $804 (waveform playback, volume 0..31).
+A0..A9       2    Write the following byte to PSG register $800+(opcode&15).
+AA           2    Pattern index metadata: consume the following byte only.
+AB           2    Pattern number metadata: consume the following byte only.
+B0           2    Upload waveform <next byte> from the shared 32-byte pool.
+C0..CF       2    Period: write the next byte to $802 (low), opcode&15 to
+                  $803 (high). This is a 12-bit period.
+FB           1    End of Stream for this channel. Stop parsing immediately,
+                  mark the stream inactive and silence control/noise. Also
+                  disable LFO when ending channel 0 or 1. No operand.
+FC           3    Start registered PCM: sample ID, flags. Flags 0 = play once,
+                  1 = loop the whole sample. Parsing continues immediately.
+FD           1    Stop and silence PCM started by this HuSFX stream. No operand;
+                  parsing continues, keeping the channel reserved.
+FE           2    Wait N updates, where N is the next unsigned byte (1..255).
+                  Zero retains the historical minimum of one update.
+FF           1    Wait one update. No operand.
 
-0x20 to 0x3f
--===========-
-                volume (DDA)            no operand
-                   |
-                   |-> Write this directly to $804
+One update is one call to HuSFXprocess (normally once per video frame).
+FE 01 and FF both resume parsing on the next call. FE 80 waits 128 calls,
+not zero or an indefinite pause. HuSFX.delay is an unsigned countdown.
 
-0x40 to 0x5f
--===========-
-                volume                  no operand
-                   |
-                   |-> Write this directly to $804 with OR $80
+An A4 operand is a RAW $804 value, not a compact volume opcode. For example,
+20 writes C0 to $804, while A4 20 writes 20. Volume/pan attenuation applies
+after decoding. AA/AB metadata never writes to hardware.
 
-0x80 to 0x9f
--===========-
-                volume (DDA)            no operand
-                   |
-                   |-> Write this directly to $804 with OR $C0
+FB stops this stream only; it does not consume another byte, process trailing
+commands, or release HuTrack channel ownership. Applications still perform
+HuTrack reserve -> HuSFX play/process -> HuTrack release.
 
-0xA0 to 0xA9
--===========-
-                register destination    one byte operand
-                   |                         |
-                   |                         |->  Write this directly to the "resolved register number"
-                   |
-                   |-> (0xA0 to 0xAF) & 0x0f + $800 to create "resolved register number"
+Examples
+--------
+C1 FB FF FB       Set period $1FB, wait one update, then end the stream.
+FC 00 01 C1 FB    Loop registered sample 0, then set period $1FB. The FB here
+FF FB            is period data; only the final FB is End of Stream.
+FE FB FB         Wait 251 updates, then end. The first FB is wait data.
+3F FF FB         DDA at volume 31 for one update, then end.
 
-0xAA 
--===========-
-                (dummy) destination    one byte operand
-                   |                         |
-                   |                         |->  Pattern Index #
-                   |
+C macros (lib/HuSFX/HuC_interface/HuVGM_defs.h)
+------------------------------------------------
+HuEndOfStream emits FB; HuWait1frame emits FF. HuWait_frames(n) emits FE,n.
+HuDDAvol(v) emits 20|v; HuWFvol(v) emits 80|v. Volume must be 0..31.
+HuChanDDA emits 30, preserving its old raw D0 setting (DDA, volume 16).
+HuPan(left,right) takes two 0..15 levels. HuPeriod(high,low) takes a 0..15
+high nibble and a 0..255 low byte. Waveform indices and wait counts are bytes.
+Arguments must fit their fields; the macros do not validate or mask them.
 
-0xAB
--===========-
-                (dummy) destination    one byte operand
-                   |                         |
-                   |                         |->  Pattern #
-                   |
+HuPlayPCM(id) emits FC,id,00; HuLoopPCM(id) emits FC,id,01.
+HuStopPCM emits FD. A typical combined effect is:
+  FC 00 00 FE 08 FD B0 00 C1 40 9F FE 08 FB
+It starts sample 0, waits eight updates, stops PCM, uploads waveform 0,
+sets period $140 and full waveform volume, waits eight updates, then ends.
 
-0xB0
--===-
-                waveform update         one byte operand.   NOTE: This is a pseudo instruction, not a register write.
-                   |
-                   |-> Waveform block number. Used as an index into table of 32byte entries. Write all 32bytes to $806
+Runtime PCM registration
+------------------------
+Initialize HuTrack (including its timer handler) and HuSFX first. Register
+converted WAV asset labels with HuSFX_QueuePCM(label). Calls append bank/address
+entries to a RAM list and return IDs 0, 1, 2, ...; they do not start playback.
+The label must name the three-byte header emitted by waveConvert.py, not raw
+sample bytes. Samples remain in ROM. The list retains their raw sample pointers,
+including any bank carry when skipping the header. Duplicate calls append again.
 
+The default list has 64 slots; a full list returns -1 without changing old IDs.
+HUSFX_PCM_SLOTS can be defined as an assembler constant from 1 to 255 before
+including HuSFX code/variables. Storage is three bytes per slot plus eight bytes
+for count and playback bookkeeping (200 bytes at the default size).
+HuSFX_Init and HuSFX_ClearPCM clear the list. Song changes and HuSFXplay/stop do
+not. ClearPCM leaves existing PCM playback running from its captured pointer,
+but future FC commands use the newly registered list. Usually clear/repopulate
+between levels after stopping effects that still refer to the old IDs.
 
-0xC0 to 0xCF
--===========-
-                period values           one byte operand
-                   |                         |
-                   |                         |->  Write this directly to $803
-                   |
-                   |-> (0xC0 to 0xCF) & 0x0f to $802
+FC requires an already reserved channel and a registered ID. Invalid IDs,
+unsupported flags, empty looping samples, or unavailable HuTrack PCM support
+end the effect. Without
+a reservation, no PCM is started. A command reuses an explicit enabled-DDA
+volume already in the stream, or starts at volume 31; per-channel HuSFX volume,
+panning and HuTrack's SFX group volume still apply. PCM runs at the existing
+timer rate, not the once-per-frame HuSFX update rate. A wait controls when the
+next sound command runs; it does not automatically wait for sample completion.
 
-0xfb
--===-
-                Stop all streaming for current channel: EOF.   no operand.         NOTE: This is a pseudo instruction, not a register write.
+FD, FB, HuSFXstop, replacement HuSFXplay and channel release stop owned PCM.
+Waveform uploads and controls that leave enabled DDA mode also stop its timer
+writer first. A naturally completed sample is silenced on the next HuSFXprocess
+call; the remaining stream continues on its own schedule. Nothing automatically
+releases the channel before the entire effect has ended.
 
-0xfc
--===-
-                play fixed sample       two byte operand
-                   |
-                   |-> TODO for sample playback
+Assembly callers may use HuSFX.PCM.Queue bank_operand, low_operand, high_operand;
+it takes the same header address in memory operands and returns A:X = ID or
+$ffff. Clear the count with stz HuSFX.pcm.count. Map the decoder normally and
+keep HuTrack's timer initialized; its sample reader handles PCM bank crossings.
 
-0xfd
--===-
-                stop sample             no operand
-                   |
-                   |-> TODO for sample playback
+Compatibility notes
+-------------------
+The older copy of this document incorrectly described the compact volume
+ranges and reversed the period high/low registers. The definitions above
+match the converter's existing stream encoding. Other opcode ranges are
+undefined and must not be emitted (the decoder retains some legacy aliases,
+including the former HuChanDDA raw D0 encoding).
 
-0xfe
--===-
-                wait <n> frames         one byte operand.   NOTE: This is a pseudo instruction, not a register write.
+The converter internally uses FFFF as a frame marker and stores the two FC
+operands in one packed Python integer. Those are internal tokens, not stream
+bytes. Both the binary and assembler exports must serialize FF and both FC
+operands, followed by one final FB.
 
-0xff
--===-
-                wait one frame          no operand.         NOTE: This is a pseudo instruction, not a register write.
+Re-export old FC streams: the VGM importer previously selected the high byte of
+the sample ID and forced the loop flag. It now retains the low-byte ID and the
+actual once/loop flag, rejecting IDs above 255 and unsupported reverse flags.
+Register the matching converted PCM assets in that ID order before playback;
+VGM2SFX does not register samples or resample its debug PCM dump for you.
 
+VGM 90 setup maps a stream ID to a PSG channel; the two numbers need not match.
+For example, 90 00 1B 05 06 maps stream 0 to HuC6280 channel 5, DAC register 6.
+Subsequent 94/95 commands use that map. IDs 0..254 are supported and 94 FF stops
+all active mapped streams. Setups for other chips, a second HuC6280, invalid
+channels or registers are rejected. For older setup-free input only, stream
+IDs 0..5 retain their previous channel-number meaning. Once a 90 appears,
+all subsequently referenced streams require explicit setup.
+
+Repeated starts on one stream/channel are supported. The converter does not
+simulate natural sample completion. Stop a started stream explicitly before
+remapping it or assigning its channel to another stream ID, even after a
+one-shot would have ended. Furnace's fixed per-channel setups need no remapping.

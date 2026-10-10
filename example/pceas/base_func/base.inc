@@ -40,8 +40,13 @@ CallFar.AXY    .macro
                 phy
                 jsr \1
 
+                ply
+                plx
+                pla
+                sta <R0
                 pla
                 tam #page(\1)
+                lda <R0
 
     .endm
 
@@ -574,7 +579,7 @@ MOVE.w    .macro
     .endif
 
     ;source=#
-    .if (\?1=2 & \2 != AX)
+    .if (\?1=2 & \2!=AX & \2!=AY & \2!=XY)
     lda #low(\1)
     sta \2
     lda #high(\1)
@@ -613,7 +618,7 @@ MOVE.w    .macro
 
 
     ;source=full ADDR
-    .if (\?1=3 & \2 != AX )
+    .if (\?1=3 & \2!=AX & \2!=AY & \2!=XY )
     lda \1
     sta \2
     lda \1 + 1
@@ -621,7 +626,7 @@ MOVE.w    .macro
     .endif
 
     ;source=indirect
-    .if (\?1=4 & \2 != AX )
+    .if (\?1=4 & \2!=AX & \2!=AY & \2!=XY )
     lda \1
     sta \2
     phy
@@ -637,7 +642,7 @@ MOVE.w    .macro
     .endif
 
     ;source=label as direct address
-    .if (\?1=6 & \2 != AX )
+    .if (\?1=6 & \2!=AX & \2!=AY & \2!=XY )
     lda \1
     sta \2
     lda \1 + 1
@@ -681,6 +686,32 @@ MOVE.sw    .macro
             .endif
         .endif
 
+        .if (\2=IX & \3=AX)
+            lda \1.hi,x
+            ldx \1.lo,x
+        .endif
+        .if (\2=IX & \3=AY)
+            lda \1.hi,x
+            ldy \1.lo,x
+        .endif
+        .if (\2=IX & \3=XY)
+            lda \1.hi,x
+            ldy \1.lo,x
+            tax
+        .endif
+        .if (\2=IY & \3=AX)
+            lda \1.hi,y
+            ldx \1.lo,y
+        .endif
+        .if (\2=IY & \3=AY)
+            lda \1.hi,y
+            ldy \1.lo,y
+        .endif
+        .if (\2=IY & \3=XY)
+            lda \1.hi,y
+            ldy \1.lo,y
+            tax
+        .endif
         .if (\?1=2)
 
         .endif
@@ -689,10 +720,24 @@ MOVE.sw    .macro
 
     ; Do split with no index
     .if (\#=2)
-        lda \1.lo
-        sta \2
-        lda \1.hi
-        sta \2+1
+        .if (\2!=AX & \2!=AY & \2!=XY)
+            lda \1.lo
+            sta \2
+            lda \1.hi
+            sta \2+1
+        .endif
+        .if (\2=AX)
+            ldx \1.lo
+            lda \1.hi
+        .endif
+        .if (\2=AY)
+            ldy \1.lo
+            lda \1.hi
+        .endif
+        .if (\2=XY)
+            ldy \1.lo
+            ldx \1.hi
+        .endif
     .endif
 
     .if (\?1=1)
@@ -776,14 +821,14 @@ MOVE.w.add    .macro
 ; MOVE.X.byte source, destination
 MOVE.X.b    .macro
     ldx \1
-    sta \2
+    stx \2
     .endm
 
 ;......................
 ; MOVE.Y.byte source, destination
 MOVE.Y.b    .macro
     ldy \1
-    sta \2
+    sty \2
     .endm
 
 ;......................
@@ -1053,108 +1098,117 @@ DMA.local        .macro
 
 ;......................
 ;CMP.word source,destination. 16bit + 16bit->16bit
-CMP.w        .macro
-
-        ;first error checks
-            .if (\#<>2)
-            .fail Macro requires two arguments
-            .endif
-            .if (\?2=0)
-            .fail destination must be label, absolute address, or indirect. 1
-            .endif
-            .if (\?2=1)
-            .fail destination must be label, absolute address, or indirect. 1
-            .endif
-            .if (\?2=5)
-            .fail destination must be label, absolute address, or indirect. 1
-            .endif
-
-    .if (\?1=2) ;src=#immd
-        .if (\?2=2)    ;#immd
-            lda #low(\1)
-            cmp #low(\2)
-            lda #high(\1)
-            sbc #high(\2)
-.skip_\@
-        .endif
-
-        .if (\?2=3 | \?2=6)
-            lda #low(\1)
-            cmp \2
-            lda #high(\1)
-            sbc \2 + 1
-.skip_\@
-        .endif
-
-        .if (\?2=4)    ;indirect dest
-            lda #low(\1)
-            cmp \2
-            ldy #$01
-            lda #high(\1)
-            sbc \2,y
-.skip_\@
-        .endif
+CMP.w .macro
+    .if (\#!=2)
+      .fail Word operation requires two operands.
     .endif
-
-
-
-    .if (\?1=3 | \?1=6) ;src=addr/label
-        .if (\?2=2)    ;#immd
-            lda \1
-            cmp #low(\2)
-            lda \1 + 1
-            sbc #high(\2)
-.skip_\@
-        .endif
-
-        .if (\?2=3 | \?2=6)
-            lda \1
-            cmp \2
-            lda \1 + 1
-            sbc \2 + 1
-.skip_\@
-        .endif
-
-        .if (\?2=4)    ;indirect dest
-            ldy #$01
-            lda \1
-            cmp \2
-            lda \1 + 1
-            sbc \2,y
-.skip_\@
-        .endif
+    .if ((\?1=2) & (\?2=2))
+        lda #high(\1)
+        cmp #high(\2)
+      bne .compare.done\@
+        lda #low(\1)
+        cmp #low(\2)
+.compare.done\@
     .endif
-
-    .if (\?1=4) ;src=indirect
-        .if (\?2=2)
-            ldy #$01
-            lda \1
-            cmp #low(\2)
-            lda \1,y
-            sbc #high(\2)
-.skip_\@
-        .endif
-
-        .if (\?2=3 | \?2=6)
-            ldy #$01
-            lda \1
-            cmp \2
-            lda \1,y
-            sbc \2 + 1
-.skip_\@
-        .endif
-
-        .if (\?2=4)    ;indirect dest
-            ldy #$01
-            lda \1
-            cmp \2
-            lda \1,y
-            sbc \2,y
-.skip_\@
-        .endif
+    .if ((\?1=2) & (\?2=3 | \?2=6))
+        lda #high(\1)
+        cmp \2+1
+      bne .compare.done\@
+        lda #low(\1)
+        cmp \2
+.compare.done\@
     .endif
-
-
+    .if ((\?1=2) & (\?2=4))
+        phy
+        ldy #1
+        lda #high(\1)
+        cmp \2,y
+      bne .compare.done\@
+        lda #low(\1)
+        cmp \2
+.compare.done\@
+        php
+        pla
+        ply
+        pha
+        plp
+    .endif
+    .if ((\?1=3 | \?1=6) & (\?2=2))
+        lda \1+1
+        cmp #high(\2)
+      bne .compare.done\@
+        lda \1
+        cmp #low(\2)
+.compare.done\@
+    .endif
+    .if ((\?1=3 | \?1=6) & (\?2=3 | \?2=6))
+        lda \1+1
+        cmp \2+1
+      bne .compare.done\@
+        lda \1
+        cmp \2
+.compare.done\@
+    .endif
+    .if ((\?1=3 | \?1=6) & (\?2=4))
+        phy
+        ldy #1
+        lda \1+1
+        cmp \2,y
+      bne .compare.done\@
+        lda \1
+        cmp \2
+.compare.done\@
+        php
+        pla
+        ply
+        pha
+        plp
+    .endif
+    .if ((\?1=4) & (\?2=2))
+        phy
+        ldy #1
+        lda \1,y
+        cmp #high(\2)
+      bne .compare.done\@
+        lda \1
+        cmp #low(\2)
+.compare.done\@
+        php
+        pla
+        ply
+        pha
+        plp
+    .endif
+    .if ((\?1=4) & (\?2=3 | \?2=6))
+        phy
+        ldy #1
+        lda \1,y
+        cmp \2+1
+      bne .compare.done\@
+        lda \1
+        cmp \2
+.compare.done\@
+        php
+        pla
+        ply
+        pha
+        plp
+    .endif
+    .if ((\?1=4) & (\?2=4))
+        phy
+        ldy #1
+        lda \1,y
+        cmp \2,y
+      bne .compare.done\@
+        lda \1
+        cmp \2
+.compare.done\@
+        php
+        pla
+        ply
+        pha
+        plp
+    .endif
     .endm
 
 
@@ -1734,7 +1788,7 @@ AND.b.b.w  .macro
         lda \2
         and \1
         sta \3
-        stz \3
+        stz \3+1
 
     .endm
 
@@ -2037,167 +2091,132 @@ LSR.4.b        .macro
 ;......................
 ;LSR.w  
 LSR.w        .macro
-    lsr \1
-    ror \1 + 1
+    lsr \1+1
+    ror \1
     .endm
 
 LSR.2.w        .macro
-    lsr \1
-    ror \1 + 1
-    lsr \1
-    ror \1 + 1
+    lsr \1+1
+    ror \1
+    lsr \1+1
+    ror \1
     .endm
 
-LSR.3.w        .macro
-
-    .if (\?1 = 6 & \1 = AX)
+LSR.3.w .macro
+    .if (\?1=6 & \1=AX)
         lsr a
         sax
         ror a
         sax
-        ror a
+        lsr a
         sax
         ror a
         sax
-        ror a
+        lsr a
         sax
         ror a
         sax
     .endif
-
-    .if (\?1 = 6 & \1 = AY)
+    .if (\?1=6 & \1=AY)
         lsr a
         say
         ror a
         say
-        ror a
+        lsr a
         say
         ror a
         say
-        ror a
+        lsr a
         say
         ror a
         say
+    .endif
+    .if (\1!=AX & \1!=AY)
+        LSR.w \1
+        LSR.w \1
+        LSR.w \1
     .endif
     .endm
 
 LSR.4.w        .macro
-    lsr \1
-    ror \1 + 1
-    lsr \1
-    ror \1 + 1
-    lsr \1
-    ror \1 + 1
-    lsr \1
-    ror \1 + 1
+    lsr \1+1
+    ror \1
+    lsr \1+1
+    ror \1
+    lsr \1+1
+    ror \1
+    lsr \1+1
+    ror \1
     .endm
 
 ;.......
 
 ;...............
 ;OR.w  src, dest
-OR.w        .macro
-
-        ;first error checks
-            .if (\#<>2)
-            .fail Macro requires two arguments
-            .endif
-            .if (\?2=0)
-            .fail destination must be label, absolute address, or indirect. 1
-            .endif
-            .if (\?2=1)
-            .fail destination must be label, absolute address, or indirect. 1
-            .endif
-            .if (\?2=5)
-            .fail destination must be label, absolute address, or indirect. 1
-            .endif
-
-    .if (\?1=2) ;src=#immd
-        .if (\?2=2)    ;#immd
-            lda #low(\1)
-            ora #low(\2)
-            lda #high(\1)
-            ora #high(\2)
-.skip_\@
-        .endif
-
-        .if (\?2=3 | \?2=6)
-            lda #low(\1)
-            ora \2
-            lda #high(\1)
-            ora \2 + 1
-.skip_\@
-        .endif
-
-        .if (\?2=4)    ;indirect dest
-            lda #low(\1)
-            ora \2
-            ldy #$01
-            lda #high(\1)
-            ora \2,y
-.skip_\@
-        .endif
+OR.w .macro
+    .if (\#!=2)
+      .fail Word operation requires two operands.
     .endif
-
-
-
-    .if (\?1=3 | \?1=6) ;src=addr/label
-        .if (\?2=2)    ;#immd
-            lda \1
-            ora #low(\2)
-            lda \1 + 1
-            ora #high(\2)
-.skip_\@
-        .endif
-
-        .if (\?2=3 | \?2=6)
-            lda \1
-            ora \2
-            lda \1 + 1
-            ora \2 + 1
-.skip_\@
-        .endif
-
-        .if (\?2=4)    ;indirect dest
-            ldy #$01
-            lda \1
-            ora \2
-            lda \1 + 1
-            ora \2,y
-.skip_\@
-        .endif
+    .if ((\?1=2) & (\?2=3 | \?2=6))
+        lda \2
+        ora #low(\1)
+        sta \2
+        lda \2+1
+        ora #high(\1)
+        sta \2+1
     .endif
-
-    .if (\?1=4) ;src=indirect
-        .if (\?2=2)
-            ldy #$01
-            lda \1
-            ora #low(\2)
-            lda \1,y
-            ora #high(\2)
-.skip_\@
-        .endif
-
-        .if (\?2=3 | \?2=6)
-            ldy #$01
-            lda \1
-            ora \2
-            lda \1,y
-            ora \2 + 1
-.skip_\@
-        .endif
-
-        .if (\?2=4)    ;indirect dest
-            ldy #$01
-            lda \1
-            ora \2
-            lda \1,y
-            ora \2,y
-.skip_\@
-        .endif
+    .if ((\?1=2) & (\?2=4))
+        phy
+        ldy #1
+        lda \2
+        ora #low(\1)
+        sta \2
+        lda \2,y
+        ora #high(\1)
+        sta \2,y
+        ply
     .endif
-
-
+    .if ((\?1=3 | \?1=6) & (\?2=3 | \?2=6))
+        lda \2
+        ora \1
+        sta \2
+        lda \2+1
+        ora \1+1
+        sta \2+1
+    .endif
+    .if ((\?1=3 | \?1=6) & (\?2=4))
+        phy
+        ldy #1
+        lda \2
+        ora \1
+        sta \2
+        lda \2,y
+        ora \1+1
+        sta \2,y
+        ply
+    .endif
+    .if ((\?1=4) & (\?2=3 | \?2=6))
+        phy
+        ldy #1
+        lda \2
+        ora \1
+        sta \2
+        lda \2+1
+        ora \1,y
+        sta \2+1
+        ply
+    .endif
+    .if ((\?1=4) & (\?2=4))
+        phy
+        ldy #1
+        lda \2
+        ora \1
+        sta \2
+        lda \2,y
+        ora \1,y
+        sta \2,y
+        ply
+    .endif
     .endm
 
 
@@ -2310,7 +2329,7 @@ PUSHBANK.4        .macro
     .endif
 
 
-        tma #(\1 + 1)
+        tma #(\1)
         pha
         tma #(\1 + 1)
         pha
@@ -2398,6 +2417,7 @@ CPU_slow    .macro
 
 
 CPU_restored    .macro
+            csh
             plp
     .endm
 
@@ -2541,7 +2561,7 @@ ADD_ENTRY.w   .macro
         lda \1
         clc
         adc #low(\2)
-        sta \3 + 1
+        sta \3
         lda \1 + 1
         adc #high(\2)
         sta \3 + 1
@@ -2549,104 +2569,76 @@ ADD_ENTRY.w   .macro
 
 ;......................
 ;SUB.word source,destination. 16bit + 16bit->16bit
-SUB.w        .macro
-
-        ;first error checks
-            .if (\#<>2)
-            .fail Macro requires two arguments
-            .endif
-            .if (\?2=0)
-            .fail destination must be label, absolute address, or indirect. 1
-            .endif
-            .if (\?2=1)
-            .fail destination must be label, absolute address, or indirect. 1
-            .endif
-            .if (\?2=2)
-            .fail destination must be label, absolute address, or indirect. 1
-            .endif
-            .if (\?2=5)
-            .fail destination must be label, absolute address, or indirect. 1
-            .endif
-
-    .if (\?1=2) ;src=#immd
-        .if (\?2=3 | \?2=6)
-            lda \2
-            sec
-            sbc #low(\1)
-            sta \2
-            lda \2 + 1
-            sbc #high(\1)
-            sta \2 + 1
-        .endif
-
-        .if (\?2=4)    ;indirect dest
-            lda \2
-            sec
-            sbc #low(\1)
-            sta \2
-                phy
-            ldy #$01
-            lda \2 + 1,y
-            sbc #high(\1)
-            sta \2 + 1,y
-                ply
-        .endif
+SUB.w .macro
+    .if (\#!=2)
+      .fail Word operation requires two operands.
     .endif
-
-    .if (\?1=3 | \?1=6) ;src=addr/label
-        .if (\?2=3 | \?2=6)
-            lda \2
-            sec
-            sbc \1
-            sta \2
-            lda \2 + 1
-            sbc \1 + 1
-            sta \2 + 1
-        .endif
-
-        .if (\?2=4)    ;indirect dest
-            lda \2
-            sec
-            sbc \1
-            sta \2
-                phy
-            ldy #$01
-            lda \2 + 1,y
-            sbc \1
-            sta \2 + 1,y
-                ply
-        .endif
+    .if ((\?1=2) & (\?2=3 | \?2=6))
+        lda \2
+        sec
+        sbc #low(\1)
+        sta \2
+        lda \2+1
+        sbc #high(\1)
+        sta \2+1
     .endif
-
-    .if (\?1=4) ;src=indirect
-        .if (\?2=3 | \?2=6)
-            lda \2
-            sec
-            sbc \1
-            sta \2
-                phy
-            ldy #$01
-            lda \2,y
-            sbc \1 + 1
-            sta \2,y
-                ply
-        .endif
-
-        .if (\?2=4)    ;indirect dest
-            lda \2
-            sec
-            sbc \1
-            sta \2
-                phy
-            ldy #$01
-            lda \2,y
-            sbc \1,y
-            sta \2,y
-                ply
-        .endif
+    .if ((\?1=2) & (\?2=4))
+        phy
+        ldy #1
+        lda \2
+        sec
+        sbc #low(\1)
+        sta \2
+        lda \2,y
+        sbc #high(\1)
+        sta \2,y
+        ply
     .endif
-
-
+    .if ((\?1=3 | \?1=6) & (\?2=3 | \?2=6))
+        lda \2
+        sec
+        sbc \1
+        sta \2
+        lda \2+1
+        sbc \1+1
+        sta \2+1
+    .endif
+    .if ((\?1=3 | \?1=6) & (\?2=4))
+        phy
+        ldy #1
+        lda \2
+        sec
+        sbc \1
+        sta \2
+        lda \2,y
+        sbc \1+1
+        sta \2,y
+        ply
+    .endif
+    .if ((\?1=4) & (\?2=3 | \?2=6))
+        phy
+        ldy #1
+        lda \2
+        sec
+        sbc \1
+        sta \2
+        lda \2+1
+        sbc \1,y
+        sta \2+1
+        ply
+    .endif
+    .if ((\?1=4) & (\?2=4))
+        phy
+        ldy #1
+        lda \2
+        sec
+        sbc \1
+        sta \2
+        lda \2,y
+        sbc \1,y
+        sta \2,y
+        ply
+    .endif
     .endm
 
 

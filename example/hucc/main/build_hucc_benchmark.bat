@@ -1,22 +1,15 @@
-rem ***************************************************************************
-
+@echo off
 setlocal
-
 cd /d "%~dp0"
 
-pushd
+rem Override HUCC_HOME to select a matching 4.x compiler, assembler and headers.
+if not defined HUCC_HOME set "HUCC_HOME=C:\huc"
+set "PATH=%HUCC_HOME%\bin;%PATH%"
+set "PCE_INCLUDE=%CD%\..\..\..\lib;%HUCC_HOME%\include\hucc"
+set "PCE_BINPATH=%HUCC_HOME%\bin"
+set "PCE_PCEAS=%HUCC_HOME%\bin\pceas.exe"
 
-del C_log.txt
-del S_log.txt
-del *.sym
-del *.lst
-del *.s
-
-set PCE_INCLUDE=%CD%\..\..\..\lib;C:\huc\include\hucc
-set PATH=%PATH%;c:\huc\bin
-
-hucc.exe -v -v -gL -AHUTRACK_BENCHMARK=1 -msmall -fno-recursive hucc_example.c > C_log.txt
-
+"%HUCC_HOME%\bin\hucc.exe" -v -v -msmall -fno-recursive -gL -AHUTRACK_BENCHMARK=1 hucc_example.c > C_log.txt 2>&1
+set "BUILD_RESULT=%ERRORLEVEL%"
 type C_log.txt
-
-pause
+exit /b %BUILD_RESULT%

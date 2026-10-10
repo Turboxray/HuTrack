@@ -8,3 +8,5 @@ S_log.txt
 *.s
 utils/wavs/
 .vscode
+/audit/
+/test_songs/recovered_legacy/

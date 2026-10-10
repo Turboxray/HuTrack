@@ -1,0 +1,82 @@
+
+
+;###########################################################################
+  .page 2
+.waveform.table
+
+  .dw .waveform.0
+  .db bank(.waveform.0)
+  .dw .waveform.1
+  .db bank(.waveform.1)
+  .dw .waveform.2
+  .db bank(.waveform.2)
+  .dw .waveform.3
+  .db bank(.waveform.3)
+  .dw .waveform.4
+  .db bank(.waveform.4)
+  .dw .waveform.5
+  .db bank(.waveform.5)
+  .dw .waveform.6
+  .db bank(.waveform.6)
+  .dw .waveform.7
+  .db bank(.waveform.7)
+  .dw .waveform.8
+  .db bank(.waveform.8)
+  .dw .waveform.9
+  .db bank(.waveform.9)
+  .dw .waveform.10
+  .db bank(.waveform.10)
+  .dw .waveform.11
+  .db bank(.waveform.11)
+  .dw .waveform.12
+  .db bank(.waveform.12)
+  .dw .waveform.13
+  .db bank(.waveform.13)
+  .dw .waveform.14
+  .db bank(.waveform.14)
+  .dw .waveform.15
+  .db bank(.waveform.15)
+  .dw .waveform.16
+  .db bank(.waveform.16)
+  .dw .waveform.17
+  .db bank(.waveform.17)
+  .dw .waveform.18
+  .db bank(.waveform.18)
+  .dw .waveform.19
+  .db bank(.waveform.19)
+  .dw .waveform.20
+  .db bank(.waveform.20)
+  .dw .waveform.21
+  .db bank(.waveform.21)
+  .dw .waveform.22
+  .db bank(.waveform.22)
+  .dw .waveform.23
+  .db bank(.waveform.23)
+  .dw .waveform.24
+  .db bank(.waveform.24)
+  .dw .waveform.25
+  .db bank(.waveform.25)
+  .dw .waveform.26
+  .db bank(.waveform.26)
+  .dw .waveform.27
+  .db bank(.waveform.27)
+  .dw .waveform.28
+  .db bank(.waveform.28)
+  .dw .waveform.29
+  .db bank(.waveform.29)
+  .dw .waveform.30
+  .db bank(.waveform.30)
+  .dw .waveform.31
+  .db bank(.waveform.31)
+  .dw .waveform.32
+  .db bank(.waveform.32)
+  .dw .waveform.33
+  .db bank(.waveform.33)
+  .dw .waveform.34
+  .db bank(.waveform.34)
+  .dw .waveform.35
+  .db bank(.waveform.35)
+  .dw .waveform.36
+  .db bank(.waveform.36)
+
+

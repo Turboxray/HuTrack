@@ -32,6 +32,11 @@
 
 NEED_SOUND_BANK	= 1
 
+; One ROM data bank holds the fast interpolation and volume tables.
+    .ifndef RESERVE_BANKS
+RESERVE_BANKS = 1
+    .endif
+
 
 
 ; ***************************************************************************

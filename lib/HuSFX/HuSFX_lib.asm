@@ -30,21 +30,47 @@ _HuSFXplay.5
         cpx #$06
       bcs .error
 
-      lda <__fbank
-      sta HuSFX.stream.bnk,x
+      php
+      sei
+      HuSFX.PCM.Stop
+      stz HuSFX.delay,x
+      stz HuSFX.rawControl,x
+      stz HuSFX.control,x
+      lda #$ff
+      sta HuSFX.rawPan,x
+      stx $800
+      stz $804
+      stz $807
+      ; Raw pan is $ff, so its mixed value is the persistent pan setting.
+      lda HuSFX.vol.pan,x
+      sta HuSFX.pan,x
+      sta $805
+      cpx #2
+    bcs .pointers
+      stz $809
+.pointers
       lda <__fptr
       sta HuSFX.stream.lo,x
       lda <__fptr + 1
       sta HuSFX.stream.hi,x
       lda <__cl
-      sta HuSFX.wf.bnk,x
+      sta HuSFX.wf.bnk
       lda <__bx
-      sta HuSFX.wf.lo,x
+      sta HuSFX.wf.lo
       lda <__bx + 1
-      sta HuSFX.wf.hi,x
+      sta HuSFX.wf.hi
+      ; Publish the stream only after all pointers and caches are installed.
+      lda <__fbank
+      sta HuSFX.stream.bnk,x
+      plp
 
-        lda #$01
-        clx
+        ; HuC returns high A / low X; HuCC returns high Y / low A.
+        cla
+        ldx #$01
+        .ifdef HUCC
+        sax
+        sxy
+        .endif
         clc
 .out    
   rts
@@ -52,6 +78,7 @@ _HuSFXplay.5
 .error
         clx
         cla
+        cly
         sec
   rts
 
@@ -68,8 +95,9 @@ HuSFX.process
         cmp #$ff
       beq .skip_entry
 
+        HuSFX.PCM.CheckEnd
+        jsr .refresh.gain
         lda HuSFX.delay,x
-      bmi .skip_entry
       beq .do_entry
         dec HuSFX.delay,x
       bra .skip_entry
@@ -84,6 +112,31 @@ HuSFX.process
       bne .loop
   rts    
 
+
+.refresh.gain
+        lda HuSFX.rawControl,x
+        HuSFX.MixVolume
+        cmp HuSFX.control,x
+      beq .refresh.pan
+        sta HuSFX.control,x
+        php
+        sei
+        stx $800
+        sta $804
+        plp
+.refresh.pan
+        lda HuSFX.rawPan,x
+        HuSFX.MixPan
+        cmp HuSFX.pan,x
+      beq .refresh.done
+        sta HuSFX.pan,x
+        php
+        sei
+        stx $800
+        sta $805
+        plp
+.refresh.done
+        rts
 
 .process
         ; Map in stream
@@ -110,14 +163,22 @@ HuSFX.process
 
         cmp #$A0
       bcs .next1
-        jmp .804            ; < #$A0
+        ; The converter packs $C0..$DF DDA controls into $20..$3F.
+        ; Raw A4 operands jump directly to .804 and must not be expanded.
+        cmp #$20
+      bcc .control.ready
+        cmp #$40
+      bcs .control.ready
+        eor #$e0
+.control.ready
+        jmp .804
 .next1
         cmp #$B0
       bcs .next2
         jmp .reg_update     ; < #$B0
 .next2
       bne .next3
-        jmp .wf_update      ; == #$A0
+        jmp .wf_update      ; == #$B0
 .next3
         cmp #$D0
       bcs .next4
@@ -147,6 +208,9 @@ HuSFX.process
 
 ;..............
 .804
+        HuSFX.PCM.Control
+        sta HuSFX.rawControl,x
+        HuSFX.MixVolume
         sta HuSFX.control,x
             php
         sei
@@ -157,6 +221,7 @@ HuSFX.process
 
 ;..............
 .wf_update
+        HuSFX.PCM.Stop
 
         ;// This is a slow, but for now it works.
 
@@ -165,12 +230,15 @@ HuSFX.process
         lda #(HuSFX.DMA.RTSop)
         sta HuSFX.DMA + 7
 
+        ; Fetch may advance the stream into the next bank. Save that updated
+        ; mapping so decoding resumes at the bank containing the next opcode.
+        jsr .fetch_byte
+        tay
         tma #$02
         pha
         tma #$03
         pha
-
-      jsr .fetch_byte
+        tya
 
           cly
           asl a
@@ -200,9 +268,9 @@ HuSFX.process
           sty HuSFX.DMA + 2
 
         clc
-        adc HuSFX.wf.lo,x
+        adc HuSFX.wf.lo
         sta HuSFX.DMA + 1
-        lda HuSFX.wf.hi,x
+        lda HuSFX.wf.hi
         and #$1f
         ora #$40
         adc HuSFX.DMA + 2
@@ -218,7 +286,7 @@ HuSFX.process
         lda #high(32)
         sta HuSFX.DMA + 6
 
-        lda HuSFX.wf.bnk,x
+        lda HuSFX.wf.bnk
 
         tam #$02
         inc a
@@ -253,6 +321,21 @@ HuSFX.process
         and #$0f
         tay
       jsr .fetch_byte
+        ; AA/AB are pattern metadata, not PSG register writes.
+        cpy #10
+      bcc .register.hardware
+        jmp .decode_byte
+.register.hardware
+        cpy #4
+      bne .register.notControl
+        jmp .804
+.register.notControl
+        cpy #5
+      bne .register.write
+        sta HuSFX.rawPan,x
+        HuSFX.MixPan
+        sta HuSFX.pan,x
+.register.write
             php
         sei
         stx $800
@@ -277,32 +360,50 @@ HuSFX.process
 
 ;..............
 .eof
+        HuSFX.PCM.Stop
         lda #$ff
         sta HuSFX.stream.bnk,x
+          php
+          sei
+        stx $800
+        stz $804
+        stz $807
+        cpx #2
+      bcs .lfo.done
+        stz $809
+.lfo.done
+          plp
       jmp .exit_parse
 
 ;..............
 .play_pcm
       jsr .fetch_byte
+        pha
       jsr .fetch_byte
-        ; Skip PCM operands for now
+        tay
+        pla
+        HuSFX.PCM.Start
+      bcc .pcm.started
+      jmp .eof
+.pcm.started
       jmp .decode_byte
 
 ;..............
 .stop_pcm
-        ; TODO
+        HuSFX.PCM.Stop
       jmp .decode_byte
 
 ;..............
 .wait_n_frames
       jsr .fetch_byte
-        and #$7f
+      beq .wait.store
+        dec a
+.wait.store
         sta HuSFX.delay,x
       jmp .exit_parse
 ;..............
 .wait_1_frame
-        lda #$01
-        sta HuSFX.delay,x
+        stz HuSFX.delay,x
       jmp .exit_parse
 
 

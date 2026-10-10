@@ -9,10 +9,10 @@
 #endasm
 
 #incasmlabel(SMB3Overworld, "../assets/song/smb3_overworld/smb3_overworld.song.inc", 2);
-#incasmlabel(FF3_smeared_graffiti, "../assets/song/FF3_smeared_graffiti/FF3_smeared_graffiti.song.inc", 2);
-#incasmlabel(Initial_Velocity, "../assets/song/Night_Slave_-_Initial_Velocity/Night_Slave_-_Initial_Velocity.song.inc", 2);
-#incasmlabel(Bottom_Sweep, "../assets/song/Night_Slave_-_Bottom_Sweep_V2/Night_Slave_-_Bottom_Sweep_V2.song.inc", 2);
-#incasmlabel(Stormy_Edge_Stage, "../assets/song/Night_Slave_-_Stormy_Edge_Stage_3A/Night_Slave_-_Stormy_Edge_Stage_3A.song.inc", 2);
+#incasmlabel(AquaBase, "../assets/song/air_zonk_aqua_base/air_zonk_aqua_base.song.inc", 2);
+#incasmlabel(LegendaryAxe, "../assets/song/legendary_axe_level_2/legendary_axe_level_2.song.inc", 2);
+#incasmlabel(SeasideFront, "../assets/song/aero_blasters_seaside_front/aero_blasters_seaside_front.song.inc", 2);
+#incasmlabel(BonkRound1, "../assets/song/bonks_adventure_round_1/bonks_adventure_round_1.song.inc", 2);
 
 #incasmlabel(pcm1, "../assets/sfx/sample2/hypercocoon.inc", 2);
 #incasmlabel(pcm2, "../assets/sfx/sample3/stageclear.inc", 2);
@@ -81,7 +81,7 @@ int main()
     int song_number, j2, last_song, cur_channel, sfxSelect, sfxMode;
     int i;
 
-    last_song    = 4;    // variable to control number of songs available. base 0, should align with number of songs queued in song queue section
+    last_song    = 4;    // SMB3 plus four game music transcriptions; indices 0..4.
     song_number  = 0;    // currently selected song
     cur_channel  = 0;    // toggle variable for which channel of sfx is being used
     sfxSelect    = 0;
@@ -100,10 +100,10 @@ int main()
 
     HuTrack_Init();
     HuTrackEngine_QueueSong(SMB3Overworld);
-    HuTrackEngine_QueueSong(FF3_smeared_graffiti);
-    HuTrackEngine_QueueSong(Initial_Velocity);
-    HuTrackEngine_QueueSong(Bottom_Sweep);
-    HuTrackEngine_QueueSong(Stormy_Edge_Stage);
+    HuTrackEngine_QueueSong(AquaBase);
+    HuTrackEngine_QueueSong(LegendaryAxe);
+    HuTrackEngine_QueueSong(SeasideFront);
+    HuTrackEngine_QueueSong(BonkRound1);
 
     loadPcmPointers();
 
@@ -148,8 +148,8 @@ int main()
         j2 = joytrg(0);
 
         put_string("      ",9,18);
-        cur_channel += (cur_channel < 5 && (j2 & JOY_RIGHT)) ? 1: 0;
-        cur_channel -= (cur_channel > 0 && (j2 & JOY_LEFT)) ? 1: 0;
+        if ((j2 & JOY_RIGHT) && cur_channel < 5) cur_channel++;
+        if ((j2 & JOY_LEFT) && cur_channel > 0) cur_channel--;
         put_string("^",9+cur_channel,18);
 
         if (j2 & JOY_SLCT) {
@@ -176,8 +176,8 @@ int main()
                 else if (HuTrackEngine_Status() == HUTRACK_PLAYING)
                     HuTrackEngine_Pause();
             }
-            else if (j2 & JOY_UP)   { song_number += (song_number < last_song) ? 1: 0; }
-            else if (j2 & JOY_DOWN) { song_number -= (song_number > 0) ? 1: 0; }
+            else if (j2 & JOY_UP)   { if (song_number < last_song) song_number++; }
+            else if (j2 & JOY_DOWN) { if (song_number > 0) song_number--; }
         }
         // SFX interface mode
         else {
@@ -189,8 +189,8 @@ int main()
             }
 
             if ((j2 & JOY_DOWN) || (j2 & JOY_UP)) {
-                sfxSelect += ((sfxSelect < (sFXcollection.len-1)) && (j2 & JOY_UP)) ? 1: 0;
-                sfxSelect -= ((sfxSelect > 0) && (j2 & JOY_DOWN)) ? 1: 0;
+                if ((j2 & JOY_UP) && sfxSelect < sFXcollection.len - 1) sfxSelect++;
+                if ((j2 & JOY_DOWN) && sfxSelect > 0) sfxSelect--;
                 put_string("    Set SFX ", 0, 19);
                 put_number(sfxSelect,2,12,19);
                 put_string("                   ", 14, 19); 
@@ -254,7 +254,7 @@ void loadPcmPointers() {
 
 void initSFXcollections()
 {
-    char sfx_num;
+    char sfx_num = 0;
     char x;
 
     sFXcollection.sfxBank[sfx_num] = getBank(SFX_1);

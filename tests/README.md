@@ -82,6 +82,24 @@ These tests do not claim exhaustive effect parity, a worst-case CPU budget,
 audio quality or physical-console validation. The supplied example ROMs and
 converted music still need listening checks on the intended hardware.
 
+## Music example playback
+
+```powershell
+python tests/run_music_examples.py
+```
+
+With the same toolchain and `MESEN` setting, this builds the HuC, HuCC and PCEAS
+music examples, starts SMB3, then uses the actual controller menus to select
+Air Zonk, The Legendary Axe, Aero Blasters and Bonk's Adventure. It checks
+titles, banked format, every order on all channels (22, 11, 18 and 8 orders),
+audible channels, noise percussion, PCM data-port writes and the loop back to
+order 0 at each song's actual final row. Aero Blasters' unused sixth channel
+must stay silent after switching songs. PCEAS also plays its standalone SFX
+sample to check its placement after the larger music bundle.
+Reports stay under `tests/.tmp/music-examples`. Use `--compiler huc`, `hucc` or
+`pceas` to check one integration. These checks establish playback and ordering;
+they do not judge the musical arrangement or replace listening on hardware.
+
 ## HuSFX command boundaries
 
 With the same toolchain and emulator settings, run:

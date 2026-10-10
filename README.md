@@ -12,6 +12,8 @@ Use the setup for your compiler: HuC installs the assembly through `libslot1.asm
 
 The example build scripts use the installed 4.x toolchain at `C:\huc` by default. Set `HUC_HOME` for HuC/PCEAS or `HUCC_HOME` for HuCC to select another installation. Run the scripts from a terminal; they print build logs and return a nonzero exit code on failure.
 
+The HuC, HuCC and PCEAS music examples include SMB3 plus [Air Zonk, The Legendary Axe, Aero Blasters and Bonk's Adventure](example/music/README.md), with editable legacy DMFs and ready-to-build converted assets. The track guide explains selection controls, conversion differences, performance limits and how to reconvert edits made in Furnace.
+
 Channel handoff for SFX uses explicit reserve/release calls. After release, music waits silently for a fresh note and then restores the channel state. See [SFX ownership and the FX support matrix](docs/compatibility.md).
 
 Music and SFX have independent volume controls. Music fades subtract attenuation from the final channel volumes, leaving SFX and hardware master volume unchanged. The API also provides playback status, pause/resume, EE event polling and `TryReserve()` for acquiring a free SFX channel.

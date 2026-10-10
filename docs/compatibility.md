@@ -126,6 +126,17 @@ scan or validate the complete asset; it still requires valid converter output.
 
 The lookup data occupies 2,868 bytes outside the fixed library and music code. HuC uses its constants bank and restores the constants' normal page afterward. HuCC needs `RESERVE_BANKS >= 1` defined before startup allocates banks; the supplied `hucc-sound.inc` reserves one bank for these tables. Standalone PCEAS integration must include `HuTrack_pitch_tables.inc` at an 8 KB boundary assembled for `$8000`, as the example does. Assembly assertions guard table and music-code overflow. Tables change ROM placement, not the period-slide representation.
 
+For standalone PCEAS, keep `HuTrack_lib.asm` and `HuTrack_parser.asm` in the
+same music code bank: the loader calls the parser's banked-data helpers.
+The example's main program and music bank both execute at `$C000`, so calls
+between them use fixed-bank trampolines. Mapping the music bank directly from
+main would replace the caller before its call instruction could execute.
+The example selects SMB3 and four game music transcriptions in banked format;
+the native playback test exercises each entire song and its loop. PCEAS places
+its standalone SFX sample after the complete song bundle, so larger songs and
+their PCM data cannot overlap a hard-coded sample bank. The dense transcriptions
+still have high peak CPU costs; see the [track guide](../example/music/README.md).
+
 Source tests, native builds, Mesen playback and benchmarks pass; physical-console listening and an exhaustive worst-case frame/IRQ budget remain unverified. Playback status, pause/resume, music fades, independent music/SFX group volumes, EE event polling and non-stealing channel reservation are documented in the [integration guide](huc/huc_hutrack_doc.html#huc_functions). The unused save/load-position and FadeToContinue placeholders were removed. Group volumes subtract attenuation from each final 5-bit channel volume with a zero clamp; they do not change the hardware master volume.
 
 The optional assembly note constants now give F its correct semitone value, with

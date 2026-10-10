@@ -1,6 +1,6 @@
 ;     Test build framework for HuTrack release packages
 ;
-;    {Assemble with PCEAS: ver 3.23 or higher}
+;    {Assemble with PCEAS 4.x}
 ;
 ;   Turboxray '21
 ;
@@ -121,6 +121,59 @@ startup:
 ;other basic functions
     .include "../base_func/video/vdc/lib.asm"
     .include "HuTrack/engine/HuTrack_engine.asm"
+
+; Main code and music both execute in MPR6. Call through the fixed bank
+; before mapping music over the caller, then restore the caller on return.
+MusicInit:
+        php
+        sei
+        HuTrack.CallFar HuTrackEngine.Init
+        plp
+        rts
+
+MusicQueueSong:
+        php
+        sei
+        HuTrack.CallFar HuTrackEngine.QueueSong
+        plp
+        rts
+
+MusicPlaySong:
+        php
+        sei
+        HuTrack.CallFar HuTrackEngine.playSong
+        plp
+        rts
+
+MusicPcmStatus:
+        php
+        sei
+        HuTrack.CallFar HuTrackEngine.SfxPcmStatus
+        plp
+        rts
+
+MusicReleaseSFX:
+        php
+        sei
+        HuTrack.CallFar HuTrackEngine.chanReleaseSFX
+        plp
+        rts
+
+MusicReserveSFX:
+        php
+        sei
+        HuTrack.CallFar HuTrackEngine.setChanForSFX
+        plp
+        rts
+
+MusicPcmRequest:
+        php
+        sei
+        HuTrack.CallFar HuTrackEngine.SfxPcmRequest
+        plp
+        rts
+
+
     .include "../base_func/IO/gamepad/lib.asm"
     .include "../lib/controls/lib.asm"
 ;end DATA
@@ -261,7 +314,7 @@ MAIN:
 
         ;...............................
         ; Reset the variables for the music engine
-        HuTrack.CallFar HuTrackEngine.Init
+        jsr MusicInit
 
         ;...............................
         ; TIRQ is already enabled, but TIMER needs to be as well
@@ -272,14 +325,23 @@ MAIN:
         ;...............................
         ; load in song
         LEA.l Song, $4000, _hk.EAX0
-        HuTrack.CallFar HuTrackEngine.QueueSong
+        jsr MusicQueueSong
+        LEA.l AquaBase, $4000, _hk.EAX0
+        jsr MusicQueueSong
+        LEA.l LegendaryAxe, $4000, _hk.EAX0
+        jsr MusicQueueSong
+        LEA.l SeasideFront, $4000, _hk.EAX0
+        jsr MusicQueueSong
+        LEA.l BonkRound1, $4000, _hk.EAX0
+        jsr MusicQueueSong
+        stz songIndex
 
 
         ;...............................
         ; Play in song
         MOVE.b #$00, <_hk.EAX0.l
         MOVE.b #$00, <_hk.EAX0.m
-        HuTrack.CallFar HuTrackEngine.playSong
+        jsr MusicPlaySong
 
         ;................................
         ;start the party
@@ -287,6 +349,19 @@ MAIN:
 
         PRINT_STR_i "HuTrack ver: 0.8.8",2,2
 
+        jsr showSongInfo
+        PRINT_STR_i "UP/DOWN: song 0-4   I: PCM sample",2,27
+
+        stz sampleStart
+
+        WAITVBLANK 10
+        jmp main_loop
+
+; Refresh the metadata after selecting a song. The engine's strings are
+; bounded to 47 characters; clear both rows so shorter titles leave no tail.
+showSongInfo:
+        PRINT_STR_i "                                                ",2,4
+        PRINT_STR_i "                                                ",2,5
         PRINT_STR_i "Song: ",2,4
         PRINT_STR_a_ptr HuTrack.songName
         PRINT_STR_i "author: ",2,5
@@ -300,15 +375,14 @@ MAIN:
         PRINT_STR_i "Number of samples: ",2,10
         PRINT_BYTEhex_a_q HuTrack.sampleListLen
 
-        stz sampleStart
-
-        WAITVBLANK 10
-
-
+        PRINT_STR_i "Selection: ",2,28
+        PRINT_BYTEhex_a_q songIndex
+        rts
 main_loop:
         WAITVBLANK
         call Gamepad.READ_IO.single_controller
         call Controls.ProcessInput
+        jsr selectSong
 
         PRINT_STR_i "Current Tick 1: ",2,12
         PRINT_BYTEhex_a_q  HuTrack.tickReload + 1
@@ -452,6 +526,36 @@ main_loop:
 ;.......................................................
 ;.......................................................
 ;.......................................................
+selectSong:
+        lda input_state.directions
+        and #control.up.mask
+        cmp #control.up.pressed
+      bne .down
+        lda songIndex
+        cmp #4
+      bcs .out
+        inc songIndex
+        bra .play
+.down
+        lda input_state.directions
+        and #control.dn.mask
+        cmp #control.dn.pressed
+      bne .out
+        lda songIndex
+      beq .out
+        dec songIndex
+.play
+        php
+        sei
+        lda songIndex
+        sta <_hk.EAX0.l
+        stz <_hk.EAX0.m
+        jsr MusicPlaySong
+        plp
+        jsr showSongInfo
+.out
+        rts
+
 showNote:
         and #$0f
         asl a
@@ -473,12 +577,12 @@ playSample:
 
         lda #$05
         sta <_hk.EAX0.u
-        CallFar HuTrackEngine.SfxPcmStatus
+        jsr MusicPcmStatus
         lda <_hk.EAX0.l
       bpl .skip
         lda #$05
         sta <_hk.EAX0.u
-        CallFar HuTrackEngine.chanReleaseSFX
+        jsr MusicReleaseSFX
         stz sampleStart
 .skip
 
@@ -492,7 +596,7 @@ playSample:
 .load_sample
         lda #$05
         sta <_hk.EAX0.l
-        CallFar HuTrackEngine.setChanForSFX
+        jsr MusicReserveSFX
         lda #$80
         sta sampleStart
 
@@ -524,7 +628,7 @@ playSample:
         sta <_hk.EAX0.h
         lda #$05
         sta <_hk.EAX0.u
-        CallFar HuTrackEngine.SfxPcmRequest
+        jsr MusicPcmRequest
 
           PULLBANK.2 $02
 
@@ -564,7 +668,7 @@ noteDisplay:
 
 ;//...................................................................
 
-    .include "HuTrack/HuTrack_lib.asm"
+
 
 
 ;/////////////////////////////////////////////////////////////////////////////////
@@ -647,7 +751,14 @@ init_video
     .org $c000
 ;....................................
 
+MusicCodeStart:
+    ; The loader and banked-data helpers must share the music code bank.
+    .include "HuTrack/HuTrack_lib.asm"
     .include "HuTrack/engine/HuTrack_parser.asm"
+MusicCodeEnd:
+    .if bank(MusicCodeEnd - 1) != bank(MusicCodeStart)
+        .fail Music code exceeds its reserved bank.
+    .endif
 
     .bank $09, "HuTrack Tables"
     .org $8000
@@ -676,6 +787,19 @@ init_video
 Song:
     .include "../assets/song/smb3_overworld/smb3_overworld.song.inc"
 Song.end
+  .page 2
+AquaBase:
+    .include "../assets/song/air_zonk_aqua_base/air_zonk_aqua_base.song.inc"
+  .page 2
+LegendaryAxe:
+    .include "../assets/song/legendary_axe_level_2/legendary_axe_level_2.song.inc"
+  .page 2
+SeasideFront:
+    .include "../assets/song/aero_blasters_seaside_front/aero_blasters_seaside_front.song.inc"
+  .page 2
+BonkRound1:
+    .include "../assets/song/bonks_adventure_round_1/bonks_adventure_round_1.song.inc"
+SongAssetsEnd:
 
 ;/////////////////////////////////////////////////////////////////////////////////
 ;/////////////////////////////////////////////////////////////////////////////////
@@ -684,7 +808,8 @@ Song.end
 
 ;....................................
     .code
-    .bank $20, "Samples"
+    ; Place SFX after all song data, including their PCM banks.
+    .bank bank(SongAssetsEnd - 1) + 1, "Samples"
     .org $4000
 ;....................................
 

@@ -13,4 +13,5 @@ flag2:          .ds 1
 flag3:          .ds 1
 
 sampleStart:    .ds 1
+songIndex:      .ds 1
 
